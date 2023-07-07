@@ -104,16 +104,19 @@ class GPTModel(Enum):
     GPT_3_5 = "gpt-3.5-turbo"
     GPT_4 = "gpt-4"
 
+CHATGPT_ROLE_USER = "user"
+CHATGPT_ROLE_SYSTEM = "system"
+CHATGPT_ROLE_ASSISTANT = "assistant"
 
 class ChatGPTResponseGenerator(ResponseGenerator):
 
     def __init__(self,
                  model: str = GPTModel.GPT_4.value,
                  base_instruction: str | None = None,
+                 initial_user_message: str | None = None,
                  presence_penalty: float | None = None,
                  frequency_penalty: float | None = None,
                  temperature: float | None = None,
-                 system_name: str = "system"
                  ):
 
         self.model = model
@@ -128,7 +131,7 @@ class ChatGPTResponseGenerator(ResponseGenerator):
         if temperature is not None:
             self.gpt_params["temperature"] = temperature
 
-        self.system_name = system_name
+        self.initial_user_message = initial_user_message
 
         self.base_instruction = base_instruction if base_instruction is not None else "You are a ChatGPT assistant that is empathetic and supportive."
 
@@ -138,15 +141,21 @@ class ChatGPTResponseGenerator(ResponseGenerator):
     async def _get_response_impl(self, dialog: list[DialogTurn]) -> str:
         dialogue_converted = [{
             "content": turn.message,
-            "role": "user" if turn.is_user else self.system_name
+            "role": CHATGPT_ROLE_USER if turn.is_user else CHATGPT_ROLE_ASSISTANT
         } for turn in dialog]
 
         instruction = self.get_instruction()
         if instruction is not None:
-            dialogue_converted.insert(0, {
+
+            system_turn = {
                 "content": instruction,
-                "role": "assistant"
-            })
+                "role": CHATGPT_ROLE_SYSTEM
+            }
+
+            if self.initial_user_message is not None:
+                dialogue_converted = [system_turn, {"content": self.initial_user_message, "role": CHATGPT_ROLE_USER}] + dialogue_converted
+            else:
+                dialogue_converted.insert(0, system_turn)
 
         result = await to_thread(openai.ChatCompletion.create,
                                  model=self.model,

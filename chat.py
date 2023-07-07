@@ -22,8 +22,11 @@ async def run_chat_loop():
     session_id = generate_id()
 
     print(f"Start a chat session (id: {session_id}).")
+    user_name = input("Please enter your name: ").strip()
     session = TurnTakingChatSession(session_id,
-                                    ChatGPTResponseGenerator())
+                                    ChatGPTResponseGenerator(
+                                        initial_user_message=f"Hi! My name is {user_name}."
+                                    ))
 
     _print_system_message(await session.initialize())  # Print initial message
 
