@@ -3,10 +3,10 @@ from os import path, getcwd, getenv
 import openai
 from dotenv import load_dotenv
 
-from core.lib.chatbot import TurnTakingChatSession
+from core.chatbot import TurnTakingChatSession
 from nanoid import generate as generate_id
 
-from core.lib.generators import ChatGPTResponseGenerator
+from core.generators import ChatGPTResponseGenerator
 import asyncio
 
 
