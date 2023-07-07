@@ -104,9 +104,11 @@ class GPTModel(Enum):
     GPT_3_5 = "gpt-3.5-turbo"
     GPT_4 = "gpt-4"
 
+
 CHATGPT_ROLE_USER = "user"
 CHATGPT_ROLE_SYSTEM = "system"
 CHATGPT_ROLE_ASSISTANT = "assistant"
+
 
 class ChatGPTResponseGenerator(ResponseGenerator):
 
@@ -147,15 +149,16 @@ class ChatGPTResponseGenerator(ResponseGenerator):
         instruction = self.get_instruction()
         if instruction is not None:
 
-            system_turn = {
+            instruction_turn = {
                 "content": instruction,
                 "role": CHATGPT_ROLE_SYSTEM
             }
 
             if self.initial_user_message is not None:
-                dialogue_converted = [system_turn, {"content": self.initial_user_message, "role": CHATGPT_ROLE_USER}] + dialogue_converted
+                dialogue_converted = [instruction_turn, {"content": self.initial_user_message,
+                                                         "role": CHATGPT_ROLE_USER}] + dialogue_converted
             else:
-                dialogue_converted.insert(0, system_turn)
+                dialogue_converted.insert(0, instruction_turn)
 
         result = await to_thread(openai.ChatCompletion.create,
                                  model=self.model,
