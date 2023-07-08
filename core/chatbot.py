@@ -22,24 +22,24 @@ class ResponseGenerator(ABC):
         pass
 
     @abstractmethod
-    async def _get_response_impl(self, dialog: list[DialogTurn]) -> str:
+    async def _get_response_impl(self, dialog: list[DialogTurn]) -> tuple[str, dict | None]:
         pass
 
-    async def get_response(self, dialog: list[DialogTurn]) -> tuple[str, int]:
+    async def get_response(self, dialog: list[DialogTurn]) -> tuple[str, dict | None, int]:
         start = perf_counter()
 
         try:
             self._pre_get_response(dialog)
-            response = await self._get_response_impl(dialog)
+            response, metadata = await self._get_response_impl(dialog)
         except RegenerateRequestException as regen:
             print(f"Regenerate response. Reason: {regen.reason}")
-            response = await self._get_response_impl(dialog)
+            response, metadata = await self._get_response_impl(dialog)
         except Exception as ex:
             raise ex
 
         end = perf_counter()
 
-        return response, int((end - start) * 1000)
+        return response, metadata, int((end - start) * 1000)
 
 
 class ChatSessionBase:
@@ -58,14 +58,14 @@ class TurnTakingChatSession(ChatSessionBase):
     def _push_new_turn(self, turn: DialogTurn):
         self._dialog.append(turn)
 
-    async def initialize(self) -> str:
+    async def initialize(self) -> tuple[str, dict|None, int]:
         self._dialog.clear()
-        initial_message, elapsed = await self._response_generator.get_response(self._dialog)
+        initial_message, metadata, elapsed = await self._response_generator.get_response(self._dialog)
         self._push_new_turn(DialogTurn(initial_message, is_user=False))
-        return initial_message
+        return initial_message, metadata, elapsed
 
-    async def push_user_message(self, message: str) -> str:
+    async def push_user_message(self, message: str) -> tuple[str, dict|None, int]:
         self._push_new_turn(DialogTurn(message, is_user=True))
-        system_message, elapsed = await self._response_generator.get_response(self._dialog)
+        system_message, metadata, elapsed = await self._response_generator.get_response(self._dialog)
         self._push_new_turn(DialogTurn(system_message, is_user=False))
-        return system_message
+        return system_message, metadata, elapsed

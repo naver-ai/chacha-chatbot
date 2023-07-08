@@ -75,9 +75,9 @@ class GPT3StaticPromptResponseGenerator(ResponseGenerator):
         else:
             return self.prompt_base
 
-    async def _get_response_impl(self, dialog: list[DialogTurn]) -> str:
+    async def _get_response_impl(self, dialog: list[DialogTurn]) -> tuple[str, dict | None]:
         if len(dialog) == 0:
-            return self.initial_system_message
+            return self.initial_system_message, None
         else:
             prompt = self._generate_prompt(dialog)
             result = await to_thread(openai.Completion.create,
@@ -93,7 +93,7 @@ class GPT3StaticPromptResponseGenerator(ResponseGenerator):
             if top_choice.finish_reason == 'stop':
                 response_text = top_choice.text.strip()
                 if len(response_text) > 0:
-                    return response_text
+                    return response_text, None
                 else:
                     raise RegenerateRequestException("Empty text")
             else:
@@ -147,7 +147,7 @@ class ChatGPTResponseGenerator(ResponseGenerator):
     def get_instruction(self) -> str | None:
         return self.base_instruction
 
-    async def _get_response_impl(self, dialog: list[DialogTurn]) -> str:
+    async def _get_response_impl(self, dialog: list[DialogTurn]) -> tuple[str, dict | None]:
         dialogue_converted = [make_chat_completion_message(turn.message, CHATGPT_ROLE_USER if turn.is_user else CHATGPT_ROLE_ASSISTANT)
                               for turn in dialog]
 
@@ -173,7 +173,7 @@ class ChatGPTResponseGenerator(ResponseGenerator):
 
         if top_choice.finish_reason == 'stop':
             response_text = top_choice.message.content
-            return response_text
+            return response_text, None
         else:
             raise Exception("ChatGPT error")
 
