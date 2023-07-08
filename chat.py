@@ -3,6 +3,7 @@ from os import path, getcwd, getenv
 import openai
 from dotenv import load_dotenv
 
+from app.response_generator import EmotionChatbotResponseGenerator
 from core.chatbot import TurnTakingChatSession
 from nanoid import generate as generate_id
 
@@ -24,9 +25,7 @@ async def run_chat_loop():
     print(f"Start a chat session (id: {session_id}).")
     user_name = input("Please enter your name: ").strip()
     session = TurnTakingChatSession(session_id,
-                                    ChatGPTResponseGenerator(
-                                        initial_user_message=f"Hi! My name is {user_name}."
-                                    ))
+                                    EmotionChatbotResponseGenerator(user_name=user_name))
 
     _print_system_message(await session.initialize())  # Print initial message
 

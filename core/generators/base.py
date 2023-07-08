@@ -110,6 +110,13 @@ CHATGPT_ROLE_SYSTEM = "system"
 CHATGPT_ROLE_ASSISTANT = "assistant"
 
 
+def make_chat_completion_message(message: str, role: str) -> dict:
+    return {
+        "content": message,
+        "role": role
+    }
+
+
 class ChatGPTResponseGenerator(ResponseGenerator):
 
     def __init__(self,
@@ -141,22 +148,19 @@ class ChatGPTResponseGenerator(ResponseGenerator):
         return self.base_instruction
 
     async def _get_response_impl(self, dialog: list[DialogTurn]) -> str:
-        dialogue_converted = [{
-            "content": turn.message,
-            "role": CHATGPT_ROLE_USER if turn.is_user else CHATGPT_ROLE_ASSISTANT
-        } for turn in dialog]
+        dialogue_converted = [make_chat_completion_message(turn.message, CHATGPT_ROLE_USER if turn.is_user else CHATGPT_ROLE_ASSISTANT)
+                              for turn in dialog]
 
         instruction = self.get_instruction()
         if instruction is not None:
 
-            instruction_turn = {
-                "content": instruction,
-                "role": CHATGPT_ROLE_SYSTEM
-            }
+            instruction_turn = make_chat_completion_message(instruction, CHATGPT_ROLE_SYSTEM)
 
             if self.initial_user_message is not None:
-                dialogue_converted = [instruction_turn, {"content": self.initial_user_message,
-                                                         "role": CHATGPT_ROLE_USER}] + dialogue_converted
+                dialogue_converted = [
+                                        instruction_turn,
+                                        make_chat_completion_message(self.initial_user_message, CHATGPT_ROLE_USER)
+                                    ] + dialogue_converted
             else:
                 dialogue_converted.insert(0, instruction_turn)
 
@@ -172,3 +176,5 @@ class ChatGPTResponseGenerator(ResponseGenerator):
             return response_text
         else:
             raise Exception("ChatGPT error")
+
+

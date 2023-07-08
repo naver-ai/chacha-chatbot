@@ -1,8 +1,9 @@
 from time import perf_counter
 from abc import ABC, abstractmethod
 
+
 class RegenerateRequestException(Exception):
-    def __iit__(self, reason: str):
+    def __init__(self, reason: str):
         self.reason = reason
 
 
@@ -14,7 +15,7 @@ class DialogTurn:
 
 class ResponseGenerator(ABC):
 
-    def initialize(self):
+    async def initialize(self):
         pass
 
     def _pre_get_response(self, dialog: list[DialogTurn]):
@@ -57,7 +58,7 @@ class TurnTakingChatSession(ChatSessionBase):
     def _push_new_turn(self, turn: DialogTurn):
         self._dialog.append(turn)
 
-    async def initialize(self)->str:
+    async def initialize(self) -> str:
         self._dialog.clear()
         initial_message, elapsed = await self._response_generator.get_response(self._dialog)
         self._push_new_turn(DialogTurn(initial_message, is_user=False))
