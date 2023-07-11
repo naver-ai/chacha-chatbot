@@ -25,7 +25,7 @@ class StateBasedResponseGenerator(ResponseGenerator, Generic[StateType], ABC):
         pass
 
     async def _get_response_impl(self, dialog: list[DialogTurn]) -> tuple[str, dict | None]:
-
+    
         # Calculate state and update response generator if the state was changed:
         next_state, next_state_payload = await self.calc_next_state_info(self.__current_state, dialog) or (None, None)
         if next_state is not None:
