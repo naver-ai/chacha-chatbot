@@ -5,6 +5,10 @@ from core.generators import ChatGPTResponseGenerator
 from core.generators.state import StateBasedResponseGenerator, StateType
 import openai
 
+from core.mapper import ChatGPTDialogueSummarizer
+from core.openai import ChatGPTParams
+
+
 class EmotionChatbotPhase(Enum):
     Rapport = "rapport"
     Label = "label"
@@ -78,33 +82,26 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
             initial_user_message="화가 나고 슬퍼."
         )
 
-
-
-    async def calc_next_state_info(self, current: EmotionChatbotPhase, dialog: list[DialogTurn]) -> tuple[EmotionChatbotPhase, dict | None] | None:
-        if current == EmotionChatbotPhase.Rapport :
-            if len(dialog) > 0 :
-                    phase_classifier = ChatGPTResponseGenerator(
+    async def calc_next_state_info(self, current: EmotionChatbotPhase, dialog: list[DialogTurn]) -> tuple[
+                                                                                                        EmotionChatbotPhase, dict | None] | None:
+        if current == EmotionChatbotPhase.Rapport:
+            if len(dialog) > 0:
+                phase_classifier = ChatGPTDialogueSummarizer(
                     base_instruction=f"""
-                        Information about your role: You are a conversation analyst. 
-                        Speaking rule: 
-                        1) Say either "label" or "rapport"
-                        2) Do not say or ask other words
                         Analyze the content of the conversation, you recommend the appropriate conversation phase for the next step. 
                         Currently the phase is Rapport. If you suggest to move on to the next phase, just return "label". Otherwise, reutrn "rapport"
                         1. Rapport: In the initial phase, you and the user establish a connection through casual conversation in 4~6 turns. 
                         2. Label: If the user has expressed a desire to talk about their emotions, you suggest a 'Label’ phase
                         """,
-                    initial_user_message="Speaking rule: 1) Say either 'label' or 'rapport' 2) Do not say or ask other words",
-                    temperature= 0.1
-                   )
-                    phase_suggestion = await phase_classifier.get_response(dialog)
-                    # print(f"Phase suggestion: {phase_suggestion[0]}")      
+                    gpt_params=ChatGPTParams(temperature=0.1)
+                )
+                phase_suggestion = (await phase_classifier.run(dialog)).lower()
+                # print(f"Phase suggestion: {phase_suggestion[0]}")
 
-                    if "label" in phase_suggestion[0]:
-                        return EmotionChatbotPhase.Label, None
+                if "label" in phase_suggestion:
+                    return EmotionChatbotPhase.Label, None
             else:
                 return None
-
 
             # result = ChatGPTResponseGenerator(
             #     base_instruction=f"""

@@ -7,7 +7,8 @@ import yaml
 import openai
 
 from core.chatbot import ResponseGenerator, DialogTurn, RegenerateRequestException
-from core.openai import ChatGPTModel, CHATGPT_ROLE_USER, CHATGPT_ROLE_SYSTEM, CHATGPT_ROLE_ASSISTANT
+from core.openai import ChatGPTModel, CHATGPT_ROLE_USER, CHATGPT_ROLE_SYSTEM, CHATGPT_ROLE_ASSISTANT, ChatGPTParams, \
+    make_chat_completion_message
 
 
 class GPT3StaticPromptResponseGenerator(ResponseGenerator):
@@ -100,35 +101,18 @@ class GPT3StaticPromptResponseGenerator(ResponseGenerator):
                 raise Exception("GPT3 error")
 
 
-def make_chat_completion_message(message: str, role: str) -> dict:
-    return {
-        "content": message,
-        "role": role
-    }
-
-
 class ChatGPTResponseGenerator(ResponseGenerator):
 
     def __init__(self,
                  model: str = ChatGPTModel.GPT_4.value,
                  base_instruction: str | None = None,
                  initial_user_message: str | None = None,
-                 presence_penalty: float | None = None,
-                 frequency_penalty: float | None = None,
-                 temperature: float | None = None,
+                 params: ChatGPTParams | None = None
                  ):
 
         self.model = model
 
-        self.gpt_params = dict()
-
-        if presence_penalty is not None:
-            self.gpt_params["presence_penalty"] = presence_penalty
-        if frequency_penalty is not None:
-            self.gpt_params["frequency_penalty"] = frequency_penalty
-
-        if temperature is not None:
-            self.gpt_params["temperature"] = temperature
+        self.gpt_params = params or ChatGPTParams()
 
         self.initial_user_message = initial_user_message
 
@@ -138,8 +122,9 @@ class ChatGPTResponseGenerator(ResponseGenerator):
         return self.base_instruction
 
     async def _get_response_impl(self, dialog: list[DialogTurn]) -> tuple[str, dict | None]:
-        dialogue_converted = [make_chat_completion_message(turn.message, CHATGPT_ROLE_USER if turn.is_user else CHATGPT_ROLE_ASSISTANT)
-                              for turn in dialog]
+        dialogue_converted = [
+            make_chat_completion_message(turn.message, CHATGPT_ROLE_USER if turn.is_user else CHATGPT_ROLE_ASSISTANT)
+            for turn in dialog]
 
         instruction = self.get_instruction()
         if instruction is not None:
@@ -157,7 +142,7 @@ class ChatGPTResponseGenerator(ResponseGenerator):
         result = await to_thread(openai.ChatCompletion.create,
                                  model=self.model,
                                  messages=dialogue_converted,
-                                 **self.gpt_params
+                                 **self.gpt_params.to_params()
                                  )
         top_choice = result.choices[0]
 
