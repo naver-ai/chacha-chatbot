@@ -1,5 +1,4 @@
 import os
-from enum import Enum
 from os import getcwd, path
 from asyncio import to_thread
 
@@ -8,6 +7,7 @@ import yaml
 import openai
 
 from core.chatbot import ResponseGenerator, DialogTurn, RegenerateRequestException
+from core.openai import ChatGPTModel, CHATGPT_ROLE_USER, CHATGPT_ROLE_SYSTEM, CHATGPT_ROLE_ASSISTANT
 
 
 class GPT3StaticPromptResponseGenerator(ResponseGenerator):
@@ -100,16 +100,6 @@ class GPT3StaticPromptResponseGenerator(ResponseGenerator):
                 raise Exception("GPT3 error")
 
 
-class GPTModel(Enum):
-    GPT_3_5 = "gpt-3.5-turbo"
-    GPT_4 = "gpt-4"
-
-
-CHATGPT_ROLE_USER = "user"
-CHATGPT_ROLE_SYSTEM = "system"
-CHATGPT_ROLE_ASSISTANT = "assistant"
-
-
 def make_chat_completion_message(message: str, role: str) -> dict:
     return {
         "content": message,
@@ -120,7 +110,7 @@ def make_chat_completion_message(message: str, role: str) -> dict:
 class ChatGPTResponseGenerator(ResponseGenerator):
 
     def __init__(self,
-                 model: str = GPTModel.GPT_4.value,
+                 model: str = ChatGPTModel.GPT_4.value,
                  base_instruction: str | None = None,
                  initial_user_message: str | None = None,
                  presence_penalty: float | None = None,
