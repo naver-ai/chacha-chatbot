@@ -1,5 +1,6 @@
 from time import perf_counter
 from abc import ABC, abstractmethod
+from typing import Callable
 
 
 class RegenerateRequestException(Exception):
@@ -52,20 +53,71 @@ class ChatSessionBase:
     def dialog(self):
         return self._dialog.copy()
 
-
-# User and system can say one by one.
-class TurnTakingChatSession(ChatSessionBase):
     def _push_new_turn(self, turn: DialogTurn):
         self._dialog.append(turn)
 
-    async def initialize(self) -> tuple[str, dict|None, int]:
+
+# User and system can say one by one.
+class TurnTakingChatSession(ChatSessionBase):
+
+    async def initialize(self) -> tuple[str, dict | None, int]:
         self._dialog.clear()
         initial_message, metadata, elapsed = await self._response_generator.get_response(self._dialog)
         self._push_new_turn(DialogTurn(initial_message, is_user=False))
         return initial_message, metadata, elapsed
 
-    async def push_user_message(self, message: str) -> tuple[str, dict|None, int]:
+    async def push_user_message(self, message: str) -> tuple[str, dict | None, int]:
         self._push_new_turn(DialogTurn(message, is_user=True))
         system_message, metadata, elapsed = await self._response_generator.get_response(self._dialog)
         self._push_new_turn(DialogTurn(system_message, is_user=False))
         return system_message, metadata, elapsed
+
+
+class MultiAgentChatSession(ChatSessionBase):
+    def __init__(self, id: str,
+                 response_generator: ResponseGenerator,
+                 user_generator: ResponseGenerator):
+        super().__init__(id, response_generator)
+        self.__user_generator = user_generator
+
+        self.__is_running = False
+        self.__is_stop_requested = False
+
+    @property
+    def is_running(self) -> bool:
+        return self.__is_running
+
+    def stop(self):
+        if self.__is_running == True:
+            self.__is_stop_requested = True
+        else:
+            self.__is_stop_requested = False
+
+    async def generate_conversation(self,
+                                    max_turns: int,
+                                    on_message: Callable[[DialogTurn, dict | None, int], None]
+                                    ) -> list[tuple[DialogTurn, dict | None, int]]:
+        self.dialog.clear()
+        self.__is_running = True
+        self.__is_stop_requested = False
+
+        dialog_with_metadata = []
+        turn_count = 0
+        while self.__is_stop_requested == False and max_turns > turn_count:
+            turn_count += 1
+            system_message, payload, elapsed = await self._response_generator.get_response(self.dialog)
+            system_turn = DialogTurn(system_message, False)
+            self._push_new_turn(system_turn)
+            dialog_with_metadata.append((system_turn, payload, elapsed))
+            on_message(system_turn, payload, elapsed)
+
+            role_reverted_dialog = [DialogTurn(message=turn.message, is_user=turn.is_user is False) for turn in
+                                    self.dialog]
+
+            user_message, payload, elapsed = await self._response_generator.get_response(role_reverted_dialog)
+            user_turn = DialogTurn(user_message, True)
+            self._push_new_turn(user_turn)
+            dialog_with_metadata.append((user_turn, payload, elapsed))
+            on_message(user_turn, payload, elapsed)
+
+        return dialog_with_metadata

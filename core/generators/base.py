@@ -150,6 +150,6 @@ class ChatGPTResponseGenerator(ResponseGenerator):
             response_text = top_choice.message.content
             return response_text, None
         else:
-            raise Exception("ChatGPT error")
+            raise Exception(f"ChatGPT error - {top_choice.finish_reason}")
 
 
