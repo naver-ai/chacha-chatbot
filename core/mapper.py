@@ -52,7 +52,7 @@ class ChatGPTDialogueSummarizer(Mapper[list[DialogTurn], str, ChatGPTDialogSumma
     async def run(self, input: list[DialogTurn], params: ChatGPTDialogSummarizerParams | None = None) -> str:
         self.__generator.initial_user_message = ChatGPTDialogueSummarizer.__convert_dialogue_to_str(input, params)
         resp, _, _ = await self.__generator.get_response([])
-        print(resp)
+        # print(resp)
         return resp
 
     @staticmethod

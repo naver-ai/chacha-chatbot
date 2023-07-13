@@ -114,7 +114,8 @@ class MultiAgentChatSession(ChatSessionBase):
             role_reverted_dialog = [DialogTurn(message=turn.message, is_user=turn.is_user is False) for turn in
                                     self.dialog]
 
-            user_message, payload, elapsed = await self._response_generator.get_response(role_reverted_dialog)
+            user_message, payload, elapsed = await self.__user_generator.get_response(role_reverted_dialog)
+
             user_turn = DialogTurn(user_message, True)
             self._push_new_turn(user_turn)
             dialog_with_metadata.append((user_turn, payload, elapsed))
