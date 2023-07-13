@@ -8,6 +8,7 @@ class ChatGPTModel(Enum):
 CHATGPT_ROLE_USER = "user"
 CHATGPT_ROLE_SYSTEM = "system"
 CHATGPT_ROLE_ASSISTANT = "assistant"
+CHATGPT_ROLE_FUNCTION = "function"
 
 class ChatGPTParams:
     def __init__(self,
@@ -23,8 +24,13 @@ class ChatGPTParams:
         return {key:value for key, value in self.__dict__.items() if value is not None}
 
 
-def make_chat_completion_message(message: str, role: str) -> dict:
-    return {
+def make_chat_completion_message(message: str, role: str, name: str = None) -> dict:
+    result = {
         "content": message,
         "role": role
     }
+
+    if name is not None and len(name) > 0:
+        result["name"] = name
+
+    return result

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, TypedDict
 
-from core.chatbot import DialogTurn
+from core.chatbot import DialogueTurn, Dialogue
 from core.generators import ChatGPTResponseGenerator
 from core.openai import ChatGPTModel, ChatGPTParams, CHATGPT_ROLE_SYSTEM, make_chat_completion_message, \
     CHATGPT_ROLE_USER
@@ -33,7 +33,7 @@ DEFAULT_SYSTEM_ALIAS = "<|Assistant|>"
 ALIAS_SEP = ": "
 TURN_SEP = "\n"
 
-class ChatGPTDialogueSummarizer(Mapper[list[DialogTurn], str, ChatGPTDialogSummarizerParams]):
+class ChatGPTDialogueSummarizer(Mapper[Dialogue, str, ChatGPTDialogSummarizerParams]):
 
     def __init__(self,
                  base_instruction: str,
@@ -49,14 +49,14 @@ class ChatGPTDialogueSummarizer(Mapper[list[DialogTurn], str, ChatGPTDialogSumma
             params=gpt_params
         )
 
-    async def run(self, input: list[DialogTurn], params: ChatGPTDialogSummarizerParams | None = None) -> str:
+    async def run(self, input: Dialogue, params: ChatGPTDialogSummarizerParams | None = None) -> str:
         self.__generator.initial_user_message = ChatGPTDialogueSummarizer.__convert_dialogue_to_str(input, params)
         resp, _, _ = await self.__generator.get_response([])
         # print(resp)
         return resp
 
     @staticmethod
-    def __convert_dialogue_to_str(dialogue: list[DialogTurn], params: ChatGPTDialogSummarizerParams | None = None)->str:
+    def __convert_dialogue_to_str(dialogue: Dialogue, params: ChatGPTDialogSummarizerParams | None = None)->str:
 
         user_alias = (params.input_user_alias if params is not None and params.input_user_alias is not None else DEFAULT_USER_ALIAS)
         system_alias = (params.input_system_alias if params is not None and params.input_system_alias is not None else DEFAULT_SYSTEM_ALIAS)

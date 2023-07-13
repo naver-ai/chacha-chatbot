@@ -1,6 +1,6 @@
 from enum import Enum
 
-from core.chatbot import DialogTurn, ResponseGenerator
+from core.chatbot import DialogueTurn, ResponseGenerator, Dialogue
 from core.generators import ChatGPTResponseGenerator
 from core.generators.state import StateBasedResponseGenerator, StateType
 import openai
@@ -185,7 +185,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
                 """
         )
 
-    async def calc_next_state_info(self, current: EmotionChatbotPhase, dialog: list[DialogTurn]) -> tuple[EmotionChatbotPhase, dict | None] | None:
+    async def calc_next_state_info(self, current: EmotionChatbotPhase, dialog: Dialogue) -> tuple[EmotionChatbotPhase, dict | None] | None:
         # Rapport --> Label
         if current == EmotionChatbotPhase.Rapport:
             # Minimum 3 rapport building conversation turns
@@ -213,7 +213,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
                 phase_suggestion = (await phase_classifier.run(dialog)).lower()
                 # print(f"Phase suggestion: {phase_suggestion}")
                 if "label" in phase_suggestion :
-                    return EmotionChatbotPhase.Label, None
+                    return EmotionChatbotPhase.Label, {"classification_result": phase_suggestion}
                 else:
                     return None
         # Label --> Find OR Record

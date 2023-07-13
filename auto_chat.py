@@ -4,7 +4,7 @@ import openai
 from dotenv import load_dotenv
 
 from app.response_generator import EmotionChatbotResponseGenerator
-from core.chatbot import TurnTakingChatSession, MultiAgentChatSession, DialogTurn
+from core.chatbot import TurnTakingChatSession, MultiAgentChatSession, DialogueTurn
 from nanoid import generate as generate_id
 
 import asyncio
@@ -12,11 +12,11 @@ import asyncio
 from core.generators import ChatGPTResponseGenerator
 
 
-def _turn_to_str(turn: DialogTurn, metadata: dict | None, elapsed: int) -> str:
+def _turn_to_str(turn: DialogueTurn, metadata: dict | None, elapsed: int) -> str:
     return f"{'<Child>  ' if turn.is_user else '<Chatbot>'} {turn.message} ({metadata.__str__() if metadata is not None else None}) - {elapsed} sec"
 
 
-def _on_chat_message(turn: DialogTurn, metadata: dict | None, elapsed: int):
+def _on_chat_message(turn: DialogueTurn, metadata: dict | None, elapsed: int):
     print(_turn_to_str(turn, metadata, elapsed))
 
 

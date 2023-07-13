@@ -6,7 +6,7 @@ import yaml
 
 import openai
 
-from core.chatbot import ResponseGenerator, DialogTurn, RegenerateRequestException
+from core.chatbot import ResponseGenerator, DialogueTurn, RegenerateRequestException, Dialogue
 from core.openai import ChatGPTModel, CHATGPT_ROLE_USER, CHATGPT_ROLE_SYSTEM, CHATGPT_ROLE_ASSISTANT, ChatGPTParams, \
     make_chat_completion_message
 
@@ -61,7 +61,7 @@ class GPT3StaticPromptResponseGenerator(ResponseGenerator):
             top_p=1
         )
 
-    def _generate_prompt(self, dialog: list[DialogTurn]) -> str:
+    def _generate_prompt(self, dialog: Dialogue) -> str:
         first_user_message_index = next((i for i, v in enumerate(dialog) if v.is_user == True), -1)
         if first_user_message_index >= 0:
             str_arr: list[str] = [self.prompt_base.strip(), " ", dialog[first_user_message_index].message]
@@ -76,7 +76,7 @@ class GPT3StaticPromptResponseGenerator(ResponseGenerator):
         else:
             return self.prompt_base
 
-    async def _get_response_impl(self, dialog: list[DialogTurn]) -> tuple[str, dict | None]:
+    async def _get_response_impl(self, dialog: Dialogue) -> tuple[str, dict | None]:
         if len(dialog) == 0:
             return self.initial_system_message, None
         else:
@@ -121,7 +121,7 @@ class ChatGPTResponseGenerator(ResponseGenerator):
     def get_instruction(self) -> str | None:
         return self.base_instruction
 
-    async def _get_response_impl(self, dialog: list[DialogTurn]) -> tuple[str, dict | None]:
+    async def _get_response_impl(self, dialog: Dialogue) -> tuple[str, dict | None]:
         dialogue_converted = [
             make_chat_completion_message(turn.message, CHATGPT_ROLE_USER if turn.is_user else CHATGPT_ROLE_ASSISTANT)
             for turn in dialog]
