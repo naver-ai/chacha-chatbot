@@ -128,4 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+.idea/misc.xml
+.idea/*.iml
+
 auto_chat_*.txt
