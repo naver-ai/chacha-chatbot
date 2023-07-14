@@ -4,103 +4,11 @@ from os import getcwd, path
 from asyncio import to_thread
 from typing import Awaitable, Any, Callable
 
-import yaml
-
 import openai
 
-from core.chatbot import ResponseGenerator, DialogTurn, RegenerateRequestException
+from core.chatbot import ResponseGenerator, Dialogue
 from core.openai import ChatGPTModel, CHATGPT_ROLE_USER, CHATGPT_ROLE_SYSTEM, CHATGPT_ROLE_ASSISTANT, ChatGPTParams, \
     make_chat_completion_message
-
-
-class GPT3StaticPromptResponseGenerator(ResponseGenerator):
-
-    @classmethod
-    def from_yml(cls, file_path: str, model: str | None):
-        with open(path.join(getcwd(), file_path), 'r') as f:
-            yml_data: dict = yaml.load(f, Loader=yaml.FullLoader)
-            print(yml_data)
-
-            return cls(
-                prompt_base=yml_data["prompt-base"],
-                user_prefix=yml_data["user-prefix"],
-                system_prefix=yml_data["system-prefix"],
-                line_separator=yml_data["line-separator"],
-                initial_system_message=yml_data["initial-system-utterance"],
-                gpt3_params=yml_data["gpt3-params"],
-                gpt3_model=model
-            )
-
-    def __init__(self,
-                 prompt_base: str,
-                 user_prefix: str = "Customer: ",
-                 system_prefix: str = "Me: ",
-                 line_separator: str = "\n",
-                 initial_system_message: str = "How's your day so far?",
-                 gpt3_model: str = None,
-                 gpt3_params: dict = None
-                 ):
-
-        openai.api_key = os.getenv('OPENAI_API_KEY')
-
-        self.prompt_base = prompt_base
-        self.user_prefix = user_prefix
-        self.system_prefix = system_prefix
-        self.line_separator = line_separator
-        self.initial_system_message = initial_system_message
-
-        if gpt3_model is not None:
-            self.gpt3_model = gpt3_model
-        else:
-            self.gpt3_model = "text-davinci-002"
-
-        self.max_tokens = 256
-
-        self.gpt3_params = gpt3_params or dict(
-            temperature=0.9,
-            presence_penalty=0.6,
-            frequency_penalty=0.5,
-            top_p=1
-        )
-
-    def _generate_prompt(self, dialog: list[DialogTurn]) -> str:
-        first_user_message_index = next((i for i, v in enumerate(dialog) if v.is_user == True), -1)
-        if first_user_message_index >= 0:
-            str_arr: list[str] = [self.prompt_base.strip(), " ", dialog[first_user_message_index].message]
-
-            str_arr += [f"{self.line_separator}{self.user_prefix if turn.is_user else self.system_prefix}{turn.message}"
-                        for turn in dialog[first_user_message_index + 1:]]
-
-            str_arr.append(f"{self.line_separator}{self.system_prefix}")
-
-            return "".join(str_arr)
-
-        else:
-            return self.prompt_base
-
-    async def _get_response_impl(self, dialog: list[DialogTurn]) -> tuple[str, dict | None]:
-        if len(dialog) == 0:
-            return self.initial_system_message, None
-        else:
-            prompt = self._generate_prompt(dialog)
-            result = await to_thread(openai.Completion.create,
-                                     engine=self.gpt3_model,
-                                     prompt=prompt,
-                                     max_tokens=self.max_tokens,
-                                     stop=[self.user_prefix, self.system_prefix],
-                                     **self.gpt3_params,
-                                     )
-
-            top_choice = result.choices[0]
-
-            if top_choice.finish_reason == 'stop':
-                response_text = top_choice.text.strip()
-                if len(response_text) > 0:
-                    return response_text, None
-                else:
-                    raise RegenerateRequestException("Empty text")
-            else:
-                raise Exception("GPT3 error")
 
 
 class ChatGPTResponseGenerator(ResponseGenerator):
@@ -108,8 +16,9 @@ class ChatGPTResponseGenerator(ResponseGenerator):
     def __init__(self,
                  model: str = ChatGPTModel.GPT_4.value,
                  base_instruction: str | None = None,
+                 initial_user_message: str | list[dict] | None = None,
+                 params: ChatGPTParams | None = None
                  initial_user_message: str | None = None,
-                 params: ChatGPTParams | None = None,
                  function_handler: Callable[[str, dict | None], Awaitable[Any]] | None = None
                  ):
 
@@ -136,17 +45,20 @@ class ChatGPTResponseGenerator(ResponseGenerator):
 
             instruction_turn = make_chat_completion_message(instruction, CHATGPT_ROLE_SYSTEM)
 
+            messages = [instruction_turn]
             if self.initial_user_message is not None:
-                dialogue_converted = [
-                                        instruction_turn,
-                                        make_chat_completion_message(self.initial_user_message, CHATGPT_ROLE_USER)
-                                    ] + dialogue_converted
-            else:
-                dialogue_converted.insert(0, instruction_turn)
+                if isinstance(self.initial_user_message, str):
+                    messages.append(make_chat_completion_message(self.initial_user_message, CHATGPT_ROLE_USER))
+                else:
+                    messages.extend(self.initial_user_message)
+
+            messages.extend(dialogue_converted)
+        else:
+            messages = dialogue_converted
 
         result = await to_thread(openai.ChatCompletion.create,
                                  model=self.model,
-                                 messages=dialogue_converted,
+                                 messages=messages,
                                  **self.gpt_params.to_params()
                                  )
         top_choice = result.choices[0]
@@ -178,7 +90,6 @@ class ChatGPTResponseGenerator(ResponseGenerator):
                 print("Shouldn't be here")
 
         else:
-            print(top_choice)
             raise Exception(f"ChatGPT error - {top_choice.finish_reason}")
 
 

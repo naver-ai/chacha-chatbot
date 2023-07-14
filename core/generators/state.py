@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic
 
-from core.chatbot import ResponseGenerator, DialogTurn
+from core.chatbot import ResponseGenerator, DialogueTurn, Dialogue
 
 StateType = TypeVar('StateType')
 
@@ -21,10 +21,10 @@ class StateBasedResponseGenerator(ResponseGenerator, Generic[StateType], ABC):
     # Calculate the next state based on the current state and the dialog.
     # Return None if the state does not change.
     @abstractmethod
-    async def calc_next_state_info(self, current: StateType, dialog: list[DialogTurn]) -> tuple[StateType, dict | None] | None:
+    async def calc_next_state_info(self, current: StateType, dialog: Dialogue) -> tuple[StateType, dict | None] | None:
         pass
 
-    async def _get_response_impl(self, dialog: list[DialogTurn]) -> tuple[str, dict | None]:
+    async def _get_response_impl(self, dialog: Dialogue) -> tuple[str, dict | None]:
     
         # Calculate state and update response generator if the state was changed:
         next_state, next_state_payload = await self.calc_next_state_info(self.__current_state, dialog) or (None, None)
