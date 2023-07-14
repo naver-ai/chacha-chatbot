@@ -17,8 +17,7 @@ class ChatGPTResponseGenerator(ResponseGenerator):
                  model: str = ChatGPTModel.GPT_4.value,
                  base_instruction: str | None = None,
                  initial_user_message: str | list[dict] | None = None,
-                 params: ChatGPTParams | None = None
-                 initial_user_message: str | None = None,
+                 params: ChatGPTParams | None = None,
                  function_handler: Callable[[str, dict | None], Awaitable[Any]] | None = None
                  ):
 
@@ -35,7 +34,7 @@ class ChatGPTResponseGenerator(ResponseGenerator):
     def get_instruction(self) -> str | None:
         return self.base_instruction
 
-    async def _get_response_impl(self, dialog: list[DialogTurn]) -> tuple[str, dict | None]:
+    async def _get_response_impl(self, dialog: Dialogue) -> tuple[str, dict | None]:
         dialogue_converted = [
             make_chat_completion_message(turn.message, CHATGPT_ROLE_USER if turn.is_user else CHATGPT_ROLE_ASSISTANT)
             for turn in dialog]
