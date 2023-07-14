@@ -132,3 +132,4 @@ dmypy.json
 .idea/*.iml
 
 auto_chat_*.txt
+.DS_Store
