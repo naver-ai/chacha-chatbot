@@ -1,3 +1,4 @@
+import json
 from enum import Enum
 
 from core.chatbot import DialogueTurn, ResponseGenerator, Dialogue
@@ -6,7 +7,7 @@ from core.generators.state import StateBasedResponseGenerator, StateType
 import openai
 
 from core.mapper import ChatGPTDialogueSummarizer
-from core.openai import ChatGPTParams
+from core.openai import ChatGPTParams, make_chat_completion_message, ChatGPTModel
 
 
 class EmotionChatbotPhase(Enum):
@@ -192,27 +193,35 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
             if len(dialog) > 3:
                 phase_classifier = ChatGPTDialogueSummarizer(
                     base_instruction=f"""
-                        Analyze the content of the dialog history.
-                        Determine whether it is reasonable to move on to the next conversation phase or not.
-                        Refer to the example.        
-                
-                        Rules: 
-                        1) Return either "Rapport" or "Label" 
-                        2) The default answer is "Rapport".
-                        3) Return "Label," only when the user explicitly expressed their feelings (e.g., good or bad) and shared a specific episode that is the cause of the feelings. 
-                        
-                        [Example]
-                        <Child> 어제 친구랑 싸웠어   
-                        <Chatbot> 친구랑 싸웠구나. 그때 기분이 어땠어?            
-                        <Child> 그냥 기분이 안 좋았어
-                        System: "Label" since the key episode (fighting with a friend) and user's emotion (felt not good) is identified.
-                        
+                        - You are a helpful assistant that analyzes the content of the dialog history.
+                        - Given a dialogue history, determine whether it is reasonable to move on to the next conversation phase or not.
+                        - Move to the next phase only when the user explicitly expressed their feelings (e.g., good or bad) and shared a specific episode that is the cause of the feelings.
+                        - Use JSON format with the following properties:
+                          (1) key_episode: a key episode that the user described.
+                          (2) user_emotion: the emotion of the user caused by the key episode.
+                          (3) move_to_next: A boolean whether it is reasonable to move on to the next conversation phase or not, judged based on (1) and (2).
+                          (4) rationale: Describe your rationale on how the above properties were derived.
+                        Refer to the example below.
                     """,
+                    examples=[(
+                        [
+                            DialogueTurn("어제 친구랑 싸웠어", is_user=True),
+                            DialogueTurn("친구랑 싸웠구나. 그때 기분이 어땠어?", is_user=False),
+                            DialogueTurn("그냥 기분이 안 좋았어", is_user=True)
+                        ],
+                        json.dumps({
+                            'key_episode': 'fighting with a friend',
+                            'user_emotion': 'felt not good',
+                            'move_to_next': True,
+                            'rationale': "We can proceed to the next phase since the key episode and user's emotion are identified."
+                        })
+                    )],
                     gpt_params=ChatGPTParams(temperature=0.1)
                 )
-                phase_suggestion = (await phase_classifier.run(dialog)).lower()
+                phase_suggestion = json.loads(await phase_classifier.run(dialog))
+                print(phase_suggestion)
                 # print(f"Phase suggestion: {phase_suggestion}")
-                if "label" in phase_suggestion :
+                if "move_to_next" in phase_suggestion and phase_suggestion["move_to_next"] is True :
                     return EmotionChatbotPhase.Label, {"classification_result": phase_suggestion}
                 else:
                     return None

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from itertools import chain
 from typing import TypeVar, Generic, TypedDict
 
 from core.chatbot import DialogueTurn, Dialogue
@@ -26,8 +27,8 @@ class ChatGPTDialogSummarizerParams:
         self.input_user_alias = input_user_alias
         self.input_system_alias = input_system_alias
 
-DEFAULT_USER_ALIAS = "<|User|>"
-DEFAULT_SYSTEM_ALIAS = "<|Assistant|>"
+DEFAULT_USER_ALIAS = "<User>"
+DEFAULT_SYSTEM_ALIAS = "<Assistant>"
 
 
 ALIAS_SEP = ": "
@@ -38,7 +39,9 @@ class ChatGPTDialogueSummarizer(Mapper[Dialogue, str, ChatGPTDialogSummarizerPar
     def __init__(self,
                  base_instruction: str,
                  model: str =ChatGPTModel.GPT_4.value,
-                 gpt_params: ChatGPTParams | None = None):
+                 gpt_params: ChatGPTParams | None = None,
+                 examples: list[tuple[Dialogue, str]] | None = None
+                 ):
         self.__model = model
         self.__gpt_params = gpt_params or ChatGPTParams()
 
@@ -49,9 +52,26 @@ class ChatGPTDialogueSummarizer(Mapper[Dialogue, str, ChatGPTDialogSummarizerPar
             params=gpt_params
         )
 
+        self.__examples = examples
+        self.__example_messages_cache: list[dict] | None = None
+
+
+
+    def __get_example_messages(self, params: ChatGPTDialogSummarizerParams)->list[dict] | None:
+        if self.__examples is not None:
+            if self.__example_messages_cache is None:
+                self.__example_messages_cache = list(chain.from_iterable([[
+                    make_chat_completion_message(ChatGPTDialogueSummarizer.__convert_dialogue_to_str(dialogue, params), CHATGPT_ROLE_SYSTEM, "example_user"),
+                    make_chat_completion_message(label, CHATGPT_ROLE_SYSTEM, "example_assistant")
+                ] for dialogue, label in self.__examples]))
+
+            return self.__example_messages_cache
+        else:
+            return None
+
     async def run(self, input: Dialogue, params: ChatGPTDialogSummarizerParams | None = None) -> str:
-        self.__generator.initial_user_message = ChatGPTDialogueSummarizer.__convert_dialogue_to_str(input, params)
-        resp, _, _ = await self.__generator.get_response([])
+        self.__generator.initial_user_message = self.__get_example_messages(params)
+        resp, _, _ = await self.__generator.get_response([DialogueTurn(ChatGPTDialogueSummarizer.__convert_dialogue_to_str(input, params), True)])
         # print(resp)
         return resp
 
