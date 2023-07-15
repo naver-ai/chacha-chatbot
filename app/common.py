@@ -18,5 +18,5 @@ COMMON_SPEAKING_RULES = [
 ]
 
 
-def stringify_list(rules: list[str], ordered: bool = False, bullet: str = "-", separator: str = "\n") -> str:
-    return separator.join([f"{f'{i + 1}.' if ordered else f'{bullet}'} {rule}" for i, rule in enumerate(rules)])
+def stringify_list(rules: list[str], ordered: bool = False, bullet: str = "-", separator: str = "\n", indent:str = "  ") -> str:
+    return separator.join([f"{indent}{f'{i + 1}.' if ordered else f'{bullet}'} {rule}" for i, rule in enumerate(rules)])
