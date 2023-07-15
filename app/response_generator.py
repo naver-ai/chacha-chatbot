@@ -15,8 +15,19 @@ class EmotionChatbotPhase(Enum):
     Record = "record"
     Share = "share"
 
-
 class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbotPhase]):
+
+    __common_speaking_rules = [
+        "Use a simple, informal Korean, like talking to a peer friend.",
+        "Ask one question per conversation turn.",
+        "Say three sentences at the most each time.",
+        "Use Emoji appropriately.",
+        "If the user asks a question that should be asked to adults or unrelated to the conversation topic, then you can say, \"I don't know,\" and go back to the conversation topic."
+    ]
+
+    @staticmethod
+    def __stringify_list(rules: list[str], ordered: bool = False, bullet: str ="-", separator: str= "\n")->str:
+        return separator.join([f"{f'{i+1}.' if ordered else f'{bullet}'} {rule}" for i, rule in enumerate(rules)])
 
     async def get_generator(self, state: StateType, payload: dict | None) -> ResponseGenerator:
         # Get generator caches
@@ -51,27 +62,24 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
             For each conversation turn, execute one task only.
                         
             [Intro Task]
-            Introduce yourself since it is your first time to meet the user.
-            Explain who you are and share your interests and stories.
-            Ask the user to introduce himself or herself.
-            After his or her introduction, continue the conversation about the ongoing topic.
-            Iterate such conversation about various topics.
-            When at least 2 conversations are done, tell them you want to learn more about how his or her day is going.
-            Continue the conversation about various topics until you find common ground and build rapport with the user.
-            Once you build enough rapport with the user by learning more about what they did and who they are, move smoothly on to the next task if you build enough rapport with the user.
+            - Introduce yourself since it is your first time to meet the user.
+            - Explain who you are and share your interests and stories.
+            - Ask the user to introduce himself or herself.
+            - After his or her introduction, continue the conversation about the ongoing topic.
+            - Iterate such conversation about various topics.
+            - When at least 2 conversations are done, tell them you want to learn more about how his or her day is going.
+            - Continue the conversation about various topics until you find common ground and build rapport with the user.
+            - Once you build enough rapport with the user by learning more about what they did and who they are, move smoothly on to the next task if you build enough rapport with the user.
                         
             [Ask Task]
-            Ask the user about an event that is the most memorable to him or her.
-            If he or she does not remember or know what to say, ask them about an event when he or she enjoyed it or felt good or bad.
-            Continue the conversation until the user indicates he or she does not want to talk about the specific topic anymore.
-            If the user indicates he or she does not want to talk anymore, ask the user about other topics.
-            If the user indicates he or she does not want to talk about anything, ask the user if he or she wants to talk later instead.
+            - Ask the user about an event that is the most memorable to him or her.
+            - If he or she does not remember or know what to say, ask them about an event when he or she enjoyed it or felt good or bad.
+            - Continue the conversation until the user indicates he or she does not want to talk about the specific topic anymore.
+            - If the user indicates he or she does not want to talk anymore, ask the user about other topics.
+            - If the user indicates he or she does not want to talk about anything, ask the user if he or she wants to talk later instead.
 
-            Speaking rules: 
-            1. Use a simple, informal Korean, like talking to a peer friend. 
-            2. Ask one question per conversation turn. 
-            3. Say three sentences at the most each time. 
-            4. You can say, "I don't know," and go back to the conversation topic if the user asks a question that should be asked to adults or unrelated to the conversation topic.
+            Speaking rules:
+            {self.__stringify_list(self.__common_speaking_rules, ordered=True)}
 """,
             initial_user_message=f"안녕! 내 이름은 {user_name}라고 해. 난 {user_age}살이야"
         )
@@ -79,7 +87,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         # Phase[Label]
         # Help the user label their emotion based on the Wheel of Emotions. Empathize their emotion.
         self.__generators[EmotionChatbotPhase.Label] = ChatGPTResponseGenerator(
-            base_instruction="""
+            base_instruction=f"""
             Based on the previous conversation history about the user’s interests, ask the user to elaborate more about their emotions and what makes him or her feel that way by providing them the 8 emotions. 
             Give positive 4 emotions if they shared positive feelings, and negative 4 emotions if shared negative feelings. 
             Tell the user that they can pick one or two emotions. 
@@ -121,10 +129,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
             24. 불쾌 + 기쁨 = 소름끼침         
             
             Speaking rules: 
-            1. Use a simple, informal Korean like talking to a peer friend. 
-            2. Say three sentences at the most each time. 
-            3. Ask one question per conversation turn. 
-            4. You can say "I don't know" and return to the conversation topic if the user asks a question that should be asked to adults or unrelated to the conversation topic.
+            {self.__stringify_list(self.__common_speaking_rules, ordered=True)}
             
             Example:
             <Child> 어제 학교 쉬는 시간이 낮잠을 자는데 친구가 갑자기 큰 소리를 내서 잠을 못 잤어.  
@@ -140,48 +145,39 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         # Phase[Find]
         # Help the user find solution to the situation in which they felt negative emotions.
         self.__generators[EmotionChatbotPhase.Find] = ChatGPTResponseGenerator(
-            base_instruction="""
+            base_instruction=f"""
                     Based on the previous conversation history about the user’s interests, ask the user about potential solutions to the problem.
                     If the episode involves other people, ask the user how they would feel. 
                     Help the user to find an actionable solution. 
          
                     Speaking rules: 
-                    1. Use a simple, informal Korean like talking to a peer friend. 
-                    2. Say three sentences at the most each time. 
-                    3. Ask one question per conversation turn. 
-                    4. You can say "I don't know" and return to the conversation topic if the user asks a question that should be asked to adults or unrelated to the conversation topic.
-                """
+                    {self.__stringify_list(self.__common_speaking_rules, ordered=True)}
+                    """
         )
 
         # Phase[Record]
         # Encourage the user to record the moments in which they felt positive emotions.
         self.__generators[EmotionChatbotPhase.Record] = ChatGPTResponseGenerator(
-            base_instruction="""
+            base_instruction=f"""
                     Based on the previous conversation history about the user’s interests, encourage the user to record the moments in which they felt positive emotions. 
                     Explain why it is important to record such moments.
 
                     Speaking rules: 
-                    1. Use a simple, informal Korean like talking to a peer friend. 
-                    2. Say three sentences at the most each time. 
-                    3. Ask one question per conversation turn. 
-                    4. You can say "I don't know" and return to the conversation topic if the user asks a question that should be asked to adults or unrelated to the conversation topic.
+                    {self.__stringify_list(self.__common_speaking_rules, ordered=True)}    
                 """
         )
 
         # Phase[Share]
         # Encourage the user to share their emotion and the episode with their parents. Ask if they want to talk about other episodes.
         self.__generators[EmotionChatbotPhase.Share] = ChatGPTResponseGenerator(
-            base_instruction="""
+            base_instruction=f"""
                     Based on the previous conversation history about the user’s interests, ask the user if they have already shared their emotions and the episode with their parents. 
                     If not, explain why it is important to share with them and encourage sharing.
                     If yes, praise them and ask what happened after sharing.
 
                     Speaking rules: 
-                    1. Use a simple, informal Korean like talking to a peer friend. 
-                    2. Say three sentences at the most each time. 
-                    3. Ask one question per conversation turn. 
-                    4. You can say "I don't know" and return to the conversation topic if the user asks a question that should be asked to adults or unrelated to the conversation topic.
-                """
+                    {self.__stringify_list(self.__common_speaking_rules, ordered=True)}
+                    """
         )
 
     async def calc_next_state_info(self, current: EmotionChatbotPhase, dialog: Dialogue) -> tuple[EmotionChatbotPhase, dict | None] | None:
