@@ -7,7 +7,7 @@ import openai
 from core.chatbot import ResponseGenerator, Dialogue
 from core.openai_utils import ChatGPTModel, CHATGPT_ROLE_USER, CHATGPT_ROLE_SYSTEM, CHATGPT_ROLE_ASSISTANT, \
     ChatGPTParams, \
-    make_chat_completion_message
+    make_chat_completion_message, CHATGPT_ROLE_FUNCTION
 
 
 class ChatGPTResponseGenerator(ResponseGenerator):
@@ -70,24 +70,20 @@ class ChatGPTResponseGenerator(ResponseGenerator):
             function_args = json.loads(function_call_info["arguments"])
             print(f"Call function - {function_name} ({function_args})")
             function_call_result = await self.function_handler(function_name, function_args)
-            dialogue_with_func_result = dialogue_converted + [{
-                "role": "function",
-                "name": function_name,
-                "content": function_call_result
-            }]
+            dialogue_with_func_result = dialogue_converted + [
+                make_chat_completion_message(function_call_result, CHATGPT_ROLE_FUNCTION, name=function_name)
+            ]
             new_result = await to_thread(openai.ChatCompletion.create,
-                                     model=self.model,
-                                     messages=dialogue_with_func_result,
-                                     **self.gpt_params.to_params()
-                                     )
+                                         model=self.model,
+                                         messages=dialogue_with_func_result,
+                                         **self.gpt_params.to_params()
+                                         )
             top_choice = new_result.choices[0]
             if top_choice.finish_reason == 'stop':
                 response_text = top_choice.message.content
                 return response_text, None
             else:
-                print("Shouldn't be here")
+                print("Shouldn't reach here")
 
         else:
             raise Exception(f"ChatGPT error - {top_choice.finish_reason}")
-
-

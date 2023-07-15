@@ -204,7 +204,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
                             DialogueTurn("그냥 기분이 안 좋았어", is_user=True)
                         ],
                         json.dumps({
-                            'key_episode': 'fighting with a friend',
+                            'key_episode': 'fighting with a friend yesterday',
                             'user_emotion': 'felt not good',
                             'move_to_next': True,
                             'rationale': "We can proceed to the next phase since the key episode and user's emotion are identified."
