@@ -130,6 +130,7 @@ dmypy.json
 
 .idea/misc.xml
 .idea/*.iml
+.idea/workspace.xml
 
 auto_chat_*.txt
 .DS_Store

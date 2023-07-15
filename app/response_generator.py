@@ -4,10 +4,8 @@ from enum import Enum
 from core.chatbot import DialogueTurn, ResponseGenerator, Dialogue
 from core.generators import ChatGPTResponseGenerator
 from core.generators.state import StateBasedResponseGenerator, StateType
-import openai
-
 from core.mapper import ChatGPTDialogueSummarizer
-from core.openai import ChatGPTParams, make_chat_completion_message, ChatGPTModel
+from core.openai_utils import ChatGPTParams
 
 
 class EmotionChatbotPhase(Enum):

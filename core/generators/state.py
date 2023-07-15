@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic
 
-from core.chatbot import ResponseGenerator, DialogueTurn, Dialogue
+from core.chatbot import ResponseGenerator, Dialogue
 
 StateType = TypeVar('StateType')
 

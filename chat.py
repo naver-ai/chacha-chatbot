@@ -1,13 +1,12 @@
+import asyncio
 from os import path, getcwd, getenv
 
 import openai
 from dotenv import load_dotenv
+from nanoid import generate as generate_id
 
 from app.response_generator import EmotionChatbotResponseGenerator
 from core.chatbot import TurnTakingChatSession
-from nanoid import generate as generate_id
-
-import asyncio
 
 
 def _print_system_message(message: str, metadata: dict | None, elapsed: int):

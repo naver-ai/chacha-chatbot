@@ -1,13 +1,12 @@
 import json
-import os
-from os import getcwd, path
 from asyncio import to_thread
 from typing import Awaitable, Any, Callable
 
 import openai
 
 from core.chatbot import ResponseGenerator, Dialogue
-from core.openai import ChatGPTModel, CHATGPT_ROLE_USER, CHATGPT_ROLE_SYSTEM, CHATGPT_ROLE_ASSISTANT, ChatGPTParams, \
+from core.openai_utils import ChatGPTModel, CHATGPT_ROLE_USER, CHATGPT_ROLE_SYSTEM, CHATGPT_ROLE_ASSISTANT, \
+    ChatGPTParams, \
     make_chat_completion_message
 
 

@@ -1,5 +1,5 @@
-from time import perf_counter
 from abc import ABC, abstractmethod
+from time import perf_counter
 from typing import Callable, TypeAlias
 
 
@@ -89,7 +89,7 @@ class MultiAgentChatSession(ChatSessionBase):
         return self.__is_running
 
     def stop(self):
-        if self.__is_running == True:
+        if self.__is_running:
             self.__is_stop_requested = True
         else:
             self.__is_stop_requested = False
