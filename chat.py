@@ -9,8 +9,8 @@ from app.response_generator import EmotionChatbotResponseGenerator
 from core.chatbot import TurnTakingChatSession
 
 
-def _print_system_message(message: str, metadata: dict | None, elapsed: int):
-    print(f"AI: {message} ({metadata.__str__() if metadata is not None else None}) - {elapsed} sec")
+def _print_system_message(message: str, metadata: dict | None, processing_time: int):
+    print(f"AI: {message} ({metadata.__str__() if metadata is not None else None}) - {processing_time} sec")
 
 
 def _print_user_message(message: str):
@@ -26,12 +26,13 @@ async def run_chat_loop():
     session = TurnTakingChatSession(session_id,
                                     EmotionChatbotResponseGenerator(user_name=user_name,user_age=user_age))
 
-    _print_system_message(*(await session.initialize()))  # Print initial message
+    system_turn = await session.initialize()
+    _print_system_message(system_turn.message, system_turn.metadata, system_turn.processing_time)  # Print initial message
 
     while True:
         user_message = input("You: ")
-        system_message, metadata, elapsed = await session.push_user_message(user_message)
-        _print_system_message(system_message, metadata, elapsed)
+        system_turn = await session.push_user_message(user_message)
+        _print_system_message(system_turn.message, system_turn.metadata, system_turn.processing_time)
 
 
 if __name__ == "__main__":

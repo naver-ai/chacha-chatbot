@@ -134,3 +134,4 @@ dmypy.json
 
 auto_chat_*.txt
 .DS_Store
+data/**/*

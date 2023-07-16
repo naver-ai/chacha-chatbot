@@ -6,16 +6,16 @@ from dotenv import load_dotenv
 from nanoid import generate as generate_id
 
 from app.response_generator import EmotionChatbotResponseGenerator
-from core.chatbot import MultiAgentChatSession, DialogueTurn
+from core.chatbot import MultiAgentChatSession, DialogueTurn, session_writer
 from core.generators import ChatGPTResponseGenerator
 
 
-def _turn_to_str(turn: DialogueTurn, metadata: dict | None, elapsed: int) -> str:
-    return f"{'<Child>  ' if turn.is_user else '<Chatbot>'} {turn.message} ({metadata.__str__() if metadata is not None else None}) - {elapsed} sec"
+def _turn_to_str(turn: DialogueTurn) -> str:
+    return f"{'<Child>  ' if turn.is_user else '<Chatbot>'} {turn.message} ({turn.metadata.__str__() if turn.metadata is not None else None}) - {turn.processing_time} sec"
 
 
-def _on_chat_message(turn: DialogueTurn, metadata: dict | None, elapsed: int):
-    print(_turn_to_str(turn, metadata, elapsed))
+def _on_chat_message(turn: DialogueTurn):
+    print(_turn_to_str(turn))
 
 
 async def run_chat_loop():
@@ -41,7 +41,7 @@ async def run_chat_loop():
 
     output_path = path.join(getcwd(), f"auto_chat_{session_id}.txt")
     with open(output_path, "w") as f:
-        f.writelines([f"{_turn_to_str(*turn)}\n" for i, turn in enumerate(dialogue)])
+        f.writelines([f"{_turn_to_str(turn)}\n" for i, turn in enumerate(dialogue)])
 
     print(f"\nSaved conversation at {output_path}")
 
