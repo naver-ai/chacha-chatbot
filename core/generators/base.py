@@ -15,9 +15,11 @@ class ChatGPTResponseGenerator(ResponseGenerator):
     def __init__(self,
                  model: str = ChatGPTModel.GPT_4.value,
                  base_instruction: str | None = None,
+                 instruction_parameters: dict | None = None,
                  initial_user_message: str | list[dict] | None = None,
                  params: ChatGPTParams | None = None,
-                 function_handler: Callable[[str, dict | None], Awaitable[Any]] | None = None
+                 function_handler: Callable[[str, dict | None], Awaitable[Any]] | None = None,
+                 verbose: bool = False
                  ):
 
         self.model = model
@@ -26,19 +28,35 @@ class ChatGPTResponseGenerator(ResponseGenerator):
 
         self.initial_user_message = initial_user_message
 
-        self.base_instruction = base_instruction if base_instruction is not None else "You are a ChatGPT assistant that is empathetic and supportive."
+        self.__base_instruction = base_instruction if base_instruction is not None else "You are a ChatGPT assistant that is empathetic and supportive."
+
+        self.__instruction_parameters = instruction_parameters
+
+        self.__resolve_instruction()
 
         self.function_handler = function_handler
 
-    def get_instruction(self) -> str | None:
-        return self.base_instruction
+        self.verbose = verbose
+
+    def __resolve_instruction(self):
+        if self.__instruction_parameters is not None:
+            self.__instruction = self.__base_instruction.format(**self.__instruction_parameters)
+        else:
+            self.__instruction = self.__base_instruction
+
+    def update_instruction_parameters(self, params: dict):
+        if self.__instruction_parameters is not None:
+            self.__instruction_parameters.update(params)
+        else:
+            self.__instruction_parameters = params
+        self.__resolve_instruction()
 
     async def _get_response_impl(self, dialog: Dialogue) -> tuple[str, dict | None]:
         dialogue_converted = [
             make_chat_completion_message(turn.message, CHATGPT_ROLE_USER if turn.is_user else CHATGPT_ROLE_ASSISTANT)
             for turn in dialog]
 
-        instruction = self.get_instruction()
+        instruction = self.__instruction
         if instruction is not None:
 
             instruction_turn = make_chat_completion_message(instruction, CHATGPT_ROLE_SYSTEM)
@@ -68,7 +86,9 @@ class ChatGPTResponseGenerator(ResponseGenerator):
             function_call_info = top_choice["message"]["function_call"]
             function_name = function_call_info["name"]
             function_args = json.loads(function_call_info["arguments"])
-            print(f"Call function - {function_name} ({function_args})")
+
+            if self.verbose: print(f"Call function - {function_name} ({function_args})")
+
             function_call_result = await self.function_handler(function_name, function_args)
             dialogue_with_func_result = dialogue_converted + [
                 make_chat_completion_message(function_call_result, CHATGPT_ROLE_FUNCTION, name=function_name)

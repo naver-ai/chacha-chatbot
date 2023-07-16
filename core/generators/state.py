@@ -8,10 +8,15 @@ StateType = TypeVar('StateType')
 
 class StateBasedResponseGenerator(ResponseGenerator, Generic[StateType], ABC):
 
-    def __init__(self, initial_state: StateType, initial_state_payload: dict | None = None):
+    def __init__(self,
+                 initial_state: StateType,
+                 initial_state_payload: dict | None = None,
+                 verbose: bool = False
+                 ):
         self.__current_state = initial_state
         self.__current_state_payload: dict | None = initial_state_payload
         self.__current_generator: ResponseGenerator | None = None
+        self.verbose = verbose
 
     # Return response generator for a state
     @abstractmethod
@@ -29,9 +34,12 @@ class StateBasedResponseGenerator(ResponseGenerator, Generic[StateType], ABC):
         # Calculate state and update response generator if the state was changed:
         next_state, next_state_payload = await self.calc_next_state_info(self.__current_state, dialog) or (None, None)
         if next_state is not None:
+            pre_state = self.__current_state
             self.__current_state = next_state
             self.__current_state_payload = next_state_payload
             self.__current_generator = await self.get_generator(self.__current_state, self.__current_state_payload)
+            if self.verbose:
+                print("▤▤▤▤▤▤▤▤▤▤▤▤ State transition from {} to {} ▤▤▤▤▤▤▤▤▤▤▤▤▤".format(pre_state, self.__current_state))
         elif self.__current_generator is None:
             self.__current_generator = await self.get_generator(self.__current_state, self.__current_state_payload)
 

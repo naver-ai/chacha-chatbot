@@ -50,9 +50,10 @@ class WheelOfEmotion:
 
 
 def create_generator():
-    return ChatGPTResponseGenerator(
-        base_instruction=f"""
+
+    base_instruction = f"""
 - Based on the previous conversation history about the user’s interests, ask the user to elaborate more about their emotions and what makes him or her feel that way by providing them the 8 emotions. 
+- Focus on the user's key episode, "<:key_episode:>", and the emotion about it, "<:user_emotion:>". 
 - Give positive 4 emotions if they shared positive feelings, and negative 4 emotions if shared negative feelings. 
 - Tell the user that they can pick one or two emotions.
 - The emotions are based on Plutchik’s Wheel of Emotions: 
@@ -76,6 +77,9 @@ Example:
 <Chatbot> 그랬구나 갑자기 소리내서 놀랐고 화도 냈구나. 그걸 격분하다 또는 매우 화가 많이 났다고 표현해. 
 <Child>  격분이 뭐야?
         """
+
+    return ChatGPTResponseGenerator(
+        base_instruction=base_instruction.replace("<:", "{").replace(":>", "}")
     )
 
 

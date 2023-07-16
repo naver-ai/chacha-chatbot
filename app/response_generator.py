@@ -3,6 +3,7 @@ import json
 from app.common import EmotionChatbotPhase
 from app.phases import rapport, label, find, record, share
 from core.chatbot import ResponseGenerator, Dialogue
+from core.generators import ChatGPTResponseGenerator
 from core.generators.state import StateBasedResponseGenerator, StateType
 from core.mapper import ChatGPTDialogueSummarizer
 from core.openai_utils import ChatGPTParams
@@ -10,8 +11,8 @@ from core.openai_utils import ChatGPTParams
 
 class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbotPhase]):
 
-    def __init__(self, user_name: str, user_age: int):
-        super().__init__(initial_state=EmotionChatbotPhase.Rapport)
+    def __init__(self, user_name: str, user_age: int, verbose: bool = False):
+        super().__init__(initial_state=EmotionChatbotPhase.Rapport, verbose = verbose)
         self.__generators: dict[EmotionChatbotPhase, ResponseGenerator] = dict()
 
         self.__generators[EmotionChatbotPhase.Rapport] = rapport.create_generator(user_name, user_age)
@@ -20,20 +21,23 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         self.__generators[EmotionChatbotPhase.Record] = record.create_generator()
         self.__generators[EmotionChatbotPhase.Share] = share.create_generator()
 
+        self.verbose = verbose
+
 
     async def get_generator(self, state: StateType, payload: dict | None) -> ResponseGenerator:
         # Get generator caches
         generator = self.__generators[state]
 
-        if state == EmotionChatbotPhase.Rapport.value:
+        if state == EmotionChatbotPhase.Rapport:
             await generator.initialize()
-        elif state == EmotionChatbotPhase.Label.value:
+        elif state == EmotionChatbotPhase.Label:
+            if isinstance(generator, ChatGPTResponseGenerator):
+                generator.update_instruction_parameters(payload) # Put the result of rapport conversation
+        elif state == EmotionChatbotPhase.Find:
             await generator.initialize()
-        elif state == EmotionChatbotPhase.Find.value:
+        elif state == EmotionChatbotPhase.Record:
             await generator.initialize()
-        elif state == EmotionChatbotPhase.Record.value:
-            await generator.initialize()
-        elif state == EmotionChatbotPhase.Share.value:
+        elif state == EmotionChatbotPhase.Share:
             await generator.initialize()
 
         return generator
@@ -48,7 +52,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
                 print(phase_suggestion)
                 # print(f"Phase suggestion: {phase_suggestion}")
                 if "move_to_next" in phase_suggestion and phase_suggestion["move_to_next"] is True:
-                    return EmotionChatbotPhase.Label, {"classification_result": phase_suggestion}
+                    return EmotionChatbotPhase.Label, phase_suggestion
                 else:
                     return None
         # Label --> Find OR Record
