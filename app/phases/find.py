@@ -9,7 +9,7 @@ Based on the previous conversation history about the user’s interests, ask the
 If the episode involves other people, ask the user how they would feel. 
 Help the user to find an actionable solution. 
 
-Speaking rules: 
+General Speaking rules: 
 {stringify_list(COMMON_SPEAKING_RULES, ordered=True)}
                     """
         )

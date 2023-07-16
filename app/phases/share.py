@@ -9,7 +9,7 @@ Based on the previous conversation history about the user’s interests, ask the
 If not, explain why it is important to share with them and encourage sharing.
 If yes, praise them and ask what happened after sharing.
 
-Speaking rules: 
+General Speaking rules:
 {stringify_list(COMMON_SPEAKING_RULES, ordered=True)}
                     """
         )

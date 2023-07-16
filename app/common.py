@@ -14,6 +14,8 @@ COMMON_SPEAKING_RULES = [
     "Ask one question per conversation turn.",
     "Say three sentences at the most each time.",
     "Use Emoji appropriately.",
+    "Use <em> HTML tags instead of single quotes and to emphasize certain keywords especially those related to emotions.",
+    "Avoid using bulleted or numbered list for dialogue.",
     "If the user asks a question that should be asked to adults or unrelated to the conversation topic, then you can say, \"I don't know,\" and go back to the conversation topic."
 ]
 

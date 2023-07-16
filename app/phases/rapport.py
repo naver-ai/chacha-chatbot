@@ -35,7 +35,7 @@ For each conversation turn, execute one task only.
 - If the user indicates he or she does not want to talk anymore, ask the user about other topics.
 - If the user indicates he or she does not want to talk about anything, ask the user if he or she wants to talk later instead.
 
-Speaking rules:
+General Speaking rules:
 {stringify_list(COMMON_SPEAKING_RULES, ordered=True)}
     """,
         initial_user_message=f"안녕! 내 이름은 {user_name}라고 해. 난 {user_age}살이야"
