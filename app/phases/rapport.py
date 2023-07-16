@@ -41,8 +41,9 @@ Speaking rules:
         initial_user_message=f"안녕! 내 이름은 {user_name}라고 해. 난 {user_age}살이야"
     )
 
-classifier = ChatGPTDialogueSummarizer(
-                    base_instruction=f"""
+
+summarizer = ChatGPTDialogueSummarizer(
+    base_instruction=f"""
 - You are a helpful assistant that analyzes the content of the dialog history.
 - Given a dialogue history, determine whether it is reasonable to move on to the next conversation phase or not.
 - Move to the next phase only when the user explicitly expressed their feelings (e.g., good or bad) and shared a specific episode that is the cause of the feelings.
@@ -53,18 +54,18 @@ classifier = ChatGPTDialogueSummarizer(
   (4) rationale: Describe your rationale on how the above properties were derived.
 Refer to the examples below.
                     """,
-                    examples=[(
-                        [
-                            DialogueTurn("어제 친구랑 싸웠어", is_user=True),
-                            DialogueTurn("친구랑 싸웠구나. 그때 기분이 어땠어?", is_user=False),
-                            DialogueTurn("그냥 기분이 안 좋았어", is_user=True)
-                        ],
-                        json.dumps({
-                            'key_episode': 'fighting with a friend yesterday',
-                            'user_emotion': 'felt not good',
-                            'move_to_next': True,
-                            'rationale': "We can proceed to the next phase since the key episode and user's emotion are identified."
-                        })
-                    )],
-                    gpt_params=ChatGPTParams(temperature=0.1)
-                )
+    examples=[(
+        [
+            DialogueTurn("어제 친구랑 싸웠어", is_user=True),
+            DialogueTurn("친구랑 싸웠구나. 그때 기분이 어땠어?", is_user=False),
+            DialogueTurn("그냥 기분이 안 좋았어", is_user=True)
+        ],
+        json.dumps({
+            'key_episode': 'fighting with a friend yesterday',
+            'user_emotion': 'felt not good',
+            'move_to_next': True,
+            'rationale': "We can proceed to the next phase since the key episode and user's emotion are identified."
+        })
+    )],
+    gpt_params=ChatGPTParams(temperature=0.1)
+)

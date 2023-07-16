@@ -83,7 +83,7 @@ Example:
     )
 
 
-classifier = ChatGPTDialogueSummarizer(
+summarizer = ChatGPTDialogueSummarizer(
     base_instruction=f"""
 - You are a helpful assistant that analyzes the content of the conversation.
 - Determine whether it is reasonable to move on to the next conversation phase or not.

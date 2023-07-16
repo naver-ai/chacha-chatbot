@@ -48,7 +48,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         if current == EmotionChatbotPhase.Rapport:
             # Minimum 3 rapport building conversation turns
             if len(dialog) > 3:
-                phase_suggestion = json.loads(await rapport.classifier.run(dialog))
+                phase_suggestion = json.loads(await rapport.summarizer.run(dialog))
                 print(phase_suggestion)
                 # print(f"Phase suggestion: {phase_suggestion}")
                 if "move_to_next" in phase_suggestion and phase_suggestion["move_to_next"] is True:
@@ -57,7 +57,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
                     return None
         # Label --> Find OR Record
         elif current == EmotionChatbotPhase.Label:
-            phase_suggestion = json.loads(await label.classifier.run(dialog))
+            phase_suggestion = json.loads(await label.summarizer.run(dialog))
             print(phase_suggestion)
             if "next_phase" in phase_suggestion and isinstance(phase_suggestion["next_phase"], str):
                 if phase_suggestion["next_phase"].lower() == "find":
