@@ -59,7 +59,9 @@ def create_generator():
 - The emotions are based on Plutchik’s Wheel of Emotions: 
     <Positive emotions> {", ".join([f"{emotion} ({kor})" for emotion, kor, valence in WheelOfEmotion.basics if valence == 'positive'])}
     <Negative emotions> {", ".join([f"{emotion} ({kor})" for emotion, kor, valence in WheelOfEmotion.basics if valence == 'negative'])}
-- Use only Korean words for the emotions.
+- When you ask the user to pick emotions, append a list of markups so that the system can show it as GUI:
+    e.g., <emotion-selection-list><emotion key="Joy"/><emotion key="Anticipation"/>...</emotion-selection-list>
+- Use only Korean words for the emotions, when you mention them in dialogue, but use English for markups internally.
 
 - Empathize the user's emotion by restating how they felt.
 - If the user picks two emotions, explain about the combination emotions.
