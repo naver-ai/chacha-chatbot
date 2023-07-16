@@ -1,16 +1,16 @@
-from enum import Enum
+from enum import StrEnum
 from typing import TypedDict, Optional
 
 
-class ChatGPTModel(Enum):
+class ChatGPTModel(StrEnum):
     GPT_3_5 = "gpt-3.5-turbo"
     GPT_4 = "gpt-4"
 
-
-CHATGPT_ROLE_USER = "user"
-CHATGPT_ROLE_SYSTEM = "system"
-CHATGPT_ROLE_ASSISTANT = "assistant"
-CHATGPT_ROLE_FUNCTION = "function"
+class ChatGPTRole(StrEnum):
+    USER = "user"
+    SYSTEM = "system"
+    ASSISTANT = "assistant"
+    FUNCTION = "function"
 
 
 class ChatGPTFunctionParameterProperty(TypedDict):

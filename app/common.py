@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class EmotionChatbotPhase(Enum):
+class EmotionChatbotPhase(StrEnum):
     Rapport = "rapport"
     Label = "label"
     Find = "find"

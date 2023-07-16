@@ -22,7 +22,7 @@ async def run_chat_loop():
 
     print(f"Start a chat session (id: {session_id}).")
     user_name = input("Please enter your name: ").strip()
-    user_age = input("Please enter your age: ").strip()
+    user_age = int(input("Please enter your age: ").strip())
     session = TurnTakingChatSession(session_id,
                                     EmotionChatbotResponseGenerator(user_name=user_name,user_age=user_age))
 

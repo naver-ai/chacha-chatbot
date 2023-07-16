@@ -5,15 +5,15 @@ from typing import Awaitable, Any, Callable
 import openai
 
 from core.chatbot import ResponseGenerator, Dialogue
-from core.openai_utils import ChatGPTModel, CHATGPT_ROLE_USER, CHATGPT_ROLE_SYSTEM, CHATGPT_ROLE_ASSISTANT, \
+from core.openai_utils import ChatGPTModel, ChatGPTRole, \
     ChatGPTParams, \
-    make_chat_completion_message, CHATGPT_ROLE_FUNCTION
+    make_chat_completion_message
 
 
 class ChatGPTResponseGenerator(ResponseGenerator):
 
     def __init__(self,
-                 model: str = ChatGPTModel.GPT_4.value,
+                 model: str = ChatGPTModel.GPT_4,
                  base_instruction: str | None = None,
                  instruction_parameters: dict | None = None,
                  initial_user_message: str | list[dict] | None = None,
@@ -53,18 +53,18 @@ class ChatGPTResponseGenerator(ResponseGenerator):
 
     async def _get_response_impl(self, dialog: Dialogue) -> tuple[str, dict | None]:
         dialogue_converted = [
-            make_chat_completion_message(turn.message, CHATGPT_ROLE_USER if turn.is_user else CHATGPT_ROLE_ASSISTANT)
+            make_chat_completion_message(turn.message, ChatGPTRole.USER if turn.is_user else ChatGPTRole.ASSISTANT)
             for turn in dialog]
 
         instruction = self.__instruction
         if instruction is not None:
 
-            instruction_turn = make_chat_completion_message(instruction, CHATGPT_ROLE_SYSTEM)
+            instruction_turn = make_chat_completion_message(instruction, ChatGPTRole.SYSTEM)
 
             messages = [instruction_turn]
             if self.initial_user_message is not None:
                 if isinstance(self.initial_user_message, str):
-                    messages.append(make_chat_completion_message(self.initial_user_message, CHATGPT_ROLE_USER))
+                    messages.append(make_chat_completion_message(self.initial_user_message, ChatGPTRole.USER))
                 else:
                     messages.extend(self.initial_user_message)
 
@@ -91,7 +91,7 @@ class ChatGPTResponseGenerator(ResponseGenerator):
 
             function_call_result = await self.function_handler(function_name, function_args)
             dialogue_with_func_result = dialogue_converted + [
-                make_chat_completion_message(function_call_result, CHATGPT_ROLE_FUNCTION, name=function_name)
+                make_chat_completion_message(function_call_result, ChatGPTRole.FUNCTION, name=function_name)
             ]
             new_result = await to_thread(openai.ChatCompletion.create,
                                          model=self.model,

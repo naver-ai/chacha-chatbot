@@ -4,7 +4,7 @@ from typing import TypeVar, Generic
 
 from core.chatbot import DialogueTurn, Dialogue
 from core.generators import ChatGPTResponseGenerator
-from core.openai_utils import ChatGPTModel, ChatGPTParams, CHATGPT_ROLE_SYSTEM, make_chat_completion_message
+from core.openai_utils import ChatGPTModel, ChatGPTParams, ChatGPTRole, make_chat_completion_message
 
 InputType = TypeVar('InputType')
 OutputType = TypeVar('OutputType')
@@ -40,7 +40,7 @@ class ChatGPTFewShotMapper(Mapper[InputType, str, ParamsType], Generic[InputType
 
     def __init__(self,
                  base_instruction: str,
-                 model: str = ChatGPTModel.GPT_4.value,
+                 model: str = ChatGPTModel.GPT_4,
                  gpt_params: ChatGPTParams | None = None,
                  examples: list[tuple[InputType, str]] | None = None
                  ):
@@ -66,8 +66,8 @@ class ChatGPTFewShotMapper(Mapper[InputType, str, ParamsType], Generic[InputType
             if self.__example_messages_cache is None:
                 self.__example_messages_cache = list(chain.from_iterable([[
                     make_chat_completion_message(self._convert_input_to_message_content(sample, params),
-                                                 CHATGPT_ROLE_SYSTEM, "example_user"),
-                    make_chat_completion_message(label, CHATGPT_ROLE_SYSTEM, "example_assistant")
+                                                 ChatGPTRole.SYSTEM, "example_user"),
+                    make_chat_completion_message(label, ChatGPTRole.SYSTEM, "example_assistant")
                 ] for sample, label in self.__examples]))
 
             return self.__example_messages_cache
