@@ -1,5 +1,7 @@
+from core.chatbot.generators import ChatGPTResponseGenerator
+
 from app.common import stringify_list, COMMON_SPEAKING_RULES
-from core.generators import ChatGPTResponseGenerator
+
 
 # Help the user find solution to the situation in which they felt negative emotions.
 def create_generator():

@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 from itertools import chain
 from typing import TypeVar, Generic
 
+from core.chatbot.generators import ChatGPTResponseGenerator
+
 from core.chatbot import DialogueTurn, Dialogue
-from core.generators import ChatGPTResponseGenerator
 from core.openai_utils import ChatGPTModel, ChatGPTParams, ChatGPTRole, make_chat_completion_message
 
 InputType = TypeVar('InputType')

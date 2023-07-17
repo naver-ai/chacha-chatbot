@@ -1,5 +1,7 @@
+from core.chatbot.generators import ChatGPTResponseGenerator
+
 from app.common import stringify_list, COMMON_SPEAKING_RULES
-from core.generators import ChatGPTResponseGenerator
+
 
 # Encourage the user to record the moments in which they felt positive emotions.
 def create_generator():

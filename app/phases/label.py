@@ -1,12 +1,13 @@
 import json
 
+from core.chatbot.generators import ChatGPTResponseGenerator
+
 from app.common import stringify_list, COMMON_SPEAKING_RULES
 from core.chatbot import DialogueTurn
-from core.generators import ChatGPTResponseGenerator
-
 # Help the user label their emotion based on the Wheel of Emotions. Empathize their emotion.
 from core.mapper import ChatGPTDialogueSummarizer
 from core.openai_utils import ChatGPTParams
+
 
 # https://en.wikipedia.org/wiki/Emotion_classification#/media/File:Plutchik_Dyads.png
 class WheelOfEmotion:

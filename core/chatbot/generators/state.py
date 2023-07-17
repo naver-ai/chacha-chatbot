@@ -45,3 +45,14 @@ class StateBasedResponseGenerator(ResponseGenerator, Generic[StateType], ABC):
 
         # Generate response from the child generator:
         return (await self.__current_generator.get_response(dialog))[0], {"state": self.__current_state, "payload": self.__current_state_payload}
+
+    def write_to_json(self, parcel: dict):
+        parcel["state"] = self.__current_state
+        parcel["state_payload"] = self.__current_state_payload
+        parcel["verbose"] = self.verbose
+
+    def restore_from_json(self, parcel: dict):
+        self.__current_state = parcel["state"]
+        self.__current_state_payload = parcel["state_payload"]
+        self.verbose = parcel["verbose"] or False
+        self.__current_generator = None

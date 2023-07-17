@@ -107,3 +107,20 @@ class ChatGPTResponseGenerator(ResponseGenerator):
 
         else:
             raise Exception(f"ChatGPT error - {top_choice.finish_reason}")
+
+    def write_to_json(self, parcel: dict):
+        parcel["model"] = self.model
+        parcel["gpt_params"] = self.gpt_params.to_params()
+        parcel["initial_user_message"] = self.initial_user_message
+        parcel["base_instruction"] = self.__base_instruction
+        parcel["instruction_parameters"] = self.__instruction_parameters
+        parcel["verbose"] = self.verbose
+
+    def restore_from_json(self, parcel: dict):
+        self.model = parcel["model"]
+        self.gpt_params = ChatGPTParams(**parcel["gpt_params"])
+        self.initial_user_message = parcel["initial_user_message"]
+        self.__base_instruction = parcel["base_instruction"]
+        self.__instruction_parameters = parcel["instruction_parameters"]
+        self.verbose = parcel["verbose"]
+        self.__resolve_instruction()

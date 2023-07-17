@@ -1,102 +1,12 @@
 from abc import ABC, abstractmethod
-from os import path, getcwd, makedirs
-from time import perf_counter
-from typing import Callable, TypeAlias
+from typing import Callable
 
-import nanoid
-import jsonlines
-
-from core.time import get_timestamp
+from .generator import ResponseGenerator
+from .types import Dialogue, DialogueTurn
+from .session_writer import SessionWriterBase, session_writer
 
 
-class RegenerateRequestException(Exception):
-    def __init__(self, reason: str):
-        self.reason = reason
-
-
-class DialogueTurn:
-    def __init__(self, message: str,
-                 is_user: bool = True,
-                 id: str = None,
-                 timestamp: int = None,
-                 processing_time: int | None=None,
-                 metadata: dict | None = None
-                 ):
-        self.message = message
-        self.is_user = is_user
-        self.id = id if id is not None else nanoid.generate(size=20)
-        self.timestamp = timestamp if timestamp is not None else get_timestamp()
-        self.processing_time = processing_time
-        self.metadata = metadata
-
-Dialogue: TypeAlias = list[DialogueTurn]
-
-class ResponseGenerator(ABC):
-
-    async def initialize(self):
-        pass
-
-    def _pre_get_response(self, dialog: Dialogue):
-        pass
-
-    @abstractmethod
-    async def _get_response_impl(self, dialog: Dialogue) -> tuple[str, dict | None]:
-        pass
-
-    async def get_response(self, dialog: Dialogue) -> tuple[str, dict | None, int]:
-        start = perf_counter()
-
-        try:
-            self._pre_get_response(dialog)
-            response, metadata = await self._get_response_impl(dialog)
-        except RegenerateRequestException as regen:
-            print(f"Regenerate response. Reason: {regen.reason}")
-            response, metadata = await self._get_response_impl(dialog)
-        except Exception as ex:
-            raise ex
-
-        end = perf_counter()
-
-        return response, metadata, int((end - start) * 1000)
-
-class SessionWriterBase(ABC):
-    @abstractmethod
-    def write_turn(self, session_id: str, turn: DialogueTurn):
-        pass
-
-    @abstractmethod
-    def read_dialogue(self, session_id: str)->Dialogue:
-        pass
-
-class SessionFileWriter(SessionWriterBase):
-
-    @staticmethod
-    def __get_dialogue_directory_path(session_id: str)->str:
-        p = path.join(getcwd(), "data/sessions/", session_id)
-        if not path.exists(p):
-            makedirs(p)
-        return p
-
-    @staticmethod
-    def __get_dialogue_file_path(session_id: str)->str:
-        dir_path = SessionFileWriter.__get_dialogue_directory_path(session_id)
-        return path.join(dir_path, "dialogue.jsonl")
-
-    def write_turn(self, session_id: str, turn: DialogueTurn):
-        with jsonlines.open(self.__get_dialogue_file_path(session_id), 'a') as writer:
-            writer.write(turn.__dict__)
-
-    def read_dialogue(self, session_id: str) -> Dialogue | None:
-        fp = self.__get_dialogue_file_path(session_id)
-        if path.exists(fp):
-            with jsonlines.open(fp, "r") as reader:
-                return [row for row in reader]
-        else:
-            return None
-
-session_writer = SessionFileWriter()
-
-class ChatSessionBase:
+class ChatSessionBase(ABC):
     def __init__(self, id: str,
                  response_generator: ResponseGenerator,
                  session_writer: SessionWriterBase | None = session_writer
@@ -106,13 +16,44 @@ class ChatSessionBase:
         self._dialog: Dialogue = []
         self._session_writer = session_writer
 
-    def load(self)->bool:
+    def __del__(self):
+        if self._session_writer is not None:
+            print("======Write session info.======")
+            self._session_writer.write_session_info(self.id, self._to_info_dict())
+
+    def load(self) -> bool:
         if self._session_writer is not None:
             dialogue = self._session_writer.read_dialogue(self.id)
             if dialogue is not None:
                 self._dialog = dialogue
-                return True
-        return False
+
+            session_info = self._session_writer.read_session_info(self.id)
+            if session_info is not None:
+                self._restore_from_info_dict(session_info)
+
+            print("Restored session from storage.")
+            return True
+        else:
+            return False
+
+    def save(self) -> bool:
+        if self._session_writer is not None:
+            session_info = self._to_info_dict()
+            self._session_writer.write_session_info(self.id, session_info)
+
+            print("Serialized session to storage.")
+            return True
+        else:
+            return False
+
+    def _restore_from_info_dict(self, data: dict):
+        if "response_generator" in data:
+            self._response_generator.restore_from_json(data["response_generator"])
+
+    def _to_info_dict(self)->dict:
+        parcel = dict(id=self.id, turns=len(self.dialog), response_generator = dict())
+        self._response_generator.write_to_json(parcel["response_generator"])
+        return parcel
 
     @property
     def dialog(self):
@@ -120,10 +61,11 @@ class ChatSessionBase:
 
     def _push_new_turn(self, turn: DialogueTurn):
         self._dialog.append(turn)
-        if self._session_writer is not None: self._session_writer.write_turn(self.id, turn)
+        if self._session_writer is not None:
+            self._session_writer.write_turn(self.id, turn)
+        self.save()
 
 
-# User and system can say one by one.
 class TurnTakingChatSession(ChatSessionBase):
 
     async def initialize(self) -> DialogueTurn:
@@ -142,6 +84,7 @@ class TurnTakingChatSession(ChatSessionBase):
 
 
 class MultiAgentChatSession(ChatSessionBase):
+
     def __init__(self, id: str,
                  response_generator: ResponseGenerator,
                  user_generator: ResponseGenerator,
@@ -152,6 +95,19 @@ class MultiAgentChatSession(ChatSessionBase):
 
         self.__is_running = False
         self.__is_stop_requested = False
+
+    def _restore_from_info_dict(self, data: dict):
+        super()._restore_from_info_dict(data)
+        if "user_generator" in data:
+            self.__user_generator.restore_from_json(data["user_generator"])
+
+    def _to_info_dict(self) -> dict:
+        parcel = super()._to_info_dict()
+        user_gen_parcel = dict()
+        self.__user_generator.write_to_json(user_gen_parcel)
+        parcel["user_generator"] = user_gen_parcel
+
+        return parcel
 
     @property
     def is_running(self) -> bool:

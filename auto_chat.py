@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 from nanoid import generate as generate_id
 
 from app.response_generator import EmotionChatbotResponseGenerator
-from core.chatbot import MultiAgentChatSession, DialogueTurn, session_writer
-from core.generators import ChatGPTResponseGenerator
+from core.chatbot import DialogueTurn, MultiAgentChatSession
+from core.chatbot.generators import ChatGPTResponseGenerator
 
 
 def _turn_to_str(turn: DialogueTurn) -> str:
@@ -37,7 +37,7 @@ async def run_chat_loop():
                                     """)
                                     )
 
-    dialogue = await session.generate_conversation(15, _on_chat_message)
+    dialogue = await session.generate_conversation(8, _on_chat_message)
 
     output_path = path.join(getcwd(), f"auto_chat_{session_id}.txt")
     with open(output_path, "w") as f:

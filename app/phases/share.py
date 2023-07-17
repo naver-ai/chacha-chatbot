@@ -1,5 +1,7 @@
+from core.chatbot.generators import ChatGPTResponseGenerator
+
 from app.common import stringify_list, COMMON_SPEAKING_RULES
-from core.generators import ChatGPTResponseGenerator
+
 
 # Encourage the user to share their emotion and the episode with their parents. Ask if they want to talk about other episodes.
 def create_generator():

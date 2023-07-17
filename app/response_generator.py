@@ -1,38 +1,51 @@
 import json
 
+from core.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator, StateType
+
 from app.common import EmotionChatbotPhase
 from app.phases import rapport, label, find, record, share
 from core.chatbot import ResponseGenerator, Dialogue
-from core.generators import ChatGPTResponseGenerator
-from core.generators.state import StateBasedResponseGenerator, StateType
 from core.mapper import ChatGPTDialogueSummarizer
 from core.openai_utils import ChatGPTParams
 
 
 class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbotPhase]):
 
-    def __init__(self, user_name: str, user_age: int, verbose: bool = False):
-        super().__init__(initial_state=EmotionChatbotPhase.Rapport, verbose = verbose)
+    def __init__(self, user_name: str | None = None, user_age: int = None, verbose: bool = False):
+        super().__init__(initial_state=EmotionChatbotPhase.Rapport, verbose=verbose)
+
+        self.__user_name = user_name
+        self.__user_age = user_age
+
         self.__generators: dict[EmotionChatbotPhase, ResponseGenerator] = dict()
 
-        self.__generators[EmotionChatbotPhase.Rapport] = rapport.create_generator(user_name, user_age)
+        self.__generators[EmotionChatbotPhase.Rapport] = rapport.create_generator()
         self.__generators[EmotionChatbotPhase.Label] = label.create_generator()
         self.__generators[EmotionChatbotPhase.Find] = find.create_generator()
         self.__generators[EmotionChatbotPhase.Record] = record.create_generator()
         self.__generators[EmotionChatbotPhase.Share] = share.create_generator()
 
-        self.verbose = verbose
+    def write_to_json(self, parcel: dict):
+        super().write_to_json(parcel)
+        parcel["user_name"] = self.__user_name
+        parcel["user_age"] = self.__user_age
 
+    def restore_from_json(self, parcel: dict):
+        self.__user_name = parcel["user_name"]
+        self.__user_age = parcel["user_age"]
+
+        super().restore_from_json(parcel)
 
     async def get_generator(self, state: StateType, payload: dict | None) -> ResponseGenerator:
         # Get generator caches
         generator = self.__generators[state]
 
         if state == EmotionChatbotPhase.Rapport:
-            await generator.initialize()
+            if isinstance(generator, ChatGPTResponseGenerator):
+                generator.update_instruction_parameters(dict(user_name = self.__user_name, user_age = self.__user_age))
         elif state == EmotionChatbotPhase.Label:
             if isinstance(generator, ChatGPTResponseGenerator):
-                generator.update_instruction_parameters(payload) # Put the result of rapport conversation
+                generator.update_instruction_parameters(payload)  # Put the result of rapport conversation
         elif state == EmotionChatbotPhase.Find:
             await generator.initialize()
         elif state == EmotionChatbotPhase.Record:
