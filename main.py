@@ -1,16 +1,24 @@
-# This is a sample Python script.
+import argparse
+from os import path, getcwd
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+import uvicorn
+from dotenv import load_dotenv
 
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+    try:
+        load_dotenv(path.join(getcwd(), ".env"))
+    except:
+        raise Exception("Please run setup_admin.py first.")
 
+    parser.add_argument("--production", dest="debug", action="store_false")
+    parser.add_argument("--debug", dest="debug", action="store_true")
+    parser.add_argument('-p', '--port', dest="port", type=int, help='Port number')
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+    parser.set_defaults(debug=True, port=8000)
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    args = parser.parse_args()
+
+    uvicorn.run("backend.server:app", host="0.0.0.0", port=args.port, reload=args.debug)
+

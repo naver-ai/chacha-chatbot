@@ -1,11 +1,11 @@
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body, Path
 from pydantic import BaseModel
 from starlette import status
 
 from app.response_generator import EmotionChatbotResponseGenerator
-from core.chatbot import TurnTakingChatSession, Dialogue
+from core.chatbot import TurnTakingChatSession, Dialogue, session_writer
 from core.time import get_timestamp
 
 router = APIRouter()
@@ -14,10 +14,12 @@ active_sessions: dict[str, TurnTakingChatSession] = dict()
 
 
 def _restore_session_instance(session_id: str) -> TurnTakingChatSession | None:
-    session = TurnTakingChatSession(session_id,
-                                    EmotionChatbotResponseGenerator())
-    if session.load():
-        return session
+    if session_writer.exists(session_id):
+        session = TurnTakingChatSession(session_id, EmotionChatbotResponseGenerator())
+        if session.load():
+            return session
+        else:
+            return None
     else:
         return None
 
@@ -52,8 +54,15 @@ class ChatSessionInitializeArgs(BaseModel):
     user_age: int
 
 
-@router.post("/{session_id}/initialize", response_model=ChatMessage)
-async def _initialize_chat_session(session_id: str, args: ChatSessionInitializeArgs) -> ChatMessage:
+@router.get("/sessions/{session_id}/messages")
+async def get_messages(session_id: str = Path(...)) -> list[ChatMessage]:
+    print("hahaha")
+    session = _assert_get_session(session_id)
+    return session.dialog
+
+
+@router.post("/sessions/{session_id}/initialize", response_model=ChatMessage)
+async def _initialize_chat_session(args: ChatSessionInitializeArgs, session_id: str = Path(...)) -> ChatMessage:
     if session_id in active_sessions and active_sessions[session_id] is not None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -77,22 +86,16 @@ async def _initialize_chat_session(session_id: str, args: ChatSessionInitializeA
         )
 
 
-@router.post("/{session_id}/terminate")
-def _terminate_chat_session(session_id: str):
+@router.post("/sessions/{session_id}/terminate")
+def _terminate_chat_session(session_id: str = Path(...)):
     if session_id in active_sessions:
         del active_sessions[session_id]
 
 
-@router.post("/{session_id}/message", response_model=ChatMessage)
-async def user_message(session_id, message: str = Body()):
+@router.post("/sessions/{session_id}/message", response_model=ChatMessage)
+async def user_message(session_id:str = Path(...), message: str = Body()):
     print(message)
     session = _assert_get_session(session_id)
 
     system_turn = await session.push_user_message(message)
     return system_turn
-
-
-@router.get("/{session_id}/messages")
-async def get_messages(session_id) -> Dialogue:
-    session = _assert_get_session(session_id)
-    return session.dialog

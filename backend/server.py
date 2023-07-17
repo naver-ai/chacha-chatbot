@@ -7,7 +7,7 @@ from backend.routers import chat
 
 app = FastAPI()
 
-app.include_router(chat.router)
+app.include_router(chat.router, prefix="/api/v1/chat")
 
 origins = [
     "http://localhost:3000",

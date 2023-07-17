@@ -22,7 +22,7 @@ class ChatSessionBase(ABC):
             self._session_writer.write_session_info(self.id, self._to_info_dict())
 
     def load(self) -> bool:
-        if self._session_writer is not None:
+        if self._session_writer is not None and self._session_writer.exists(self.id):
             dialogue = self._session_writer.read_dialogue(self.id)
             if dialogue is not None:
                 self._dialog = dialogue
@@ -30,8 +30,6 @@ class ChatSessionBase(ABC):
             session_info = self._session_writer.read_session_info(self.id)
             if session_info is not None:
                 self._restore_from_info_dict(session_info)
-
-            print("Restored session from storage.")
             return True
         else:
             return False
@@ -40,8 +38,6 @@ class ChatSessionBase(ABC):
         if self._session_writer is not None:
             session_info = self._to_info_dict()
             self._session_writer.write_session_info(self.id, session_info)
-
-            print("Serialized session to storage.")
             return True
         else:
             return False
