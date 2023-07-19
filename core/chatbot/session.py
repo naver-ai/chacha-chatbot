@@ -71,8 +71,8 @@ class TurnTakingChatSession(ChatSessionBase):
         self._push_new_turn(system_turn)
         return system_turn
 
-    async def push_user_message(self, message: str) -> DialogueTurn:
-        self._push_new_turn(DialogueTurn(message, is_user=True))
+    async def push_user_message(self, user_turn: DialogueTurn) -> DialogueTurn:
+        self._push_new_turn(user_turn)
         system_message, metadata, elapsed = await self._response_generator.get_response(self._dialog)
         system_turn = DialogueTurn(system_message, is_user=False, processing_time=elapsed, metadata=metadata)
         self._push_new_turn(system_turn)

@@ -9,8 +9,9 @@
   },
   "keywords": [],
   "author": "Young-Ho Kim",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
+    "@types/node": "^20.4.2",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "parcel": "^2.9.3",
@@ -20,8 +21,15 @@
     "tailwindcss": "^3.3.3"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.1.1",
+    "@reduxjs/toolkit": "^1.9.5",
+    "nanoid": "^4.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "typescript": "^5.1.6"
+    "react-hook-form": "^7.45.2",
+    "react-redux": "^8.1.1",
+    "react-router-dom": "^6.14.2",
+    "typescript": "^5.1.6",
+    "yup": "^1.2.0"
   }
 }

@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from nanoid import generate as generate_id
 
 from app.response_generator import EmotionChatbotResponseGenerator
-from core.chatbot import TurnTakingChatSession
+from core.chatbot import TurnTakingChatSession, DialogueTurn
 
 
 def _print_system_message(message: str, metadata: dict | None, processing_time: int):
@@ -31,7 +31,7 @@ async def run_chat_loop():
 
     while True:
         user_message = input("You: ")
-        system_turn = await session.push_user_message(user_message)
+        system_turn = await session.push_user_message(DialogueTurn(user_message, is_user=True))
         _print_system_message(system_turn.message, system_turn.metadata, system_turn.processing_time)
 
 
