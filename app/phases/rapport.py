@@ -58,10 +58,11 @@ summarizer = ChatGPTDialogueSummarizer(
     base_instruction=f"""
 - You are a helpful assistant that analyzes the content of the dialog history.
 - Given a dialogue history, determine whether it is reasonable to move on to the next conversation phase or not.
-- Move to the next phase only when the user explicitly expressed their feelings (e.g., good or bad) and shared a specific episode that is the cause of the feelings.
+- Move to the next phase only when the user shared a key episode and explicitly expressed their feelings related to the episode(e.g., good or bad).
+- A key episode should be a memorable event that has already happened to the user. 
 - Use JSON format with the following properties:
   (1) key_episode: a key episode that the user described.
-  (2) user_emotion: the emotion of the user caused by the key episode.
+  (2) user_emotion: the emotion of the user caused by the key episode. Make sure the emotion is connected to (1)
   (3) move_to_next: A boolean whether it is reasonable to move on to the next conversation phase or not, judged based on (1) and (2).
   (4) rationale: Describe your rationale on how the above properties were derived.
 Refer to the examples below.
