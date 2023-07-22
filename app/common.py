@@ -12,7 +12,7 @@ class EmotionChatbotPhase(StrEnum):
 COMMON_SPEAKING_RULES = [
     "Use a simple, informal Korean, like talking to a peer friend.",
     "Ask one question per conversation turn.",
-    "Say three sentences at the most each time.",
+    "Say two sentences at the most each time.",
     "Use Emoji appropriately.",
     "Use <em> HTML tags instead of single quotes and to emphasize certain keywords especially those related to emotions.",
     "Avoid using bulleted or numbered list for dialogue.",
