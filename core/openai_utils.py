@@ -1,10 +1,14 @@
+from asyncio import to_thread
 from enum import StrEnum
-from typing import TypedDict, Optional
+from typing import TypedDict, Optional, Any
+
+import openai
 
 
 class ChatGPTModel(StrEnum):
     GPT_3_5 = "gpt-3.5-turbo"
     GPT_4 = "gpt-4"
+
 
 class ChatGPTRole(StrEnum):
     USER = "user"
@@ -54,5 +58,25 @@ def make_chat_completion_message(message: str, role: str, name: str = None) -> d
 
     if name is not None and len(name) > 0:
         result["name"] = name
+
+    return result
+
+
+async def run_chat_completion(model: str, messages: list[dict], gpt_params: ChatGPTParams,
+                                     trial_count: int = 3) -> Any:
+    trial = 0
+    result = None
+    while trial <= trial_count and result is None:
+        try:
+            result = await to_thread(openai.ChatCompletion.create,
+                                     model=model,
+                                     messages=messages,
+                                     **gpt_params.to_params()
+                                     )
+        except openai.APIError as e:
+            result = None
+            trial += 1
+            print("OpenAI API error - ", e)
+            print("Retry ChatCompletion.")
 
     return result

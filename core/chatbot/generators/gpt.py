@@ -7,7 +7,7 @@ import openai
 from core.chatbot import ResponseGenerator, Dialogue
 from core.openai_utils import ChatGPTModel, ChatGPTRole, \
     ChatGPTParams, \
-    make_chat_completion_message
+    make_chat_completion_message, run_chat_completion
 
 
 class ChatGPTResponseGenerator(ResponseGenerator):
@@ -72,11 +72,8 @@ class ChatGPTResponseGenerator(ResponseGenerator):
         else:
             messages = dialogue_converted
 
-        result = await to_thread(openai.ChatCompletion.create,
-                                 model=self.model,
-                                 messages=messages,
-                                 **self.gpt_params.to_params()
-                                 )
+        result = await run_chat_completion(self.model, messages, self.gpt_params)
+
         top_choice = result.choices[0]
 
         if top_choice.finish_reason == 'stop':
@@ -93,11 +90,8 @@ class ChatGPTResponseGenerator(ResponseGenerator):
             dialogue_with_func_result = dialogue_converted + [
                 make_chat_completion_message(function_call_result, ChatGPTRole.FUNCTION, name=function_name)
             ]
-            new_result = await to_thread(openai.ChatCompletion.create,
-                                         model=self.model,
-                                         messages=dialogue_with_func_result,
-                                         **self.gpt_params.to_params()
-                                         )
+            new_result = await run_chat_completion(self.model, dialogue_with_func_result, self.gpt_params)
+
             top_choice = new_result.choices[0]
             if top_choice.finish_reason == 'stop':
                 response_text = top_choice.message.content
