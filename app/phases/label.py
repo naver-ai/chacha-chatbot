@@ -152,22 +152,3 @@ Refer to the examples below.
     ],
     gpt_params=ChatGPTParams(temperature=0.5)
 )
-
-###                    [Example]
-###                    <Child> 어제 학교 쉬는 시간이 낮잠을 자는데 친구가 갑자기 큰 소리를 내서 잠을 못 잤어.
-###                    <Chatbot> 그랬구나. 그때 기분이 어땠어?
-###                    <Child> 그냥 기분이 안 좋았어
-#                    <Chatbot> 어떤 기분이 들었는지 자세히 말해줄 수 있을까?
-#                    <Child> 갑자기 소리를 내서 놀랐고, 화도 났어
-#                    <Chatbot>
-#                    <Child>  격분이 뭐야?
-#                    System: "Find" since the Chatbot empathized and explained the user's negative emotions and the key episode (a friend made a big noise while sleeping) and user's negative emotion (격분) is identified.
-
-#                    <Child> 어제 친구들이랑 축구를 했어.
-#                    <Chatbot> 축구를 했구나! 기분이 어땠어?
-#                    <Child> 오랜만에 하는거라 기분이 좋았어
-#                    <Chatbot> 어떤 기분이 들었는지 자세히 말해줄 수 있을까?
-#                    <Child> 뭔가 기대 됐고 기뻤어
-#                    <Chatbot> 오랜만에 친구들이랑 축구를 해서 기대가 되고 기뻤구나. 그걸 낙관적이라고 표현해.
-#                    <Child>  낙관이 뭐야?
-#                    System: "Record" since the Chatbot empathized and explained the user's positive emotions and the key episode (playing soccer with friends) and user's positive emotion (낙관) is identified.

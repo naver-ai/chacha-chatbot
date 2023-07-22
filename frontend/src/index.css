@@ -1,3 +1,75 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import url('https://cdn.rawgit.com/innks/NanumSquareRound/master/nanumsquareround.min.css');
+
+
+
+body {
+    padding: 0;
+    margin: 0;
+    font-family: NanumSquareRound, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    @apply text-gray-700 text-xl font-bold;
+}
+
+.background-panel {
+    @apply bg-background;
+    /*background: linear-gradient(121deg, rgb(233, 235, 237) 0%, rgb(214, 241, 232) 100%);*/
+}
+
+@layer components {
+
+    .text-input, input[type=text], input[type=number] {
+        @apply shadow-inner border-2 bg-white px-2 py-1 rounded-md border-slate-200 disabled:text-gray-400 focus:outline-none focus:border-clova-blue;
+    }
+
+    .button-main{
+        @apply bg-gradient-to-r from-teal-500 to-clova-blue p-3 py-1.5 rounded-md text-white shadow-md cursor-pointer hover:opacity-90 active:ring active:ring-clova-blue/50 disabled:opacity-50;
+    }
+
+    .turn-list-container{
+        @apply snap-y scroll-pb-[100px]
+    }
+
+    .turn-list{
+        @apply mb-[100px]
+    }
+
+    .turn-container {
+        @apply px-2 py-2 flex flex-col scroll-m-2 snap-end;
+    }
+
+    .turn-container > .callout {
+        @apply rounded-xl px-3 py-2 shadow-md max-w-xl text-gray-600 font-normal leading-relaxed;
+        
+    }
+
+    .turn-container > .callout > em{
+        @apply not-italic font-extrabold;
+    }
+
+    .turn-container.system {
+        @apply items-start;
+    }
+
+    .turn-container.system.last-system-message {
+        @apply flex-row items-end justify-start;
+    }
+
+    .turn-container.system > .callout {
+        @apply rounded-tl-none text-white bg-gradient-to-r from-chat-1 to-chat-2;
+    }
+
+    .turn-container.user {
+        @apply items-end;
+    }
+
+    .turn-container.user > .callout {
+        @apply bg-white rounded-tr-none border-[1px];
+    }
+}

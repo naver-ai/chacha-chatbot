@@ -15,9 +15,10 @@ export const ChatPage = ()=>{
     const isInitialized = useSelector(state => state.chatState.sessionInfo != null)
 
 
-    return <div>
+    return <div className="App h-screen flex flex-col justify-between">
         {
             isInitialized ? <ChatView/> : <IntroView sessionId={sessionId!!}/>
         }
+        <div className="background-panel fixed top-0 left-0 right-0 bottom-0 z-[-1] pointer-events-none"/>
     </div>
 }

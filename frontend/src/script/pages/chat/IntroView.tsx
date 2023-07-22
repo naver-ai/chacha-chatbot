@@ -1,7 +1,7 @@
 import * as yup from "yup"
 import {useForm} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
-import {useCallback} from "react";
+import {KeyboardEvent, useCallback, useEffect} from "react";
 import {useDispatch} from "../../redux/hooks";
 import {initializeChatSession} from "./reducer";
 
@@ -15,10 +15,13 @@ export const IntroView = (props: {
 }) => {
     const {
         register,
+        setFocus,
         handleSubmit,
-        formState: {errors}
+        formState: {errors, isValid},
+        getFieldState
     } = useForm({
-        resolver: yupResolver(schema)
+        resolver: yupResolver(schema),
+        reValidateMode: 'onChange'
     })
 
     const dispatch = useDispatch()
@@ -27,13 +30,29 @@ export const IntroView = (props: {
         dispatch(initializeChatSession(props.sessionId, data.user_name, data.user_age))
     }, [props.sessionId])
 
-    return <form onSubmit={handleSubmit(onSubmit)}>
-        <input {...register("user_name")} placeholder={"너의 이름은 뭐야? (성 빼고)"}/>
-        <p>{errors.user_name?.message}</p>
+    useEffect(()=>{
+        setFocus("user_name")
+    }, [setFocus])
 
-        <input {...register("user_age")} placeholder={"몇살이야?"}/>
-        <p>{errors.user_age?.message}</p>
+    const handleKeyDownOnNameField = useCallback((ev: KeyboardEvent<HTMLInputElement>)=>{
+        if(ev.key == 'Enter'){
+            if(!getFieldState("user_name").invalid){
+                setFocus("user_age")
+            }
+        }
+    }, [getFieldState, setFocus])
 
-        <input type={"submit"} value={"대화 시작하기"}/>
+    return <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col container-sm my-auto mx-auto">
+        <input {...register("user_name")} type="text" placeholder={"너의 이름은 뭐야? (성 빼고)"} 
+        autoComplete="off"
+        className=""
+        onKeyDown={handleKeyDownOnNameField}
+        />
+
+        <input {...register("user_age")} type="number" placeholder={"몇살이야?"} className="mt-2" autoComplete="off"/>
+        {
+            isValid ? <input type={"submit"} value={"대화 시작하기!"} className="button-main mt-2"/> : undefined
+        }
+        
     </form>
 }
