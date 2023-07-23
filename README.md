@@ -45,6 +45,12 @@
     ```
     Access http://localhost:8888 on web browser.
 
+Once you have installed NPM dependencies, you can run both servers using a shell script:
+```shell
+> sh ./run-web-dev.sh
+```
+
+
 #### Running on production mode
 
 The backend server can serve the frontend web under the hood, via the same port.
