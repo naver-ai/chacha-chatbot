@@ -32,6 +32,18 @@ body {
         @apply bg-gradient-to-r from-teal-500 to-clova-blue p-3 py-1.5 rounded-md text-white shadow-md cursor-pointer hover:opacity-90 active:ring active:ring-clova-blue/50 disabled:opacity-50;
     }
 
+    .button-clear{
+        @apply bg-transparent text-gray-700;
+    }
+
+    .button-tiny{
+        @apply px-1.5 py-0.5 hover:bg-slate-500/20 rounded-md text-sm font-bold;
+    }
+
+    .button-with-icon{
+        @apply flex items-center;
+    }
+
     .turn-list-container{
         @apply snap-y scroll-pb-[100px]
     }

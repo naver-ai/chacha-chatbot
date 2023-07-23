@@ -7,6 +7,9 @@ export class NetworkHelper{
     static readonly ENDPOINT_TERMINATE = "/terminate"
     static readonly ENDPOINT_MESSAGE = "/message"
     
+    static readonly JSON_HEADERS = {
+        "Content-Type": "application/json"
+    }
 
     static makeChatAPIEndpointPrefix(sessionId: string): string {
         return (process.env.NODE_ENV == "development" ? "http://localhost:8000" : "") + "/api/v1/chat/sessions/" + sessionId
@@ -28,9 +31,7 @@ export class NetworkHelper{
             {
                 method: 'POST',
                 body: JSON.stringify(this.makeInitializeEndpointArgs(userName, userAge)),
-                headers: {
-                    "Content-Type": "application/json"
-                }
+                headers: NetworkHelper.JSON_HEADERS
             }
         )
         if(resp.status === 200){
@@ -39,15 +40,24 @@ export class NetworkHelper{
     }
 
 
+    static async loadSessionChatMessages(sessionId: string): Promise<Array<ChatMessage>>{
+        const resp = await fetch(this.makeEndpoint(sessionId, this.ENDPOINT_MESSAGES),
+            {
+                method: 'GET',
+                headers: NetworkHelper.JSON_HEADERS
+            }
+        )
+        if(resp.status === 200){
+            return resp.json()
+        }else throw Error(`Session initialization error - ${resp.status}`)
+    }
 
     static async sendUserMessage(sessionId: string, userMessage: ChatMessage): Promise<ChatMessage>{
         const resp = await fetch(this.makeEndpoint(sessionId, this.ENDPOINT_MESSAGE),
             {
                 method: 'POST',
                 body: JSON.stringify(userMessage),
-                headers: {
-                    "Content-Type": "application/json"
-                }
+                headers: NetworkHelper.JSON_HEADERS
             }
         )
         if(resp.status === 200){

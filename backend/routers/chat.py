@@ -68,9 +68,8 @@ class ChatSessionInitializeArgs(BaseModel):
 
 @router.get("/sessions/{session_id}/messages")
 async def get_messages(session_id: str = Path(...)) -> list[ChatMessage]:
-    print("hahaha")
     session = _assert_get_session(session_id)
-    return session.dialog
+    return [ChatMessage.from_turn(turn) for turn in session.dialog]
 
 
 @router.post("/sessions/{session_id}/initialize", response_model=ChatMessage)

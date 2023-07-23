@@ -1,8 +1,10 @@
 import {combineReducers, configureStore} from "@reduxjs/toolkit";
 import chatReducer from '../pages/chat/reducer'
+import chatShareReducer from '../pages/chat-share/reducer'
 
 const rootReducer = combineReducers({
-    chatState: chatReducer
+    chatState: chatReducer,
+    chatShareState: chatShareReducer
 })
 
 const store = configureStore({
