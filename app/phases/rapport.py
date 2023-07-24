@@ -1,11 +1,11 @@
 import json
 
-from core.chatbot.generators import ChatGPTResponseGenerator
+from chatlib.chatbot.generators import ChatGPTResponseGenerator
 
 from app.common import stringify_list, COMMON_SPEAKING_RULES
-from core.chatbot import DialogueTurn
-from core.mapper import ChatGPTDialogueSummarizer
-from core.openai_utils import ChatGPTParams
+from chatlib.chatbot import DialogueTurn
+from chatlib.mapper import ChatGPTDialogueSummarizer
+from chatlib.openai_utils import ChatGPTParams
 
 
 # Build rapport with the user. Ask about the most memorable episode. Ask about what happened and what the user felt.

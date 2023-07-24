@@ -1,12 +1,12 @@
 import json
 
-from core.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator, StateType
+from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator, StateType
 
 from app.common import EmotionChatbotPhase
 from app.phases import rapport, label, find, record, share
-from core.chatbot import ResponseGenerator, Dialogue
-from core.mapper import ChatGPTDialogueSummarizer
-from core.openai_utils import ChatGPTParams
+from chatlib.chatbot import ResponseGenerator, Dialogue
+from chatlib.mapper import ChatGPTDialogueSummarizer
+from chatlib.openai_utils import ChatGPTParams
 
 
 class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbotPhase]):

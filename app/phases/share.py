@@ -1,4 +1,4 @@
-from core.chatbot.generators import ChatGPTResponseGenerator
+from chatlib.chatbot.generators import ChatGPTResponseGenerator
 
 from app.common import stringify_list, COMMON_SPEAKING_RULES
 

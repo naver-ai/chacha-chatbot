@@ -5,8 +5,7 @@ from pydantic import BaseModel
 from starlette import status
 
 from app.response_generator import EmotionChatbotResponseGenerator
-from core.chatbot import TurnTakingChatSession, Dialogue, session_writer, DialogueTurn
-from core.time import get_timestamp
+from chatlib.chatbot import TurnTakingChatSession, Dialogue, session_writer, DialogueTurn
 
 router = APIRouter()
 
