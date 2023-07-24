@@ -6,7 +6,7 @@ from dotenv import find_dotenv, set_key
 
 env_file = find_dotenv()
 if not path.exists(env_file):
-    env_file = open(path.join(getcwd(), '.env'), 'w')
+    env_file = open(path.join(getcwd(), '.env'), 'w', encoding='utf-8')
     env_file.close()
     env_file = find_dotenv()
 

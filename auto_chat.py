@@ -40,7 +40,7 @@ async def run_chat_loop():
     dialogue = await session.generate_conversation(8, _on_chat_message)
 
     output_path = path.join(getcwd(), f"auto_chat_{session_id}.txt")
-    with open(output_path, "w") as f:
+    with open(output_path, "w", encoding='utf-8') as f:
         f.writelines([f"{_turn_to_str(turn)}\n" for i, turn in enumerate(dialogue)])
 
     print(f"\nSaved conversation at {output_path}")

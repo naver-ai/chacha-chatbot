@@ -58,11 +58,11 @@ class SessionFileWriter(SessionWriterBase):
         return path.exists(self.__get_session_info_file_path(session_id))
 
     def write_session_info(self, session_id, session_info: dict):
-        with open(self.__get_session_info_file_path(session_id, True), "w") as f:
+        with open(self.__get_session_info_file_path(session_id, True), "w", encoding='utf-8') as f:
             json.dump(session_info, f, indent=2)
 
     def read_session_info(self, session_id) -> dict:
-        with open(self.__get_session_info_file_path(session_id), 'r') as f:
+        with open(self.__get_session_info_file_path(session_id), 'r', encoding='utf-8') as f:
             return json.load(f)
 
     def write_turn(self, session_id: str, turn: DialogueTurn):
