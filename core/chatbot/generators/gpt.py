@@ -52,9 +52,15 @@ class ChatGPTResponseGenerator(ResponseGenerator):
         self.__resolve_instruction()
 
     async def _get_response_impl(self, dialog: Dialogue) -> tuple[str, dict | None]:
-        dialogue_converted = [
-            make_chat_completion_message(turn.message, ChatGPTRole.USER if turn.is_user else ChatGPTRole.ASSISTANT)
-            for turn in dialog]
+        dialogue_converted = []
+        for turn in dialog:
+            if turn.metadata is not None and "chatgpt" in turn.metadata and "function_message" in turn.metadata[
+                "chatgpt"]:
+                dialogue_converted.append(
+                    turn.metadata["chatgpt"]["function_message"]
+                )
+            dialogue_converted.append(
+                make_chat_completion_message(turn.message, ChatGPTRole.USER if turn.is_user else ChatGPTRole.ASSISTANT))
 
         instruction = self.__instruction
         if instruction is not None:
@@ -87,15 +93,19 @@ class ChatGPTResponseGenerator(ResponseGenerator):
             if self.verbose: print(f"Call function - {function_name} ({function_args})")
 
             function_call_result = await self.function_handler(function_name, function_args)
-            dialogue_with_func_result = dialogue_converted + [
-                make_chat_completion_message(function_call_result, ChatGPTRole.FUNCTION, name=function_name)
-            ]
+            function_turn = make_chat_completion_message(function_call_result, ChatGPTRole.FUNCTION, name=function_name)
+            dialogue_with_func_result = dialogue_converted + [function_turn]
+
             new_result = await run_chat_completion(self.model, dialogue_with_func_result, self.gpt_params)
 
             top_choice = new_result.choices[0]
             if top_choice.finish_reason == 'stop':
                 response_text = top_choice.message.content
-                return response_text, None
+                return response_text, {
+                    "chatgpt": {
+                        "function_message": function_turn
+                    }
+                }
             else:
                 print("Shouldn't reach here")
 
