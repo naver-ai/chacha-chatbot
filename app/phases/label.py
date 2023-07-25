@@ -53,35 +53,25 @@ class WheelOfEmotion:
 def create_generator():
 
     base_instruction = f"""
-- Based on the previous dialog history about the user’s interests, ask the user to elaborate more about their emotions and what makes him or her feel that way.
-- Only when they explicitly mention that they do not know how to describe their emotions, provide them 16 emotion options(8 basic emotions and 8 primary combination emtoions from Plutchi's Wheel of Emotions). 
+- Based on the previous dialog history about the user’s interests, ask them to elaborate more about their emotions and what makes them feel that way.
+- Only when they explicitly mention that they do not know how to describe their emotions, provide them with a list of 16 emotions that consists of {WheelOfEmotion.basics} and {WheelOfEmotion.combinations}.
+- Tell the user that they can pick as many emotions as they feel at the moment. 
+- When you ask the user to pick emotions, append a list of markups and proper emoji so that the system can show it as GUI:
+    e.g., <div class="emolist"><span class="emotions"><input type="checkbox" id="joy"><label for="joy">기쁨</label></span><span class="emotions"><input type="checkbox" id="anticipation"><label class="emotions" for="anticipation">기대</label></span>...</div>
 - Focus on the user's key episode, "<:key_episode:>", and the emotion about it, "<:user_emotion:>". 
-
-- Tell the user that they can pick as manay emotions as they felt at the moment.
 - The emotions are based on Plutchik’s Wheel of Emotions: 
     <Positive emotions> {", ".join([f"{emotion} ({kor})" for emotion, kor, valence in WheelOfEmotion.basics if valence == 'positive'])}
     <Negative emotions> {", ".join([f"{emotion} ({kor})" for emotion, kor, valence in WheelOfEmotion.basics if valence == 'negative'])}
-- When you ask the user to pick emotions, append a list of markups so that the system can show it as GUI:
-    e.g., <select max='2'><emotion key="Joy"/><emotion key="Anticipation"/>...</select>
 - Use only Korean words for the emotions, when you mention them in dialogue, but use English for markups internally.
 - Do not directly mention or academically describe Plutchik’s Wheel of Emotions.
-
-- Empathize the user's emotion by restating how they felt. If there are multiple emotions, empathize each one and tell the user it is okay to feel multiple emotions.
-- If the user feel multiple emotions, ask the user how they feel each emotion.
-- If the user picks a combination emotion, explain about the combination emotion by decompose it into the two basic emotions.
+- Empathize the user's emotion by restating how they felt. If there are multiple emotions, empathize with each one and tell the user it is okay to feel multiple emotions.
+- If the user feels multiple emotions, ask the user how they feel each emotion.
+- If the user's key episode involves other people, ask the user about how the other people would feel.
+- If the user picks a combination emotion, explain the combination emotion by decomposing it into the two basic emotions.
 {stringify_list([f"{res[0]} ({res[1]}) => {a} + {b}" for a,b, res in WheelOfEmotion.combinations], ordered=True, indent="    ")}
 
 General Speaking rules: 
 {stringify_list(COMMON_SPEAKING_RULES, ordered=True)}
-
-Example:
-<Child> 어제 학교 쉬는 시간이 낮잠을 자는데 친구가 갑자기 큰 소리를 내서 잠을 못 잤어.  
-<Chatbot> 그랬구나. 그때 기분이 어땠어?            
-<Child> 그냥 기분이 안 좋았어
-<Chatbot> 어떤 기분이 들었는지 자세히 말해줄 수 있을까?       
-<Child> 갑자기 소리를 내서 놀랐고, 화도 났어 
-<Chatbot> 그랬구나 갑자기 소리내서 놀랐고 화도 냈구나. 그걸 격분하다 또는 매우 화가 많이 났다고 표현해. 
-<Child>  격분이 뭐야?
         """
 
     return ChatGPTResponseGenerator(
@@ -104,7 +94,7 @@ summarizer = ChatGPTDialogueSummarizer(
 
 Rules for the "next_phase":
 1) Set "find" only when the following conditions are satisfied:
-    - The user expressed negative emotions and shared a specific episode that describes problems that the user faced.
+    - Among the emotions that the user expressed, there is at least one negative emotion that is related to a specific episode that describes problems that the user faced.
     - You empathized the user's negative emotion
     - You explained the emotion to the user so that the user understand what emotion they felt.
 2) Set "record" only when the following conditions are satisfied:

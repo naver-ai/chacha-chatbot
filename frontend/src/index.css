@@ -4,10 +4,6 @@
 
 @import url('https://cdn.rawgit.com/innks/NanumSquareRound/master/nanumsquareround.min.css');
 
-.emolsit {
-    background: black;
-}
-
 body {
     padding: 0;
     margin: 0;
@@ -55,7 +51,7 @@ body {
     }
 
     .turn-container {
-        @apply px-2 py-2 flex flex-col scroll-m-2 snap-end;
+        @apply px-2 py-3 flex flex-col scroll-m-2 snap-end;
     }
 
     .turn-container > .callout {
@@ -86,4 +82,33 @@ body {
     .turn-container.user > .callout {
         @apply text-white bg-gradient-to-r from-indigo-800 to-clova-blue rounded-tr-none border-[1px];
     }
+}
+
+.emolist {
+    margin-top: 10px;
+}
+
+
+.emolist > .emotions {
+    display: inline-block;
+    position: relative;
+    margin: 0 10px 10px 0;
+}
+
+.emotions > input + label {
+    cursor: pointer !important;
+}
+
+.emotions > input:checked + label {
+    @apply border-clova-blue font-bold text-clova-blue;
+    cursor: pointer !important;
+}
+
+.emotions > input {
+    opacity: 0;
+    position: absolute;
+}
+
+.emotions > label {
+    @apply rounded-lg text-slate-500 border-slate-300 hover:bg-slate-200 border px-2 py-1;
 }
