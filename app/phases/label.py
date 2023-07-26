@@ -10,27 +10,35 @@ from chatlib.openai_utils import ChatGPTParams
 
 
 # https://en.wikipedia.org/wiki/Emotion_classification#/media/File:Plutchik_Dyads.png
-class WheelOfEmotion:
-    basics = [
-        ("Joy", "기쁨", "positive"),
-        ("Trust", "신뢰", "positive"),
-        ("Surprise", "놀람", "positive"),
-        ("Anticipation", "기대", "positive"),
-        ("Fear", "두려움", "negative"),
-        ("Sadness", "슬픔", "negative"),
-        ("Disgust", "불쾌함", "negative"),
-        ("Anger", "화남", "negative")
-    ]
+# class WheelOfEmotion:
+#     basics = [
+#         ("Joy", "기쁨", "positive"),
+#         ("Trust", "신뢰", "positive"),
+#         ("Surprise", "놀람", "positive"),
+#         ("Anticipation", "기대", "positive"),
+#         ("Fear", "두려움", "negative"),
+#         ("Sadness", "슬픔", "negative"),
+#         ("Disgust", "불쾌함", "negative"),
+#         ("Anger", "화남", "negative"),
+#         ("Optimism", "낙관", "positive"),
+#         ("Love", "사랑", "positive"),
+#         ("Submission", "굴복감", "negative"),
+#         ("Awe", "경외감", "positive"),
+#         ("Disapproval", "못마땅함", "negative"),
+#         ("Remorse", "후회", "negative"),
+#         ("Contempt", "경멸", "negative"),
+#         ("Aggressiveness", "공격성", "negative")
+#     ]
 
-    combinations = [
-    ("Anticipation", "Joy", ("Optimism", "낙관")),
-    ("Joy", "Trust", ("Love", "사랑")),
-    ("Trust", "Fear", ("Submission", "굴복감")),
-    ("Fear", "Surprise", ("Awe", "경외감")),
-    ("Surprise", "Sadness", ("Disapproval", "못마땅함")),
-    ("Sadness", "Disgust", ("Remorse", "후회")),
-    ("Disgust", "Anger", ("Contempt", "경멸")),
-    ("Anger", "Anticipation", ("Aggressiveness", "공격성"))
+    # combinations = [
+    # ("Anticipation", "Joy", ("Optimism", "낙관")),
+    # ("Joy", "Trust", ("Love", "사랑")),
+    # ("Trust", "Fear", ("Submission", "굴복감")),
+    # ("Fear", "Surprise", ("Awe", "경외감")),
+    # ("Surprise", "Sadness", ("Disapproval", "못마땅함")),
+    # ("Sadness", "Disgust", ("Remorse", "후회")),
+    # ("Disgust", "Anger", ("Contempt", "경멸")),
+    # ("Anger", "Anticipation", ("Aggressiveness", "공격성"))
     # ("Joy", "Fear", ("Guilt", "죄책감")),
     # ("Fear", "Sadness", ("Despair", "절망감")),
     # ("Sadness", "Anger", ("Envy", "질투심")),
@@ -47,28 +55,22 @@ class WheelOfEmotion:
     # ("Anticipation", "Fear", ("Anxiety", "불안함")),
     # ("Fear", "Disgust", ("Shame", "부끄러움")),
     # ("Disgust", "Joy", ("Morbidness", "소름끼침"))
-    ]
+    # ]
 
 
 def create_generator():
 
     base_instruction = f"""
 - Based on the previous dialog history about the user’s interests, ask them to elaborate more about their emotions and what makes them feel that way.
-- Only when they explicitly mention that they do not know how to describe their emotions, provide them with a list of 16 emotions that consists of {WheelOfEmotion.basics} and {WheelOfEmotion.combinations}.
+- Only when they explicitly mention that they do not know how to describe their emotions or vaguely expressed their emotions (e.g., feels good/bad), ask them to pick an emotion.
+- When you ask the user to pick emotions, append a special token "<|EmotionSelect|>" at the end 
 - Tell the user that they can pick as many emotions as they feel at the moment. 
-- When you ask the user to pick emotions, append a list of markups and proper emoji so that the system can show it as GUI:
-    e.g., <div class="emolist"><span class="emotions"><input type="checkbox" id="joy"><label for="joy">기쁨</label></span><span class="emotions"><input type="checkbox" id="anticipation"><label class="emotions" for="anticipation">기대</label></span>...</div>
 - Focus on the user's key episode, "<:key_episode:>", and the emotion about it, "<:user_emotion:>". 
-- The emotions are based on Plutchik’s Wheel of Emotions: 
-    <Positive emotions> {", ".join([f"{emotion} ({kor})" for emotion, kor, valence in WheelOfEmotion.basics if valence == 'positive'])}
-    <Negative emotions> {", ".join([f"{emotion} ({kor})" for emotion, kor, valence in WheelOfEmotion.basics if valence == 'negative'])}
 - Use only Korean words for the emotions, when you mention them in dialogue, but use English for markups internally.
 - Do not directly mention or academically describe Plutchik’s Wheel of Emotions.
 - Empathize the user's emotion by restating how they felt. If there are multiple emotions, empathize with each one and tell the user it is okay to feel multiple emotions.
 - If the user feels multiple emotions, ask the user how they feel each emotion.
 - If the user's key episode involves other people, ask the user about how the other people would feel.
-- If the user picks a combination emotion, explain the combination emotion by decomposing it into the two basic emotions.
-{stringify_list([f"{res[0]} ({res[1]}) => {a} + {b}" for a,b, res in WheelOfEmotion.combinations], ordered=True, indent="    ")}
 
 General Speaking rules: 
 {stringify_list(COMMON_SPEAKING_RULES, ordered=True)}
