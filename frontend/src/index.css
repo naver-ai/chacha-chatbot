@@ -88,11 +88,11 @@ body {
     }
 
     .turn-container.user .callout {
-        @apply text-white bg-gradient-to-r mr-3 from-indigo-800 to-clova-blue rounded-tr-none border-[1px];
+        @apply text-white bg-gradient-to-r mr-9 from-indigo-800 to-clova-blue rounded-tr-none border-[1px];
     }
 
     .turn-container.user > .profilePic {
-        @apply object-cover h-14 w-14 -mx-12 -my-6 rounded-full border-2 border-indigo-500;
+        @apply object-cover h-14 w-14 -mx-6 -my-6 rounded-full border-2 border-indigo-500;
         content: url(
             https://images.unsplash.com/photo-1564766195764-ec3059fe8edf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2340&q=80;
         );
@@ -100,22 +100,22 @@ body {
 }
 
 .emolist {
-    margin-top: 10px;
+    @apply sticky mt-5;
 }
 
-
 .emolist > .emotions {
+    @apply mx-1 my-1.5;
     display: inline-block;
     position: relative;
-    margin: 0 10px 10px 0;
 }
 
 .emotions > input + label {
+    @apply h-auto py-1;
     cursor: pointer !important;
 }
 
 .emotions > input:checked + label {
-    @apply border-clova-blue font-bold text-clova-blue;
+    @apply border-clova-blue font-bold bg-cyan-100;
     cursor: pointer !important;
 }
 
@@ -125,5 +125,9 @@ body {
 }
 
 .emotions > label {
-    @apply rounded-lg text-slate-500 border-slate-300 hover:bg-slate-200 border px-2 py-1;
+    @apply rounded-lg text-slate-500 font-medium border-slate-300 hover:bg-slate-200 border px-2 py-1 drop-shadow-sm bg-slate-100;
+}
+
+#submitEmotion {
+    @apply absolute font-bold border-slate-300 px-2 py-1 drop-shadow-sm bg-slate-100;
 }

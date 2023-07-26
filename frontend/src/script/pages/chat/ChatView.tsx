@@ -11,6 +11,7 @@ import path from "path"
 import {ClipboardDocumentIcon} from "@heroicons/react/20/solid";
 import { enqueueSnackbar } from "notistack"
 import {boolean} from "yup";
+import Avatar from "boring-avatars";
 
 export const ChatView = () => {
 
@@ -159,7 +160,75 @@ const SessionMessageView = (props: { id: EntityId }) => {
 
   return <MessageView message={turn} overrideMessageText={message}>
     {
-      isEmotionSelectionTurn ? <div>Emotion Selector comes here.</div> : null
+      !isEmotionSelectionTurn 
+      ? null : <>
+        <form class="emolist">
+          <span class="emotions">
+            <input type="checkbox" id="joy"/>
+            <label for="joy">기쁨 😃</label>
+          </span>
+          <span class="emotions">
+            <input type="checkbox" id="trust"/>
+            <label class="emotions" for="trust">신뢰 🤝 </label>
+          </span>
+          <span class="emotions">
+            <input type="checkbox" id="surprise"/>
+            <label for="surprise">놀람 😮</label>
+          </span>
+          <span class="emotions">
+            <input type="checkbox" id="anticipation"/>
+            <label class="emotions" for="anticipation">기대 🤔</label>
+          </span>
+          <span class="emotions">
+            <input type="checkbox" id="fear"/>
+            <label for="fear">두려움 😨</label>
+          </span>
+          <span class="emotions">
+            <input type="checkbox" id="sadness"/>
+            <label class="emotions" for="Sadness">슬픔 😢</label>
+          </span>
+          <span class="emotions">
+            <input type="checkbox" id="disgust"/>
+            <label for="disgust">불쾌함 🤮</label>
+          </span>
+          <span class="emotions">
+            <input type="checkbox" id="anger"/>
+            <label class="emotions" for="anger">화남 😠</label>
+          </span>
+          <span class="emotions">
+            <input type="checkbox" id="optimism"/>
+            <label for="optimism">낙관 😄</label>
+          </span>
+          <span class="emotions">
+            <input type="checkbox" id="love"/>
+            <label class="emotions" for="love">사랑 😍</label>
+          </span>
+          <span class="emotions">
+            <input type="checkbox" id="submission"/>
+            <label for="submission">굴복감 😔</label>
+          </span>
+          <span class="emotions">
+            <input type="checkbox" id="awe"/>
+            <label class="emotions" for="awe">경외감 😲</label>
+          </span>
+          <span class="emotions">
+            <input type="checkbox" id="disapproval"/>
+            <label class="emotions" for="disapproval">못마땅함 😒</label>
+          </span>
+          <span class="emotions">
+            <input type="checkbox" id="remorse"/>
+            <label for="remorse">후회 😞</label>
+          </span>
+          <span class="emotions">
+            <input type="checkbox" id="contempt"/>
+            <label class="emotions" for="contempt">경멸 😏</label>
+          </span>
+          <span class="emotions">
+            <input type="checkbox" id="aggressiveness"/>
+            <label for="aggressiveness">공격성 😡</label>
+          </span>
+          <input id="submitEmotion" type="submit" value="보내기" className="button-main"/>
+        </form></>
     }
   </MessageView>
 }

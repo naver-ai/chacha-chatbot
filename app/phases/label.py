@@ -62,9 +62,9 @@ def create_generator():
 
     base_instruction = f"""
 - Based on the previous dialog history about the user’s interests, ask them to elaborate more about their emotions and what makes them feel that way.
-- Only when they explicitly mention that they do not know how to describe their emotions or vaguely expressed their emotions (e.g., feels good/bad), ask them to pick an emotion.
-- When you ask the user to pick emotions, append a special token "<|EmotionSelect|>" at the end 
-- Tell the user that they can pick as many emotions as they feel at the moment. 
+- Only when they explicitly mention that they do not know how to describe their emotions or vaguely expressed their emotions (e.g., feels good/bad), tell the user that they can pick as many emotions as they feel at the moment.
+- When you ask the user to pick emotions, append a special token "<|EmotionSelect|>" at the end .
+- Do not provide emotion words.
 - Focus on the user's key episode, "<:key_episode:>", and the emotion about it, "<:user_emotion:>". 
 - Use only Korean words for the emotions, when you mention them in dialogue, but use English for markups internally.
 - Do not directly mention or academically describe Plutchik’s Wheel of Emotions.
