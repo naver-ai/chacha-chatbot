@@ -3,7 +3,7 @@ import json
 from chatlib.chatbot.generators import ChatGPTResponseGenerator
 
 from app.common import stringify_list, COMMON_SPEAKING_RULES
-from chatlib.chatbot import DialogueTurn
+from chatlib.chatbot import DialogueTurn, Dialogue
 # Help the user label their emotion based on the Wheel of Emotions. Empathize their emotion.
 from chatlib.mapper import ChatGPTDialogueSummarizer
 from chatlib.openai_utils import ChatGPTParams
@@ -30,40 +30,41 @@ from chatlib.openai_utils import ChatGPTParams
 #         ("Aggressiveness", "공격성", "negative")
 #     ]
 
-    # combinations = [
-    # ("Anticipation", "Joy", ("Optimism", "낙관")),
-    # ("Joy", "Trust", ("Love", "사랑")),
-    # ("Trust", "Fear", ("Submission", "굴복감")),
-    # ("Fear", "Surprise", ("Awe", "경외감")),
-    # ("Surprise", "Sadness", ("Disapproval", "못마땅함")),
-    # ("Sadness", "Disgust", ("Remorse", "후회")),
-    # ("Disgust", "Anger", ("Contempt", "경멸")),
-    # ("Anger", "Anticipation", ("Aggressiveness", "공격성"))
-    # ("Joy", "Fear", ("Guilt", "죄책감")),
-    # ("Fear", "Sadness", ("Despair", "절망감")),
-    # ("Sadness", "Anger", ("Envy", "질투심")),
-    # ("Anger", "Joy", ("Pride", "자존심")),
-    # ("Trust", "Surprise", ("Curiosity", "호기심")),
-    # ("Surprise", "Disgust", ("Unbelief", "불신")),
-    # ("Disgust", "Anticipation", ("Cynicism", "냉소적임")),
-    # ("Anticipation", "Trust", ("Hope", "희망감")),
-    # ("Joy", "Surprise", ("Delight", "큰 기쁨")),
-    # ("Surprise", "Anger", ("Outrage", "격분함")),
-    # ("Anger", "Trust", ("Dominance", "우월감")),
-    # ("Trust", "Sadness", ("Sentimentality", "감상에 잠긴")),
-    # ("Sadness", "Anticipation", ("Pessimism", "비관적")),
-    # ("Anticipation", "Fear", ("Anxiety", "불안함")),
-    # ("Fear", "Disgust", ("Shame", "부끄러움")),
-    # ("Disgust", "Joy", ("Morbidness", "소름끼침"))
-    # ]
+# combinations = [
+# ("Anticipation", "Joy", ("Optimism", "낙관")),
+# ("Joy", "Trust", ("Love", "사랑")),
+# ("Trust", "Fear", ("Submission", "굴복감")),
+# ("Fear", "Surprise", ("Awe", "경외감")),
+# ("Surprise", "Sadness", ("Disapproval", "못마땅함")),
+# ("Sadness", "Disgust", ("Remorse", "후회")),
+# ("Disgust", "Anger", ("Contempt", "경멸")),
+# ("Anger", "Anticipation", ("Aggressiveness", "공격성"))
+# ("Joy", "Fear", ("Guilt", "죄책감")),
+# ("Fear", "Sadness", ("Despair", "절망감")),
+# ("Sadness", "Anger", ("Envy", "질투심")),
+# ("Anger", "Joy", ("Pride", "자존심")),
+# ("Trust", "Surprise", ("Curiosity", "호기심")),
+# ("Surprise", "Disgust", ("Unbelief", "불신")),
+# ("Disgust", "Anticipation", ("Cynicism", "냉소적임")),
+# ("Anticipation", "Trust", ("Hope", "희망감")),
+# ("Joy", "Surprise", ("Delight", "큰 기쁨")),
+# ("Surprise", "Anger", ("Outrage", "격분함")),
+# ("Anger", "Trust", ("Dominance", "우월감")),
+# ("Trust", "Sadness", ("Sentimentality", "감상에 잠긴")),
+# ("Sadness", "Anticipation", ("Pessimism", "비관적")),
+# ("Anticipation", "Fear", ("Anxiety", "불안함")),
+# ("Fear", "Disgust", ("Shame", "부끄러움")),
+# ("Disgust", "Joy", ("Morbidness", "소름끼침"))
+# ]
 
+SPECIAL_TOKEN = "<|EmotionSelect|>"
 
-def create_generator():
-
-    base_instruction = f"""
+class LabelResponseGenerator(ChatGPTResponseGenerator):
+    def __init__(self):
+        base_instruction = f"""
 - Based on the previous dialog history about the user’s interests, ask them to elaborate more about their emotions and what makes them feel that way.
 - Only when they explicitly mention that they do not know how to describe their emotions or vaguely expressed their emotions (e.g., feels good/bad), tell the user that they can pick as many emotions as they feel at the moment.
-- When you ask the user to pick emotions, append a special token "<|EmotionSelect|>" at the end.
+- When you ask the user to pick emotions, append a special token {SPECIAL_TOKEN} at the end.
 - Do not provide emotion words.
 - Focus on the user's key episode, "<:key_episode:>", and the emotion about it, "<:user_emotion:>". 
 - Use only Korean words for the emotions, when you mention them in dialogue, but use English for markups internally.
@@ -74,11 +75,25 @@ def create_generator():
 
 General Speaking rules: 
 {stringify_list(COMMON_SPEAKING_RULES, ordered=True)}
-        """
+                """
 
-    return ChatGPTResponseGenerator(
-        base_instruction=base_instruction.replace("<:", "{").replace(":>", "}")
-    )
+        super().__init__(base_instruction=base_instruction.replace("<:", "{").replace(":>", "}"))
+
+    async def _get_response_impl(self, dialog: Dialogue) -> tuple[str, dict | None]:
+        message, metadata = await super()._get_response_impl(dialog)
+
+        if SPECIAL_TOKEN in message:
+            message = message.replace(SPECIAL_TOKEN, "")
+            if metadata is not None:
+                metadata["select_emotion"] = True
+            else:
+                metadata = {"select_emotion": True}
+
+        return message, metadata
+
+
+def create_generator():
+    return LabelResponseGenerator()
 
 
 summarizer = ChatGPTDialogueSummarizer(

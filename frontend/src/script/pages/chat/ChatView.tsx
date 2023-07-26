@@ -56,18 +56,14 @@ const TypingPanel = () => {
 
   const isSystemMessageLoading = useSelector(state => state.chatState.isLoadingMessage)
 
-  const lastSystemMessageText = useSelector(state => {
+  const shouldHideTypingPanel = useSelector(state => {
     const lastSystemMessageId = state.chatState.messages.ids.findLast(id => state.chatState.messages.entities[id]?.is_user === false)
     if(lastSystemMessageId){
-      return state.chatState.messages.entities[lastSystemMessageId]?.message
+      return state.chatState.messages.entities[lastSystemMessageId]?.metadata?.select_emotion === true
     }else{
-      return undefined
+      return false
     }
   })
-
-  const shouldHideTypingPanel = useMemo(()=>{
-    return lastSystemMessageText?.includes("<|EmotionSelect|>")
-  }, [lastSystemMessageText])
 
   const dispatch = useDispatch()
 
@@ -147,18 +143,13 @@ const ShareButton = () => {
 
 const SessionMessageView = (props: { id: EntityId }) => {
   const turn = useSelector(state => state.chatState.messages.entities[props.id]!)
-
-  const message = useMemo(()=>{
-    if(turn.message.includes("<|EmotionSelect|>")){
-      return turn.message.replace("<|EmotionSelect|>", "")
-    }else return turn.message
-  }, [turn.message])
+  console.log(turn)
 
   const isEmotionSelectionTurn = useMemo(()=>{
-    return turn.is_user === false && turn.message.includes("<|EmotionSelect|>")
-  }, [turn.message, turn.is_user])
+    return turn.metadata?.select_emotion === true
+  }, [turn.metadata])
 
-  return <MessageView message={turn} overrideMessageText={message}>
+  return <MessageView message={turn}>
     {
       !isEmotionSelectionTurn 
       ? null : <>
