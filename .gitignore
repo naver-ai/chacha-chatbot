@@ -128,9 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-.idea/misc.xml
-.idea/*.iml
-.idea/workspace.xml
+.idea/
 
 auto_chat_*.txt
 .DS_Store
