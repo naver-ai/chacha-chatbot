@@ -12,7 +12,7 @@ body {
     sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    @apply text-gray-700 text-base font-bold;
+    @apply text-gray-700 text-base font-semibold;
 }
 
 .background-panel {
@@ -51,12 +51,12 @@ body {
     }
 
     .turn-container {
-        @apply px-2 py-3 flex flex-col scroll-m-2 snap-end;
+        @apply px-2 py-4 flex flex-col scroll-m-2 snap-end;
     }
 
     .turn-container > .callout {
         @apply rounded-xl px-6 py-3 shadow-md max-w-xl text-gray-600 font-normal leading-relaxed;
-        
+
     }
 
     .turn-container > .callout > em{
@@ -64,7 +64,8 @@ body {
     }
 
     .turn-container.system {
-        @apply items-start;
+        @apply items-start pl-8;
+        position: relative;
     }
 
     .turn-container.system.last-system-message {
@@ -72,7 +73,14 @@ body {
     }
 
     .turn-container.system > .callout {
-        @apply rounded-tl-none text-black bg-slate-50;
+        @apply rounded-tl-none text-black bg-slate-50 ml-3;
+    }
+
+    .turn-container.system > .profilePic {
+        @apply object-cover h-14 w-14 -mx-12 -my-6 rounded-full border-2 border-violet-600;
+        content: url(
+            https://images.unsplash.com/photo-1564766195764-ec3059fe8edf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2340&q=80;
+        );
     }
 
     .turn-container.user {
@@ -80,7 +88,14 @@ body {
     }
 
     .turn-container.user > .callout {
-        @apply text-white bg-gradient-to-r from-indigo-800 to-clova-blue rounded-tr-none border-[1px];
+        @apply text-white bg-gradient-to-r mr-3 from-indigo-800 to-clova-blue rounded-tr-none border-[1px];
+    }
+
+    .turn-container.user > .profilePic {
+        @apply object-cover h-14 w-14 -mx-12 -my-6 rounded-full border-2 border-indigo-500;
+        content: url(
+            https://images.unsplash.com/photo-1564766195764-ec3059fe8edf?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2340&q=80;
+        );
     }
 }
 
