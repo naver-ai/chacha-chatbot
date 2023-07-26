@@ -55,6 +55,19 @@ const TypingPanel = () => {
 
   const isSystemMessageLoading = useSelector(state => state.chatState.isLoadingMessage)
 
+  const lastSystemMessageText = useSelector(state => {
+    const lastSystemMessageId = state.chatState.messages.ids.findLast(id => state.chatState.messages.entities[id]?.is_user === false)
+    if(lastSystemMessageId){
+      return state.chatState.messages.entities[lastSystemMessageId]?.message
+    }else{
+      return undefined
+    }
+  })
+
+  const shouldHideTypingPanel = useMemo(()=>{
+    return lastSystemMessageText?.includes("<|EmotionSelect|>")
+  }, [lastSystemMessageText])
+
   const dispatch = useDispatch()
 
   const {
@@ -83,7 +96,7 @@ const TypingPanel = () => {
   // const chatbotPic = document.getElementsByClassName("profilePic")[-1]
   // isSystemMessageLoading ? chatbotPic.addList.add("animate-pulse-fast") : chatbotPic.addList.add("")
 
-  return <>
+  return shouldHideTypingPanel ? null : <>
     <div id="chat-typing-panel" className="fixed z-10 left-4 right-4 bottom-10 lg:left-0 lg:right-0">
       <div className="container relative">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-row bg-slate-50 px-3 py-1.5 pl-1.5 rounded-lg shadow-lg">
@@ -136,5 +149,20 @@ const ShareButton = () => {
 
 const SessionMessageView = (props: { id: EntityId }) => {
   const turn = useSelector(state => state.chatState.messages.entities[props.id]!)
-  return <MessageView message={turn}/>
+
+  const message = useMemo(()=>{
+    if(turn.message.includes("<|EmotionSelect|>")){
+      return turn.message.replace("<|EmotionSelect|>", "")
+    }else return turn.message
+  }, [turn.message])
+
+  const isEmotionSelectionTurn = useMemo(()=>{
+    return turn.is_user === false && turn.message.includes("<|EmotionSelect|>")
+  }, [turn.message, turn.is_user])
+
+  return <MessageView message={turn} overrideMessageText={message}>
+    {
+      isEmotionSelectionTurn ? <div>Emotion Selector comes here.</div> : null
+    }
+  </MessageView>
 }

@@ -54,12 +54,12 @@ body {
         @apply px-2 py-4 flex flex-col scroll-m-2 snap-end;
     }
 
-    .turn-container > .callout {
+    .turn-container .callout {
         @apply rounded-xl px-6 py-3 shadow-md max-w-xl text-gray-600 font-normal leading-relaxed;
 
     }
 
-    .turn-container > .callout > em{
+    .turn-container .callout > em{
         @apply not-italic font-extrabold;
     }
 
@@ -72,7 +72,7 @@ body {
         @apply flex-row items-end justify-start;
     }
 
-    .turn-container.system > .callout {
+    .turn-container.system .callout {
         @apply rounded-tl-none text-black bg-slate-50 ml-3;
     }
 
@@ -87,7 +87,7 @@ body {
         @apply items-end;
     }
 
-    .turn-container.user > .callout {
+    .turn-container.user .callout {
         @apply text-white bg-gradient-to-r mr-3 from-indigo-800 to-clova-blue rounded-tr-none border-[1px];
     }
 
