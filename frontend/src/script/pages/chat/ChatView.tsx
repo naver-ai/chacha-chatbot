@@ -93,9 +93,6 @@ const TypingPanel = () => {
     setFocus('message')
   }, [setFocus])
 
-  // const chatbotPic = document.getElementsByClassName("profilePic")[-1]
-  // isSystemMessageLoading ? chatbotPic.addList.add("animate-pulse-fast") : chatbotPic.addList.add("")
-
   return shouldHideTypingPanel ? null : <>
     <div id="chat-typing-panel" className="fixed z-10 left-4 right-4 bottom-10 lg:left-0 lg:right-0">
       <div className="container relative">
