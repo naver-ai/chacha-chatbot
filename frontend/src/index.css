@@ -100,28 +100,23 @@ body {
 }
 
 .emolist {
-    @apply sticky mt-5;
+    @apply sticky mt-5 aria-disabled:pointer-events-none;
 }
 
 .emolist > .emotion {
-    @apply mx-1 my-1.5;
-    display: inline-block;
-    position: relative;
+    @apply mx-1 my-1.5 inline-block relative;
 }
 
 .emotion > input + label {
-    @apply h-auto py-1;
-    cursor: pointer !important;
+    @apply h-auto py-1 cursor-pointer disabled:cursor-default;
 }
 
 .emotion > input:checked + label {
-    @apply border-clova-blue font-bold bg-cyan-100 shadow-inner;
-    cursor: pointer !important;
+    @apply border-clova-blue font-bold bg-cyan-100 shadow-inner cursor-pointer disabled:cursor-default;
 }
 
 .emotion > input {
-    opacity: 0;
-    position: absolute;
+    @apply absolute opacity-0;
 }
 
 .emotion > label {

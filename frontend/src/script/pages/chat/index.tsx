@@ -4,7 +4,6 @@ import { nanoid } from "nanoid";
 import { useSelector } from "../../redux/hooks";
 import { ChatView } from "./ChatView";
 import { BackgroundPanel } from "src/script/components/background";
-import {EmotionPicker} from "./components/EmotionPicker";
 
 export const ChatPage = () => {
 
@@ -18,7 +17,6 @@ export const ChatPage = () => {
 
 
   return <div className="h-screen">
-    <EmotionPicker messageId={""}/>
     {
       isInitialized ? <ChatView /> : <IntroView sessionId={sessionId!!} />
     }

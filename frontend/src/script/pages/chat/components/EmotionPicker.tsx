@@ -1,8 +1,10 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { EntityId } from "@reduxjs/toolkit"
+import { EntityId, nanoid } from "@reduxjs/toolkit"
 import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from 'yup';
+import { sendUserMessage } from "../reducer";
+import { useDispatch } from "src/script/redux/hooks";
 
 const EMOTION_LIST = [
     { "key": "joy", "label": "기쁨 😃" },
@@ -32,30 +34,42 @@ const schema = yup.object({
         })
 }) 
 
-export const EmotionPicker = (props: { messageId: EntityId }) => {
+export const EmotionPicker = (props: { messageId: EntityId, disabled?: boolean }) => {
+
+    const dispatch = useDispatch()
 
     const { register, handleSubmit, formState: {errors, isValid} } = useForm({
         resolver: yupResolver(schema),
         mode: 'onChange',
-        reValidateMode: 'onChange',
-        defaultValues: {emotions: {}}
+        reValidateMode: 'onChange'
     })
 
     const onSubmit = useCallback((data: {emotions: {[key:string]: boolean}})=>{
         const selectedEmotions = Object.keys(data.emotions).filter(key => data.emotions[key] === true)
+        dispatch(sendUserMessage({
+            id: nanoid(),
+            message: selectedEmotions.map(e => `{key: "${e}"}`).join(", "),
+            is_user: true,
+            metadata: {
+                hide: true,
+                selected_emotions: selectedEmotions,
+            },
+            timestamp: Date.now()
+        }))
     }, [])
 
-    return <form className="emolist" onSubmit={handleSubmit(onSubmit)}>
+    return <form className="emolist" onSubmit={handleSubmit(onSubmit)} aria-disabled={props.disabled}>
         {
             EMOTION_LIST.map(em => {
+                const id = props.messageId + "_" + em.key
                 return <span className="emotion" key={em.key}>
-                    <input type="checkbox" id={em.key} {...register(`emotions.${em.key}` as any)} />
-                    <label htmlFor={em.key}>{em.label}</label>
+                    <input type="checkbox" disabled={props.disabled} id={id} {...register(`emotions.${em.key}` as any)} />
+                    <label htmlFor={id}>{em.label}</label>
                 </span>
             })
         }
         {
-            isValid === true ? <input id="submitEmotion" type="submit" value="보내기" className="button-main" /> : null
+            (isValid === true && props.disabled !== true) ? <input id="submitEmotion" type="submit" value="보내기" className="button-main" /> : null
         }        
     </form>
 }

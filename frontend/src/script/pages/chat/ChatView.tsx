@@ -35,15 +35,25 @@ export const ChatView = () => {
     })
   }, [messageIds.length])
 
-  return <div className="turn-list-container pt-10 overflow-y-auto justify-end h-full" ref={scrollViewRef}>
+  return <div className="turn-list-container pt-2 overflow-y-auto justify-end h-full" ref={scrollViewRef}>
+    <SessionInfoPanel/>
     <div className="turn-list container mx-auto px-10">{
-      messageIds.map(id => {
-        return <SessionMessageView key={id.toString()} id={id} />
+      messageIds.map((id, i) => {
+        return <SessionMessageView key={id.toString()} id={id} isLast={messageIds.length - 1 === i}/>
       })
     }
     </div>
     <TypingPanel />
   </div>
+}
+
+const SessionInfoPanel = () => {
+  const sessionInfo = useSelector(state => state.chatState.sessionInfo)
+
+  return <div className="container bg-slate-400/20 px-1.5 pr-1 py-1 rounded-md flex justify-between">
+          <span>세션 ID: {sessionInfo?.sessionId} ({sessionInfo?.name}, {sessionInfo?.age}세)</span>
+          <ShareButton/>
+          </div>
 }
 
 
@@ -56,12 +66,12 @@ const TypingPanel = () => {
   const isSystemMessageLoading = useSelector(state => state.chatState.isLoadingMessage)
 
   const shouldHideTypingPanel = useSelector(state => {
-    const lastSystemMessageId = state.chatState.messages.ids.findLast(id => state.chatState.messages.entities[id]?.is_user === false)
-    if (lastSystemMessageId) {
-      return state.chatState.messages.entities[lastSystemMessageId]?.metadata?.select_emotion === true
-    } else {
-      return false
-    }
+    const {ids, entities} = state.chatState.messages
+    if(ids.length > 0){
+      const lastId = ids[ids.length - 1]
+      const lastMessage = entities[lastId]
+      return (lastMessage?.is_user === false && lastMessage?.metadata?.select_emotion === true)
+    }else return false
   })
 
   const dispatch = useDispatch()
@@ -71,7 +81,6 @@ const TypingPanel = () => {
     handleSubmit,
     reset,
     setFocus,
-    formState: { errors, isValid },
   } = useForm({
     resolver: yupResolver(schema),
     reValidateMode: 'onChange'
@@ -104,10 +113,6 @@ const TypingPanel = () => {
           <input type="submit" value="보내기" className="button-main" disabled={isSystemMessageLoading} />
 
         </form>
-
-        <div className="absolute bottom-2 left-0 translate-y-10">
-          <ShareButton />
-        </div>
       </div>
 
 
@@ -140,15 +145,17 @@ const ShareButton = () => {
     </button></CopyToClipboard>
 }
 
-const SessionMessageView = (props: { id: EntityId }) => {
+const SessionMessageView = (props: { id: EntityId, isLast: boolean }) => {
   const turn = useSelector(state => state.chatState.messages.entities[props.id]!)
+
+  const hideMessage = turn.metadata?.hide === true
 
   const isEmotionSelectionTurn = turn.metadata?.select_emotion === true
 
-  return <MessageView message={turn}>
+  return hideMessage ? null : <MessageView message={turn}>
     {
       !isEmotionSelectionTurn
-        ? null : <EmotionPicker messageId={props.id} />
+        ? null : <EmotionPicker messageId={props.id} disabled={!props.isLast}/>
     }
   </MessageView>
 }
