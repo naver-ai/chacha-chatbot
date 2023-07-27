@@ -6,12 +6,11 @@ import { useDispatch, useSelector } from "src/script/redux/hooks"
 import * as yup from "yup"
 import { sendUserMessage } from "./reducer"
 import { MessageView } from "src/script/components/messages"
-import {CopyToClipboard} from 'react-copy-to-clipboard';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 import path from "path"
-import {ClipboardDocumentIcon} from "@heroicons/react/20/solid";
+import { ClipboardDocumentIcon } from "@heroicons/react/20/solid";
 import { enqueueSnackbar } from "notistack"
-import {boolean} from "yup";
-import Avatar from "boring-avatars";
+import { EmotionPicker } from "./components/EmotionPicker"
 
 export const ChatView = () => {
 
@@ -36,9 +35,9 @@ export const ChatView = () => {
     })
   }, [messageIds.length])
 
-    return <div className="turn-list-container pt-10 overflow-y-auto justify-end h-full" ref={scrollViewRef}>
+  return <div className="turn-list-container pt-10 overflow-y-auto justify-end h-full" ref={scrollViewRef}>
     <div className="turn-list container mx-auto px-10">{
-       messageIds.map(id => {
+      messageIds.map(id => {
         return <SessionMessageView key={id.toString()} id={id} />
       })
     }
@@ -58,9 +57,9 @@ const TypingPanel = () => {
 
   const shouldHideTypingPanel = useSelector(state => {
     const lastSystemMessageId = state.chatState.messages.ids.findLast(id => state.chatState.messages.entities[id]?.is_user === false)
-    if(lastSystemMessageId){
+    if (lastSystemMessageId) {
       return state.chatState.messages.entities[lastSystemMessageId]?.metadata?.select_emotion === true
-    }else{
+    } else {
       return false
     }
   })
@@ -77,7 +76,7 @@ const TypingPanel = () => {
     resolver: yupResolver(schema),
     reValidateMode: 'onChange'
   })
-  
+
 
   const onSubmit = useCallback((data: { message: string }) => {
     if (!isSystemMessageLoading) {
@@ -96,19 +95,19 @@ const TypingPanel = () => {
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-row bg-slate-50 px-3 py-1.5 pl-1.5 rounded-lg shadow-lg">
           {
             isSystemMessageLoading
-                ? <div className="text-input text-chat-1 animate-pulse-fast flex-1 mr-2">할 말을 생각 중이야. 잠시만 기다려줘!</div>
-                : <input {...register("message")} type="text" autoFocus={true} placeholder={"나에게 할 말을 입력해줘!"}
-                       className="flex-1 mr-2"
-                        autoComplete="off"
-                        />
+              ? <div className="text-input text-chat-1 animate-pulse-fast flex-1 mr-2">할 말을 생각 중이야. 잠시만 기다려줘!</div>
+              : <input {...register("message")} type="text" autoFocus={true} placeholder={"나에게 할 말을 입력해줘!"}
+                className="flex-1 mr-2"
+                autoComplete="off"
+              />
           }
           <input type="submit" value="보내기" className="button-main" disabled={isSystemMessageLoading} />
-        
+
         </form>
 
         <div className="absolute bottom-2 left-0 translate-y-10">
-            <ShareButton/>
-          </div>
+          <ShareButton />
+        </div>
       </div>
 
 
@@ -123,11 +122,11 @@ const ShareButton = () => {
 
   const sessionId = useSelector(state => state.chatState.sessionInfo!.sessionId)
   const urlOrigin = useMemo(() => new URL(window.location.href).origin, [])
-  const shareURL = useMemo(()=> {
+  const shareURL = useMemo(() => {
     return path.join(urlOrigin, "share", sessionId)
   }, [urlOrigin, sessionId])
 
-  const onCopy = useCallback((text: string, result: boolean)=>{
+  const onCopy = useCallback((text: string, result: boolean) => {
     enqueueSnackbar('링크가 클립보드에 복사되었습니다.', {
       autoHideDuration: 1000,
       preventDuplicate: true
@@ -136,90 +135,20 @@ const ShareButton = () => {
 
   return <CopyToClipboard text={shareURL} onCopy={onCopy}>
     <button className="button-clear button-tiny button-with-icon opacity-70">
-      <ClipboardDocumentIcon className="w-4 mr-1 opacity-70"/>
+      <ClipboardDocumentIcon className="w-4 mr-1 opacity-70" />
       <span>링크 공유하기</span>
     </button></CopyToClipboard>
 }
 
 const SessionMessageView = (props: { id: EntityId }) => {
   const turn = useSelector(state => state.chatState.messages.entities[props.id]!)
-  console.log(turn)
 
-  const isEmotionSelectionTurn = useMemo(()=>{
-    return turn.metadata?.select_emotion === true
-  }, [turn.metadata])
+  const isEmotionSelectionTurn = turn.metadata?.select_emotion === true
 
   return <MessageView message={turn}>
     {
-      !isEmotionSelectionTurn 
-      ? null : <>
-        <form className="emolist">
-          <span className="emotions">
-            <input type="checkbox" id="joy"/>
-            <label htmlFor="joy">기쁨 😃</label>
-          </span>
-          <span className="emotions">
-            <input type="checkbox" id="trust"/>
-            <label htmlFor="trust">신뢰 🤝 </label>
-          </span>
-          <span className="emotions">
-            <input type="checkbox" id="surprise"/>
-            <label htmlFor="surprise">놀람 😮</label>
-          </span>
-          <span className="emotions">
-            <input type="checkbox" id="anticipation"/>
-            <label htmlFor="anticipation">기대 🤔</label>
-          </span>
-          <span className="emotions">
-            <input type="checkbox" id="fear"/>
-            <label htmlFor="fear">두려움 😨</label>
-          </span>
-          <span className="emotions">
-            <input type="checkbox" id="sadness"/>
-            <label htmlFor="sadness">슬픔 😢</label>
-          </span>
-          <span className="emotions">
-            <input type="checkbox" id="disgust"/>
-            <label htmlFor="disgust">불쾌함 🤮</label>
-          </span>
-          <span className="emotions">
-            <input type="checkbox" id="anger"/>
-            <label htmlFor="anger">화남 😠</label>
-          </span>
-          <span className="emotions">
-            <input type="checkbox" id="optimism"/>
-            <label htmlFor="optimism">낙관 😄</label>
-          </span>
-          <span className="emotions">
-            <input type="checkbox" id="love"/>
-            <label htmlFor="love">사랑 😍</label>
-          </span>
-          <span className="emotions">
-            <input type="checkbox" id="submission"/>
-            <label htmlFor="submission">굴복감 😔</label>
-          </span>
-          <span className="emotions">
-            <input type="checkbox" id="awe"/>
-            <label htmlFor="awe">경외감 😲</label>
-          </span>
-          <span className="emotions">
-            <input type="checkbox" id="disapproval"/>
-            <label htmlFor="disapproval">못마땅함 😒</label>
-          </span>
-          <span className="emotions">
-            <input type="checkbox" id="remorse"/>
-            <label htmlFor="remorse">후회 😞</label>
-          </span>
-          <span className="emotions">
-            <input type="checkbox" id="contempt"/>
-            <label htmlFor="contempt">경멸 😏</label>
-          </span>
-          <span className="emotions">
-            <input type="checkbox" id="aggressiveness"/>
-            <label htmlFor="aggressiveness">공격성 😡</label>
-          </span>
-          <input id="submitEmotion" type="submit" value="보내기" className="button-main"/>
-        </form></>
+      !isEmotionSelectionTurn
+        ? null : <EmotionPicker messageId={props.id} />
     }
   </MessageView>
 }
