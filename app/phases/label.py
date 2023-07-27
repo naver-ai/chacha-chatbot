@@ -58,6 +58,7 @@ class WheelOfEmotion:
 # ]
 
 SPECIAL_TOKEN = "<|EmotionSelect|>"
+IDENTIFIED_EMOTIONS = ["",""]
 
 class LabelResponseGenerator(ChatGPTResponseGenerator):
     def __init__(self):
@@ -69,7 +70,7 @@ class LabelResponseGenerator(ChatGPTResponseGenerator):
 - Focus on the user's key episode, "<:key_episode:>", and the emotion about it, "<:user_emotion:>". 
 - Use only Korean words for the emotions, when you mention them in dialogue, but use English for markups internally.
 - Do not directly mention or academically describe Plutchik’s Wheel of Emotions.
-- Empathize the user's emotion by restating how they felt. If there are multiple emotions, empathize with each one and tell the user it is okay to feel multiple emotions.
+- Empathize the user's emotion by restating how they felt. If there are multiple emotions, empathize with each one from {IDENTIFIED_EMOTIONS}.
 - If the user feels multiple emotions, ask the user how they feel each emotion.
 - If the user's key episode involves other people, ask the user about how the other people would feel.
 
@@ -101,12 +102,14 @@ summarizer = ChatGPTDialogueSummarizer(
 - You are a helpful assistant that analyzes the content of the conversation.
 - Determine whether it is reasonable to move on to the next conversation phase or not.
 - There are 16 emotions to choose from. 
+- Add identified emotions to {IDENTIFIED_EMOTIONS}.
 - Return JSON in the following format:
     {{
      "assistant_emphasized": boolean,
      "assistant_explained": boolean,
      "emotion_category": "positive" | "negative",
-     "identified_emotion_types": Array<string>,
+     "identified_emotion_types": {IDENTIFIED_EMOTIONS},
+     "empathize_all_emotions": boolean,
      "next_phase": "find" | "label" | null
     }}
 
@@ -142,6 +145,7 @@ Refer to the examples below.
              "assistant_explained": True,
              "emotion_category": "negative",
              "identified_emotion_types": ["Surprise", "Anger"],
+             "empathize_all_emotions": True,
              "next_phase": "find"
          })),
         ([
@@ -155,9 +159,10 @@ Refer to the examples below.
          json.dumps({
              "assistant_emphasized": True,
              "assistant_explained": True,
-             "emotion_category": "positive",
-             "identified_emotion_types": ["Anticipation", "Joy", "Optimism"],
-             "next_phase": "record"
+             "emotion_category": "negative",
+             "identified_emotion_types": ["Remorse"],
+             "empathize_all_emotions": True,
+             "next_phase": "find"
          })),
     ],
     gpt_params=ChatGPTParams(temperature=0.5)
