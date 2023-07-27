@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "avatars": "^0.9.7",
+    "boring": "^1.1.1",
     "boring-avatars": "^1.10.1"
   }
 }

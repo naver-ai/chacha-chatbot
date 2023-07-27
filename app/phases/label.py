@@ -10,25 +10,25 @@ from chatlib.openai_utils import ChatGPTParams
 
 
 # https://en.wikipedia.org/wiki/Emotion_classification#/media/File:Plutchik_Dyads.png
-# class WheelOfEmotion:
-#     basics = [
-#         ("Joy", "기쁨", "positive"),
-#         ("Trust", "신뢰", "positive"),
-#         ("Surprise", "놀람", "positive"),
-#         ("Anticipation", "기대", "positive"),
-#         ("Fear", "두려움", "negative"),
-#         ("Sadness", "슬픔", "negative"),
-#         ("Disgust", "불쾌함", "negative"),
-#         ("Anger", "화남", "negative"),
-#         ("Optimism", "낙관", "positive"),
-#         ("Love", "사랑", "positive"),
-#         ("Submission", "굴복감", "negative"),
-#         ("Awe", "경외감", "positive"),
-#         ("Disapproval", "못마땅함", "negative"),
-#         ("Remorse", "후회", "negative"),
-#         ("Contempt", "경멸", "negative"),
-#         ("Aggressiveness", "공격성", "negative")
-#     ]
+class WheelOfEmotion:
+    basics = [
+        ("Joy", "기쁨", "positive"),
+        ("Trust", "신뢰", "positive"),
+        ("Surprise", "놀람", "positive"),
+        ("Anticipation", "기대", "positive"),
+        ("Fear", "두려움", "negative"),
+        ("Sadness", "슬픔", "negative"),
+        ("Disgust", "불쾌함", "negative"),
+        ("Anger", "화남", "negative"),
+        ("Optimism", "낙관", "positive"),
+        ("Love", "사랑", "positive"),
+        ("Submission", "굴복감", "negative"),
+        ("Awe", "경외감", "positive"),
+        ("Disapproval", "못마땅함", "negative"),
+        ("Remorse", "후회", "negative"),
+        ("Contempt", "경멸", "negative"),
+        ("Aggressiveness", "공격성", "negative")
+    ]
 
 # combinations = [
 # ("Anticipation", "Joy", ("Optimism", "낙관")),
@@ -100,6 +100,7 @@ summarizer = ChatGPTDialogueSummarizer(
     base_instruction=f"""
 - You are a helpful assistant that analyzes the content of the conversation.
 - Determine whether it is reasonable to move on to the next conversation phase or not.
+- There are 16 emotions to choose from. 
 - Return JSON in the following format:
     {{
      "assistant_emphasized": boolean,

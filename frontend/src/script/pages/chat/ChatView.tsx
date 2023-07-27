@@ -153,70 +153,70 @@ const SessionMessageView = (props: { id: EntityId }) => {
     {
       !isEmotionSelectionTurn 
       ? null : <>
-        <form class="emolist">
-          <span class="emotions">
+        <form className="emolist">
+          <span className="emotions">
             <input type="checkbox" id="joy"/>
-            <label for="joy">기쁨 😃</label>
+            <label htmlFor="joy">기쁨 😃</label>
           </span>
-          <span class="emotions">
+          <span className="emotions">
             <input type="checkbox" id="trust"/>
-            <label class="emotions" for="trust">신뢰 🤝 </label>
+            <label htmlFor="trust">신뢰 🤝 </label>
           </span>
-          <span class="emotions">
+          <span className="emotions">
             <input type="checkbox" id="surprise"/>
-            <label for="surprise">놀람 😮</label>
+            <label htmlFor="surprise">놀람 😮</label>
           </span>
-          <span class="emotions">
+          <span className="emotions">
             <input type="checkbox" id="anticipation"/>
-            <label class="emotions" for="anticipation">기대 🤔</label>
+            <label htmlFor="anticipation">기대 🤔</label>
           </span>
-          <span class="emotions">
+          <span className="emotions">
             <input type="checkbox" id="fear"/>
-            <label for="fear">두려움 😨</label>
+            <label htmlFor="fear">두려움 😨</label>
           </span>
-          <span class="emotions">
+          <span className="emotions">
             <input type="checkbox" id="sadness"/>
-            <label class="emotions" for="Sadness">슬픔 😢</label>
+            <label htmlFor="sadness">슬픔 😢</label>
           </span>
-          <span class="emotions">
+          <span className="emotions">
             <input type="checkbox" id="disgust"/>
-            <label for="disgust">불쾌함 🤮</label>
+            <label htmlFor="disgust">불쾌함 🤮</label>
           </span>
-          <span class="emotions">
+          <span className="emotions">
             <input type="checkbox" id="anger"/>
-            <label class="emotions" for="anger">화남 😠</label>
+            <label htmlFor="anger">화남 😠</label>
           </span>
-          <span class="emotions">
+          <span className="emotions">
             <input type="checkbox" id="optimism"/>
-            <label for="optimism">낙관 😄</label>
+            <label htmlFor="optimism">낙관 😄</label>
           </span>
-          <span class="emotions">
+          <span className="emotions">
             <input type="checkbox" id="love"/>
-            <label class="emotions" for="love">사랑 😍</label>
+            <label htmlFor="love">사랑 😍</label>
           </span>
-          <span class="emotions">
+          <span className="emotions">
             <input type="checkbox" id="submission"/>
-            <label for="submission">굴복감 😔</label>
+            <label htmlFor="submission">굴복감 😔</label>
           </span>
-          <span class="emotions">
+          <span className="emotions">
             <input type="checkbox" id="awe"/>
-            <label class="emotions" for="awe">경외감 😲</label>
+            <label htmlFor="awe">경외감 😲</label>
           </span>
-          <span class="emotions">
+          <span className="emotions">
             <input type="checkbox" id="disapproval"/>
-            <label class="emotions" for="disapproval">못마땅함 😒</label>
+            <label htmlFor="disapproval">못마땅함 😒</label>
           </span>
-          <span class="emotions">
+          <span className="emotions">
             <input type="checkbox" id="remorse"/>
-            <label for="remorse">후회 😞</label>
+            <label htmlFor="remorse">후회 😞</label>
           </span>
-          <span class="emotions">
+          <span className="emotions">
             <input type="checkbox" id="contempt"/>
-            <label class="emotions" for="contempt">경멸 😏</label>
+            <label htmlFor="contempt">경멸 😏</label>
           </span>
-          <span class="emotions">
+          <span className="emotions">
             <input type="checkbox" id="aggressiveness"/>
-            <label for="aggressiveness">공격성 😡</label>
+            <label htmlFor="aggressiveness">공격성 😡</label>
           </span>
           <input id="submitEmotion" type="submit" value="보내기" className="button-main"/>
         </form></>

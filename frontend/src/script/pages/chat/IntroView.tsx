@@ -50,7 +50,7 @@ export const IntroView = (props: {
         onKeyDown={handleKeyDownOnNameField}
         />
 
-        <input {...register("user_age")} type="number" placeholder={"몇살이야?"} className="mt-2" autoComplete="off"/>
+        <input {...register("user_age")} type="number" placeholder={"몇 살이야?"} className="mt-2" autoComplete="off"/>
         {
             isValid ? <input type={"submit"} value={"대화 시작하기!"} className="button-main mt-2"/> : undefined
         }
