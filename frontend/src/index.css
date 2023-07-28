@@ -111,7 +111,7 @@ body {
     @apply h-auto py-1 cursor-pointer disabled:cursor-default;
 }
 
-.emotion > input:checked + label {
+.emotion > input:checked + label, .emotion.view-only[aria-selected=true] {
     @apply border-clova-blue font-bold bg-cyan-100 shadow-inner cursor-pointer disabled:cursor-default;
 }
 
@@ -119,8 +119,8 @@ body {
     @apply absolute opacity-0;
 }
 
-.emotion > label {
-    @apply rounded-lg text-slate-500 font-medium border-slate-300 hover:bg-slate-200 border px-2 py-1 shadow-sm bg-slate-100;
+.emotion > label, .emotion.view-only {
+    @apply rounded-lg text-slate-500 font-medium border-slate-300 hover:bg-slate-200 border px-2 py-1 shadow-sm bg-slate-100 aria-disabled:pointer-events-none;
 }
 
 #submitEmotion {

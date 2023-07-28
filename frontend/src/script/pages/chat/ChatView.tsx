@@ -152,10 +152,8 @@ const SessionMessageView = (props: { id: EntityId, isLast: boolean }) => {
 
   const isEmotionSelectionTurn = turn.metadata?.select_emotion === true
 
-  return hideMessage ? null : <MessageView message={turn}>
-    {
+  return hideMessage ? null : <MessageView message={turn} componentsBelowCallout={
       !isEmotionSelectionTurn
         ? null : <EmotionPicker messageId={props.id} disabled={!props.isLast}/>
-    }
-  </MessageView>
+    }/>
 }
