@@ -1,5 +1,6 @@
 from chatlib.chatbot.generators import ChatGPTResponseGenerator
 from chatlib.mapper import ChatGPTDialogueSummarizer
+from chatlib.openai_utils import ChatGPTModel
 
 from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens
 
@@ -26,5 +27,6 @@ summarizer = ChatGPTDialogueSummarizer(
 Follow this JSON format: {{
   "proceed_to_next_phase": boolean // true if it is proper moment to proceed to the next conversation phase
 }}.
-"""
+""",
+    model=ChatGPTModel.GPT_3_5_latest
 )

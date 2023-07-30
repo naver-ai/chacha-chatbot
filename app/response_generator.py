@@ -76,6 +76,12 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
                 return None
         # Find/Record --> Share
         elif current == EmotionChatbotPhase.Find or current == EmotionChatbotPhase.Record:
+            if current == EmotionChatbotPhase.Record:
+                turns = [turn for turn in dialog if dict_utils.get_nested_value(turn.metadata, "state") == EmotionChatbotPhase.Record and turn.is_user == False]
+                if len(turns) < 2:
+                    print("Not enough turns to finish the Record phase. Continue.")
+                    return None
+
             summarizer = find.summarizer if current == EmotionChatbotPhase.Find else record.summarizer
             phase_suggestion = await summarizer.run(dialog,
                                                     ChatGPTDialogSummarizerParams(

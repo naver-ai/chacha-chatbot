@@ -8,14 +8,11 @@ class EmotionChatbotPhase(StrEnum):
     Record = "record"
     Share = "share"
 
-class EmotionChatbotSpecialTokens(StrEnum):
-    Terminate="<|Terminate|>"
-    NewEpisode="<|AskNewEpisode|>"
-    EmotionSelect="<|EmotionSelect|>"
-    Done = "<|Done|>"
 
-class EmotionChatbotPayloadKeys(StrEnum):
-    ProceedToNextPhase="proceed_to_next_phase"
+class EmotionChatbotSpecialTokens(StrEnum):
+    Terminate = "<|Terminate|>"
+    NewEpisode = "<|AskNewEpisode|>"
+    EmotionSelect = "<|EmotionSelect|>"
 
 
 COMMON_SPEAKING_RULES = [
@@ -29,5 +26,6 @@ COMMON_SPEAKING_RULES = [
 ]
 
 
-def stringify_list(rules: list[str], ordered: bool = False, bullet: str = "-", separator: str = "\n", indent:str = "  ") -> str:
+def stringify_list(rules: list[str], ordered: bool = False, bullet: str = "-", separator: str = "\n",
+                   indent: str = "  ") -> str:
     return separator.join([f"{indent}{f'{i + 1}.' if ordered else f'{bullet}'} {rule}" for i, rule in enumerate(rules)])
