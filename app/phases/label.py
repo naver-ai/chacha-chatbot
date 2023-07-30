@@ -85,8 +85,10 @@ summarizer = ChatGPTDialogueSummarizer(
     base_instruction=f"""
 - You are a helpful assistant that analyzes the content of the conversation.
 - Determine whether it is reasonable to move on to the next conversation phase or not.
-- There are 16 emotions to choose from. 
 - Add identified emotions to {IDENTIFIED_EMOTIONS}.
+- Move on to the next conversation phase when you empathized all emotions from {IDENTIFIED_EMOTIONS}.
+- There are 16 emotions to choose from. 
+
 - Return JSON in the following format:
     {{
      "assistant_emphasized": boolean,
@@ -130,6 +132,21 @@ Refer to the examples below.
              "emotion_category": "negative",
              "identified_emotion_types": ["Surprise", "Anger"],
              "empathize_all_emotions": True,
+             "next_phase": "find"
+         })),
+                 ([
+             DialogueTurn("어떤 기분이 들었는지 자세히 말해줄 수 있을까?", is_user=False),
+             DialogueTurn("슬프고 후회돼", is_user=True),
+             DialogueTurn("그랬구나 슬프고 후회됐구나. 어떤 상황이 슬펐어?", is_user=False),
+             DialogueTurn("달리기 연습을 많이 했는데 넘어져서 꼴등을 한게 슬퍼", is_user=True),
+             DialogueTurn("그랬구나 그래서 슬펐구나.", is_user=False),
+         ],
+         json.dumps({
+             "assistant_emphasized": True,
+             "assistant_explained": True,
+             "emotion_category": "negative",
+             "identified_emotion_types": ["Sadness", "Remorse"],
+             "empathize_all_emotions": False,
              "next_phase": "find"
          })),
         ([

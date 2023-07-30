@@ -7,6 +7,7 @@ class EmotionChatbotPhase(StrEnum):
     Find = "find"
     Record = "record"
     Share = "share"
+    Help = "help"
 
 
 class EmotionChatbotSpecialTokens(StrEnum):

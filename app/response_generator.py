@@ -5,6 +5,9 @@ from chatlib.mapper import ChatGPTDialogSummarizerParams
 
 from app.common import EmotionChatbotPhase
 from app.phases import rapport, label, find, record, share
+from chatlib.chatbot import ResponseGenerator, Dialogue
+from chatlib.mapper import ChatGPTDialogueSummarizer
+from chatlib.openai_utils import ChatGPTParams
 
 
 class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbotPhase]):
@@ -22,6 +25,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         self.__generators[EmotionChatbotPhase.Find] = find.create_generator()
         self.__generators[EmotionChatbotPhase.Record] = record.create_generator()
         self.__generators[EmotionChatbotPhase.Share] = share.create_generator()
+        self.__generators[EmotionChatbotPhase.Help] = help.create_generator()
 
     def write_to_json(self, parcel: dict):
         super().write_to_json(parcel)
@@ -42,7 +46,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
             generator.update_instruction_parameters(dict(user_name=self.__user_name, user_age=self.__user_age))
         elif state == EmotionChatbotPhase.Label:
             generator.update_instruction_parameters(payload)  # Put the result of rapport conversation
-        elif state in [EmotionChatbotPhase.Find, EmotionChatbotPhase.Share, EmotionChatbotPhase.Record]:
+        elif state in [EmotionChatbotPhase.Find, EmotionChatbotPhase.Share, EmotionChatbotPhase.Record, EmotionChatbotPhase.Help]:
             generator.update_instruction_parameters(
                 dict(key_episode=self._get_memoized_payload(EmotionChatbotPhase.Rapport)["key_episode"],
                      identified_emotion_types=", ".join(
