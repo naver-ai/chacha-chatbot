@@ -8,10 +8,19 @@ class EmotionChatbotPhase(StrEnum):
     Record = "record"
     Share = "share"
 
+class EmotionChatbotSpecialTokens(StrEnum):
+    Terminate="<|Terminate|>"
+    NewEpisode="<|AskNewEpisode|>"
+    EmotionSelect="<|EmotionSelect|>"
+    Done = "<|Done|>"
+
+class EmotionChatbotPayloadKeys(StrEnum):
+    ProceedToNextPhase="proceed_to_next_phase"
+
 
 COMMON_SPEAKING_RULES = [
     "Use a simple, informal Korean, like talking to a peer friend.",
-    "Ask one question per conversation turn.",
+    "Cover only one topic or question in a message if possible, and move to the next upon the user's reaction.",
     "Say two sentences at the most each time.",
     "Use Emoji appropriately.",
     "Use <em> HTML tags instead of single quotes and to emphasize certain keywords especially those related to emotions.",
