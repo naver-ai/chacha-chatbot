@@ -4,7 +4,7 @@ from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedRespo
 from chatlib.mapper import ChatGPTDialogSummarizerParams
 
 from app.common import EmotionChatbotPhase
-from app.phases import rapport, label, find, record, share
+from app.phases import rapport, label, find, record, share, help
 from chatlib.chatbot import ResponseGenerator, Dialogue
 from chatlib.mapper import ChatGPTDialogueSummarizer
 from chatlib.openai_utils import ChatGPTParams
@@ -46,7 +46,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
             generator.update_instruction_parameters(dict(user_name=self.__user_name, user_age=self.__user_age))
         elif state == EmotionChatbotPhase.Label:
             generator.update_instruction_parameters(payload)  # Put the result of rapport conversation
-        elif state in [EmotionChatbotPhase.Find, EmotionChatbotPhase.Share, EmotionChatbotPhase.Record, EmotionChatbotPhase.Help]:
+        elif state in [EmotionChatbotPhase.Find, EmotionChatbotPhase.Share, EmotionChatbotPhase.Record]:
             generator.update_instruction_parameters(
                 dict(key_episode=self._get_memoized_payload(EmotionChatbotPhase.Rapport)["key_episode"],
                      identified_emotion_types=", ".join(
@@ -62,6 +62,9 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
             if len(dialog) > 3:
                 phase_suggestion = await rapport.summarizer.run(dialog)
                 print(phase_suggestion)
+                # Check if the user expressed sensitive topics
+                if "sensitive_topic" in phase_suggestion and phase_suggestion["sensitive_topic"] is True:
+                    return EmotionChatbotPhase.Help, None
                 # print(f"Phase suggestion: {phase_suggestion}")
                 if "move_to_next" in phase_suggestion and phase_suggestion["move_to_next"] is True:
                     return EmotionChatbotPhase.Label, phase_suggestion
@@ -107,3 +110,4 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
             if user_intention_to_share_new_episode:
                 return EmotionChatbotPhase.Rapport, None
         return None
+    
