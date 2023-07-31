@@ -56,15 +56,18 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
 
     async def calc_next_state_info(self, current: EmotionChatbotPhase, dialog: Dialogue) -> tuple[
                                                                                                 EmotionChatbotPhase, dict | None] | None:
+        
+        # Check if the user expressed sensitive topics
+        phase_suggestion = await help.summarizer.run(dialog)
+        if "sensitive_topic" in phase_suggestion and phase_suggestion["sensitive_topic"] is True:
+            return EmotionChatbotPhase.Help, None
+        
         # Rapport --> Label
         if current == EmotionChatbotPhase.Rapport:
             # Minimum 3 rapport building conversation turns
             if len(dialog) > 3:
                 phase_suggestion = await rapport.summarizer.run(dialog)
                 print(phase_suggestion)
-                # Check if the user expressed sensitive topics
-                if "sensitive_topic" in phase_suggestion and phase_suggestion["sensitive_topic"] is True:
-                    return EmotionChatbotPhase.Help, None
                 # print(f"Phase suggestion: {phase_suggestion}")
                 if "move_to_next" in phase_suggestion and phase_suggestion["move_to_next"] is True:
                     return EmotionChatbotPhase.Label, phase_suggestion
