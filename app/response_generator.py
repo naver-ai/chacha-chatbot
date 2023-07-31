@@ -42,7 +42,6 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         if state == EmotionChatbotPhase.Rapport:
             generator.update_instruction_parameters(dict(user_name=self.__user_name, user_age=self.__user_age))
         elif state == EmotionChatbotPhase.Label:
-            print(payload)
             generator.update_instruction_parameters(payload)  # Put the result of rapport conversation
         elif state in [EmotionChatbotPhase.Find, EmotionChatbotPhase.Share, EmotionChatbotPhase.Record, EmotionChatbotPhase.Help]:
             generator.update_instruction_parameters(

@@ -2,11 +2,11 @@ import json
 
 from chatlib.chatbot.generators import ChatGPTResponseGenerator
 
-from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens
+from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens, PromptFactory
 from chatlib.chatbot import DialogueTurn, Dialogue
 # Help the user label their emotion based on the Wheel of Emotions. Empathize their emotion.
 from chatlib.mapper import ChatGPTDialogueSummarizer
-from chatlib.openai_utils import ChatGPTParams
+from chatlib.openai_utils import ChatGPTParams, ChatGPTModel
 
 
 # https://en.wikipedia.org/wiki/Emotion_classification#/media/File:Plutchik_Dyads.png
@@ -59,27 +59,24 @@ class WheelOfEmotion:
 
 
 def create_generator():
-    base_instruction = f"""
+    return ChatGPTResponseGenerator(base_instruction=ChatGPTResponseGenerator.convert_to_jinja_template("""
 - Based on the previous dialog history about the user’s interests, ask them to elaborate more about their emotions and what makes them feel that way.
 - Only when they explicitly mention that they do not know how to describe their emotions or vaguely expressed their emotions (e.g., feels good/bad), tell the user that they can pick as many emotions as they feel at the moment.
+"""
+f"""
     - When you ask the user to pick emotions, append a special token {EmotionChatbotSpecialTokens.EmotionSelect} at the end.
         - Then the user will pick one or more emotions from the list of emotions: {", ".join([f"{eng} ({kor})" for eng, kor, _ in WheelOfEmotion.basics])}.
-        - Do not mention the list of emotion words as they will be shown as GUI.
-        - The user's choices will be fed as a JSON list, in the format such as [{{ "key": "Joy" }}, {{ "key": "Trust" }}].
+        - Do not mention the list of emotion words as they will be shown as GUI."""
+"""
+        - The user's choices will be fed as a JSON list, in the format such as [{"key": "Joy"}, {"key":"Trust"}].
     
-- Focus on the user's key episode ("<:key_episode:>") and the emotion about it ("<:user_emotion:>"). 
+- Focus on the user's key episode ("{{key_episode}}") and the emotion about it ("{{user_emotion}}"). 
 - Use only Korean words for the emotions when you mention them in dialogue.
 - Empathize the user's emotion by restating how they felt. If there are multiple emotions, empathize with each one from the user's choices.
 - If the user feels multiple emotions, ask the user how they feel each emotion.
 - If the user's key episode involves other people, ask the user about how the other people would feel.
 
-    General Speaking rules: 
-    {stringify_list(COMMON_SPEAKING_RULES, ordered=True)}
-                    """
-
-    print(base_instruction)
-
-    return ChatGPTResponseGenerator(base_instruction=base_instruction.replace("<:", "{").replace(":>", "}"),
+""" + PromptFactory.get_speaking_rules_block()),
             special_tokens=[(EmotionChatbotSpecialTokens.EmotionSelect, "select_emotion", True)])
 
 
@@ -197,5 +194,6 @@ Refer to the examples below.
              "next_phase": "find"
          })),
     ],
+    model=ChatGPTModel.GPT_3_5_latest,
     gpt_params=ChatGPTParams(temperature=0.5)
 )

@@ -6,24 +6,21 @@ from chatlib.chatbot.generators import ChatGPTResponseGenerator
 from chatlib.mapper import ChatGPTDialogueSummarizer
 from chatlib.openai_utils import ChatGPTParams, ChatGPTModel
 
-from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens
+from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens, PromptFactory
 
 
 # Encourage the user to share their emotion and the episode with their parents. Ask if they want to talk about other episodes.
 def create_generator():
     return ChatGPTResponseGenerator(
-        base_instruction=f"""
-- In the previous conversation, the user shared his/her episode (<:key_episode:>) and corresponding emotions (<:identified_emotion_types:>).
+        base_instruction=ChatGPTResponseGenerator.convert_to_jinja_template(f"""
+- In the previous conversation, the user shared his/her episode ({{{{key_episode}}}}) and corresponding emotions ({{{{identified_emotion_types}}}}).
 - Ask the user if they have already shared their emotions and the episode with their parents. 
 - If not, explain why it is important to share with them and encourage sharing.
 - If yes, praise them and ask what happened after sharing.
 
-- After the conversation about the key episode (<:key_episode:>), ask the user if the user would like to share another episode, and put a special token <|AskNewEpisode|> at the end of the question.
-If the user has nothing to share or byes, bye the user and append a special token <|Terminate|> at the end of the message.
-
-General Speaking rules:
-{stringify_list(COMMON_SPEAKING_RULES, ordered=True)}
-                            """.replace("<:", "{").replace(":>", "}"),
+- After the conversation about the key episode ({{{{key_episode}}}}), ask the user if the user would like to share another episode, and put a special token {EmotionChatbotSpecialTokens.NewEpisode} at the end of the question.
+If the user has nothing to share or byes, bye the user and append a special token {EmotionChatbotSpecialTokens.Terminate} at the end of the message.
+""" + PromptFactory.get_speaking_rules_block()),
         special_tokens=[
             (EmotionChatbotSpecialTokens.NewEpisode, "new_episode_requested", True),
             (EmotionChatbotSpecialTokens.Terminate, "terminate", True),

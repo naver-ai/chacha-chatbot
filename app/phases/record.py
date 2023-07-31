@@ -2,20 +2,17 @@ from chatlib.chatbot.generators import ChatGPTResponseGenerator
 from chatlib.mapper import ChatGPTDialogueSummarizer
 from chatlib.openai_utils import ChatGPTModel
 
-from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens
+from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens, PromptFactory
 
 
 # Encourage the user to record the moments in which they felt positive emotions.
 def create_generator():
     return ChatGPTResponseGenerator(
-        base_instruction=f"""
-- In the previous conversation, the user shared his/her episode (<:key_episode:>) and corresponding emotions (<:identified_emotion_types:>).
+        base_instruction=ChatGPTResponseGenerator.convert_to_jinja_template("""
+- In the previous conversation, the user shared his/her episode ({{key_episode}}) and corresponding emotions ({{identified_emotion_types}}).
 - Encourage the user to record the moments in which they felt positive emotions.
 - Explain why it is important to record such moments.
-
-General Speaking rules:
-{stringify_list(COMMON_SPEAKING_RULES, ordered=True)}  
-                """,
+""" + PromptFactory.get_speaking_rules_block()),
     )
 
 summarizer = ChatGPTDialogueSummarizer(
