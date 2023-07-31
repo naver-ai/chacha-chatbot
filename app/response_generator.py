@@ -1,13 +1,10 @@
-from chatlib import dict_utils
+from chatlib import dict_utils, dialogue_utils
 from chatlib.chatbot import ResponseGenerator, Dialogue
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator, StateType
 from chatlib.mapper import ChatGPTDialogSummarizerParams
 
 from app.common import EmotionChatbotPhase
 from app.phases import rapport, label, find, record, share, help
-from chatlib.chatbot import ResponseGenerator, Dialogue
-from chatlib.mapper import ChatGPTDialogueSummarizer
-from chatlib.openai_utils import ChatGPTParams
 
 
 class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbotPhase]):
@@ -55,13 +52,13 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         return generator
 
     async def calc_next_state_info(self, current: EmotionChatbotPhase, dialog: Dialogue) -> tuple[
-                                                                                                EmotionChatbotPhase, dict | None] | None:
-        
+                                   
+        #dialog = dialogue_utils.extract_last_turn_sequence(dialog, lambda turn: dict_utils.get_nested_value(turn.metadata, "state") == current or turn.is_user)
+
         # Check if the user expressed sensitive topics
         phase_suggestion = await help.summarizer.run(dialog)
         if "sensitive_topic" in phase_suggestion and phase_suggestion["sensitive_topic"] is True:
             return EmotionChatbotPhase.Help, None
-        
         # Rapport --> Label
         if current == EmotionChatbotPhase.Rapport:
             # Minimum 3 rapport building conversation turns

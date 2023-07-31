@@ -1,12 +1,13 @@
 import json
 
+from chatlib.chatbot import DialogueTurn
 from chatlib.chatbot.generators import ChatGPTResponseGenerator
-
-from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens
-from chatlib.chatbot import DialogueTurn, Dialogue
+from chatlib.jinja_utils import convert_to_jinja_template
 # Help the user label their emotion based on the Wheel of Emotions. Empathize their emotion.
 from chatlib.mapper import ChatGPTDialogueSummarizer
-from chatlib.openai_utils import ChatGPTParams
+from chatlib.openai_utils import ChatGPTParams, ChatGPTModel
+
+from app.common import EmotionChatbotSpecialTokens, PromptFactory
 
 
 # https://en.wikipedia.org/wiki/Emotion_classification#/media/File:Plutchik_Dyads.png
@@ -57,27 +58,26 @@ class WheelOfEmotion:
 # ("Disgust", "Joy", ("Morbidness", "소름끼침"))
 # ]
 
-IDENTIFIED_EMOTIONS = ["",""]
-
 
 def create_generator():
-    base_instruction = f"""
-    - Based on the previous dialog history about the user’s interests, ask them to elaborate more about their emotions and what makes them feel that way.
-    - Only when they explicitly mention that they do not know how to describe their emotions or vaguely expressed their emotions (e.g., feels good/bad), tell the user that they can pick as many emotions as they feel at the moment.
+    return ChatGPTResponseGenerator(base_instruction=convert_to_jinja_template("""
+- Based on the previous dialog history about the user’s interests, ask them to elaborate more about their emotions and what makes them feel that way.
+- Only when they explicitly mention that they do not know how to describe their emotions or vaguely expressed their emotions (e.g., feels good/bad), tell the user that they can pick as many emotions as they feel at the moment.
+"""
+f"""
     - When you ask the user to pick emotions, append a special token {EmotionChatbotSpecialTokens.EmotionSelect} at the end.
-    - Do not provide emotion words.
-    - Focus on the user's key episode, "<:key_episode:>", and the emotion about it, "<:user_emotion:>". 
-    - Use only Korean words for the emotions, when you mention them in dialogue, but use English for markups internally.
-    - Do not directly mention or academically describe Plutchik’s Wheel of Emotions.
-    - Empathize the user's emotion by restating how they felt. If there are multiple emotions, empathize with each one from {IDENTIFIED_EMOTIONS}.
-    - If the user feels multiple emotions, ask the user how they feel each emotion.
-    - If the user's key episode involves other people, ask the user about how the other people would feel.
+        - Then the user will pick one or more emotions from the list of emotions: {", ".join([f"{eng} ({kor})" for eng, kor, _ in WheelOfEmotion.basics])}.
+        - Do not mention the list of emotion words as they will be shown as GUI."""
+"""
+        - The user's choices will be fed as a JSON list, in the format such as [{"key": "Joy"}, {"key":"Trust"}].
+    
+- Focus on the user's key episode ("{{key_episode}}") and the emotion about it ("{{user_emotion}}"). 
+- Use only Korean words for the emotions when you mention them in dialogue.
+- Empathize the user's emotion by restating how they felt. If there are multiple emotions, empathize with each one from the user's choices.
+- If the user feels multiple emotions, ask the user how they feel each emotion.
+- If the user's key episode involves other people, ask the user about how the other people would feel.
 
-    General Speaking rules: 
-    {stringify_list(COMMON_SPEAKING_RULES, ordered=True)}
-                    """
-
-    return ChatGPTResponseGenerator(base_instruction=base_instruction.replace("<:", "{").replace(":>", "}"),
+""" + PromptFactory.get_speaking_rules_block()),
             special_tokens=[(EmotionChatbotSpecialTokens.EmotionSelect, "select_emotion", True)])
 
 
@@ -85,8 +85,12 @@ summarizer = ChatGPTDialogueSummarizer(
     base_instruction=f"""
 - You are a helpful assistant that analyzes the content of the conversation.
 - Determine whether it is reasonable to move on to the next conversation phase or not.
-- Add identified emotions to {IDENTIFIED_EMOTIONS}.
-- Move on to the next conversation phase when you empathized all emotions from {IDENTIFIED_EMOTIONS}.
+- Add identified emotions to IDENTIFIED_EMOTIONS.
+- Move on to the next conversation phase when you empathized all emotions from IDENTIFIED
+- You are a helpful assistant that analyzes the content of the conversation.
+- Determine whether it is reasonable to move on to the next conversation phase or not.
+- Add identified emotions to IDENTIFIED_EMOTIONS.
+- Move on to the next conversation phase when you empathized all emotions from IDENTIFIED_EMOTIONS.
 - There are 16 emotions to choose from. 
 
 - Return JSON in the following format:
@@ -94,7 +98,7 @@ summarizer = ChatGPTDialogueSummarizer(
      "assistant_emphasized": boolean,
      "assistant_explained": boolean,
      "emotion_category": "positive" | "negative",
-     "identified_emotion_types": {IDENTIFIED_EMOTIONS},
+     "identified_emotion_types": IDENTIFIED_EMOTIONS,
      "empathize_all_emotions": boolean,
      "next_phase": "find" | "label" | null
     }}
@@ -166,5 +170,6 @@ Refer to the examples below.
              "next_phase": "find"
          })),
     ],
+    model=ChatGPTModel.GPT_3_5_latest,
     gpt_params=ChatGPTParams(temperature=0.5)
 )

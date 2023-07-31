@@ -1,5 +1,7 @@
 from enum import StrEnum
 
+from app.prompt_builder import PromptBuilder
+
 
 class EmotionChatbotPhase(StrEnum):
     Rapport = "rapport"
@@ -30,3 +32,11 @@ COMMON_SPEAKING_RULES = [
 def stringify_list(rules: list[str], ordered: bool = False, bullet: str = "-", separator: str = "\n",
                    indent: str = "  ") -> str:
     return separator.join([f"{indent}{f'{i + 1}.' if ordered else f'{bullet}'} {rule}" for i, rule in enumerate(rules)])
+
+
+class PromptFactory:
+    @staticmethod
+    def get_speaking_rules_block() -> str:
+        return f"""
+General Speaking rules:
+{stringify_list(COMMON_SPEAKING_RULES, ordered=True)}"""

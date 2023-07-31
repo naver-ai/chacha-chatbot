@@ -3,27 +3,25 @@ import json
 from chatlib import dialogue_utils, dict_utils
 from chatlib.chatbot import Dialogue
 from chatlib.chatbot.generators import ChatGPTResponseGenerator
+from chatlib.jinja_utils import convert_to_jinja_template
 from chatlib.mapper import ChatGPTDialogueSummarizer
 from chatlib.openai_utils import ChatGPTParams, ChatGPTModel
 
-from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens
+from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens, PromptFactory
 
 
 # Encourage the user to share their emotion and the episode with their parents. Ask if they want to talk about other episodes.
 def create_generator():
     return ChatGPTResponseGenerator(
-        base_instruction=f"""
-- In the previous conversation, the user shared his/her episode (<:key_episode:>) and corresponding emotions (<:identified_emotion_types:>).
+        base_instruction=convert_to_jinja_template(f"""
+- In the previous conversation, the user shared his/her episode ({{{{key_episode}}}}) and corresponding emotions ({{{{identified_emotion_types}}}}).
 - Ask the user if they have already shared their emotions and the episode with their parents. 
 - If not, explain why it is important to share with them and encourage sharing.
 - If yes, praise them and ask what happened after sharing.
 
-- After the conversation about the key episode (<:key_episode:>), ask the user if the user would like to share another episode, and put a special token <|AskNewEpisode|> at the end of the question.
-If the user has nothing to share or byes, bye the user and append a special token <|Terminate|> at the end of the message.
-
-General Speaking rules:
-{stringify_list(COMMON_SPEAKING_RULES, ordered=True)}
-                            """.replace("<:", "{").replace(":>", "}"),
+- After the conversation about the key episode ({{{{key_episode}}}}), ask the user if the user would like to share another episode, and put a special token {EmotionChatbotSpecialTokens.NewEpisode} at the end of the question.
+If the user has nothing to share or byes, bye the user and append a special token {EmotionChatbotSpecialTokens.Terminate} at the end of the message.
+""" + PromptFactory.get_speaking_rules_block()),
         special_tokens=[
             (EmotionChatbotSpecialTokens.NewEpisode, "new_episode_requested", True),
             (EmotionChatbotSpecialTokens.Terminate, "terminate", True),
@@ -31,13 +29,18 @@ General Speaking rules:
     )
 
 __classifier = ChatGPTDialogueSummarizer(
-    base_instruction=f"""
+    base_instruction=convert_to_jinja_template("""
 You are a helpful assistant that analyzes the content of the dialogue history.
-The dialogue is between a child user and an AI regarding the key episode (<:key_episode:>) and corresponding emotions (<:identified_emotion_types:>).
+The dialogue is between a child user and an AI regarding the key episode ({{key_episode}}) and corresponding emotions ({{identified_emotion_types}})."""
+f"""
 In an a message marked with a special token {EmotionChatbotSpecialTokens.NewEpisode}, the AI asked the user if he or she wants to share a new key episode.
-Analyze a given dialogue and return whether the user wants to share a new episode.
-Follow this JSON format: {{"share_new_episode": boolean | undefined // true if the user expressed a desire to share, false if the user doesn't want to, and undefined if the user did not express any intention yet.}}.
-""".replace("<:", "{").replace(":>", "}"),
+Analyze a given dialogue and return whether the user wants to share a new episode."""
+"""
+Follow this JSON format:
+{  
+  "share_new_episode": boolean | undefined // true if the user expressed a desire to share, false if the user doesn't want to, and undefined if the user did not express any intention yet.
+}.
+"""),
     model=ChatGPTModel.GPT_3_5_latest
 )
 
