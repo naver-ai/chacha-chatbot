@@ -1,12 +1,13 @@
 import json
 
+from chatlib.chatbot import DialogueTurn
 from chatlib.chatbot.generators import ChatGPTResponseGenerator
-
-from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens, PromptFactory
-from chatlib.chatbot import DialogueTurn, Dialogue
+from chatlib.jinja_utils import convert_to_jinja_template
 # Help the user label their emotion based on the Wheel of Emotions. Empathize their emotion.
 from chatlib.mapper import ChatGPTDialogueSummarizer
 from chatlib.openai_utils import ChatGPTParams, ChatGPTModel
+
+from app.common import EmotionChatbotSpecialTokens, PromptFactory
 
 
 # https://en.wikipedia.org/wiki/Emotion_classification#/media/File:Plutchik_Dyads.png
@@ -59,7 +60,7 @@ class WheelOfEmotion:
 
 
 def create_generator():
-    return ChatGPTResponseGenerator(base_instruction=ChatGPTResponseGenerator.convert_to_jinja_template("""
+    return ChatGPTResponseGenerator(base_instruction=convert_to_jinja_template("""
 - Based on the previous dialog history about the user’s interests, ask them to elaborate more about their emotions and what makes them feel that way.
 - Only when they explicitly mention that they do not know how to describe their emotions or vaguely expressed their emotions (e.g., feels good/bad), tell the user that they can pick as many emotions as they feel at the moment.
 """
@@ -90,31 +91,6 @@ summarizer = ChatGPTDialogueSummarizer(
 - Determine whether it is reasonable to move on to the next conversation phase or not.
 - Add identified emotions to IDENTIFIED_EMOTIONS.
 - Move on to the next conversation phase when you empathized all emotions from IDENTIFIED_EMOTIONS.
-- There are 16 emotions to choose from. 
-
-- Return JSON in the following format:
-    {{
-     "assistant_emphasized": boolean,
-     "assistant_explained": boolean,
-     "emotion_category": "positive" | "negative",
-     "identified_emotion_types": IDENTIFIED_EMOTIONS,
-     "empathize_all_emotions": boolean,
-     "next_phase": "find" | "label" | null
-    }}
-
-Rules for the "next_phase":
-1) Set "find" only when the following conditions are satisfied:
-    - Among the emotions that the user expressed, there is at least one negative emotion that is related to a specific episode that describes problems that the user faced.
-    - You empathized the user's negative emotion
-    - You explained the emotion to the user so that the user understand what emotion they felt.
-2) Set "record" only when the following conditions are satisfied:
-    - The user expressed positive emotions and shared a specific episode when they felt the emotions.
-    - You empathized the user's positive emotion. 
-    - You explained the emotion to the user so that the user understand what emotion they felt.
-3) Set null if it is better to stay in the current conversational phase.
-
-Refer to the examples below.
-_EMOTIONS.
 - There are 16 emotions to choose from. 
 
 - Return JSON in the following format:

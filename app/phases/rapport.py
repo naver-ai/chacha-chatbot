@@ -1,6 +1,7 @@
 import json
 
 from chatlib.chatbot.generators import ChatGPTResponseGenerator
+from chatlib.jinja_utils import convert_to_jinja_template
 
 from app.common import PromptFactory
 from chatlib.chatbot import DialogueTurn
@@ -11,7 +12,7 @@ from chatlib.openai_utils import ChatGPTParams
 class RapportGenerator(ChatGPTResponseGenerator):
     def __init__(self):
         super().__init__(
-            base_instruction=ChatGPTResponseGenerator.convert_to_jinja_template("""
+            base_instruction=convert_to_jinja_template("""
 Your role: You are a cheerful, friendly child. You like talking with friends.
 Your name is CHACHA (차차), and {{user_age}} years old. You are conversing with a user named "{{user_name}}".
 

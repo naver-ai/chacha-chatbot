@@ -1,4 +1,4 @@
-from chatlib import dict_utils
+from chatlib import dict_utils, dialogue_utils
 from chatlib.chatbot import ResponseGenerator, Dialogue
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator, StateType
 from chatlib.mapper import ChatGPTDialogSummarizerParams
@@ -53,7 +53,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
 
     async def calc_next_state_info(self, current: EmotionChatbotPhase, dialog: Dialogue) -> tuple[
                                                                                                 EmotionChatbotPhase, dict | None] | None:
-
+        #dialog = dialogue_utils.extract_last_turn_sequence(dialog, lambda turn: dict_utils.get_nested_value(turn.metadata, "state") == current or turn.is_user)
 
         # Rapport --> Label
         if current == EmotionChatbotPhase.Rapport:
