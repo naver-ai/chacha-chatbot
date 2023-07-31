@@ -43,7 +43,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
             generator.update_instruction_parameters(dict(user_name=self.__user_name, user_age=self.__user_age))
         elif state == EmotionChatbotPhase.Label:
             generator.update_instruction_parameters(payload)  # Put the result of rapport conversation
-        elif state in [EmotionChatbotPhase.Find, EmotionChatbotPhase.Share, EmotionChatbotPhase.Record, EmotionChatbotPhase.Help]:
+        elif state in [EmotionChatbotPhase.Find, EmotionChatbotPhase.Share, EmotionChatbotPhase.Record]:
             generator.update_instruction_parameters(
                 dict(key_episode=self._get_memoized_payload(EmotionChatbotPhase.Rapport)["key_episode"],
                      identified_emotion_types=", ".join(
@@ -52,9 +52,13 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         return generator
 
     async def calc_next_state_info(self, current: EmotionChatbotPhase, dialog: Dialogue) -> tuple[
-                                                                                                EmotionChatbotPhase, dict | None] | None:
+                                   
         #dialog = dialogue_utils.extract_last_turn_sequence(dialog, lambda turn: dict_utils.get_nested_value(turn.metadata, "state") == current or turn.is_user)
 
+        # Check if the user expressed sensitive topics
+        phase_suggestion = await help.summarizer.run(dialog)
+        if "sensitive_topic" in phase_suggestion and phase_suggestion["sensitive_topic"] is True:
+            return EmotionChatbotPhase.Help, None
         # Rapport --> Label
         if current == EmotionChatbotPhase.Rapport:
             # Minimum 3 rapport building conversation turns
@@ -106,3 +110,4 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
             if user_intention_to_share_new_episode:
                 return EmotionChatbotPhase.Rapport, None
         return None
+    

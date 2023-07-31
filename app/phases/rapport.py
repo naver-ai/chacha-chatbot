@@ -65,6 +65,7 @@ summarizer = ChatGPTDialogueSummarizer(
   (2) user_emotion: the emotion of the user caused by the key episode. Make sure the emotion is connected to (1)
   (3) move_to_next: A boolean whether it is reasonable to move on to the next conversation phase or not, judged based on (1) and (2).
   (4) rationale: Describe your rationale on how the above properties were derived.
+  (5) sensitive_topic: A boolean whether if the user expressed indication of indications of self-harm, suicide or death.
 Refer to the examples below.
                     """,
     examples=[(
