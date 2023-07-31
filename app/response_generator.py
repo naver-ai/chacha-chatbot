@@ -4,10 +4,7 @@ from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedRespo
 from chatlib.mapper import ChatGPTDialogSummarizerParams
 
 from app.common import EmotionChatbotPhase
-from app.phases import rapport, label, find, record, share
-from chatlib.chatbot import ResponseGenerator, Dialogue
-from chatlib.mapper import ChatGPTDialogueSummarizer
-from chatlib.openai_utils import ChatGPTParams
+from app.phases import rapport, label, find, record, share, help
 
 
 class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbotPhase]):
@@ -45,6 +42,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         if state == EmotionChatbotPhase.Rapport:
             generator.update_instruction_parameters(dict(user_name=self.__user_name, user_age=self.__user_age))
         elif state == EmotionChatbotPhase.Label:
+            print(payload)
             generator.update_instruction_parameters(payload)  # Put the result of rapport conversation
         elif state in [EmotionChatbotPhase.Find, EmotionChatbotPhase.Share, EmotionChatbotPhase.Record, EmotionChatbotPhase.Help]:
             generator.update_instruction_parameters(
@@ -56,6 +54,8 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
 
     async def calc_next_state_info(self, current: EmotionChatbotPhase, dialog: Dialogue) -> tuple[
                                                                                                 EmotionChatbotPhase, dict | None] | None:
+
+
         # Rapport --> Label
         if current == EmotionChatbotPhase.Rapport:
             # Minimum 3 rapport building conversation turns

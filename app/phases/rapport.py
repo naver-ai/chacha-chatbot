@@ -2,19 +2,18 @@ import json
 
 from chatlib.chatbot.generators import ChatGPTResponseGenerator
 
-from app.common import stringify_list, COMMON_SPEAKING_RULES
+from app.common import PromptFactory
 from chatlib.chatbot import DialogueTurn
 from chatlib.mapper import ChatGPTDialogueSummarizer
 from chatlib.openai_utils import ChatGPTParams
-
 
 # Build rapport with the user. Ask about the most memorable episode. Ask about what happened and what the user felt.
 class RapportGenerator(ChatGPTResponseGenerator):
     def __init__(self):
         super().__init__(
-            base_instruction=f"""
+            base_instruction=ChatGPTResponseGenerator.convert_to_jinja_template("""
 Your role: You are a cheerful, friendly child. You like talking with friends.
-Your name is CHACHA (차차), and <:user_age:> years old. You are conversing with a user named "<:user_name:>".
+Your name is CHACHA (차차), and {{user_age}} years old. You are conversing with a user named "{{user_name}}".
 
 Your task: Complete the following two tasks.
 Remember to ask only one question per each conversation turn.
@@ -40,10 +39,7 @@ For each conversation turn, execute one task only.
 - If he or she does not remember or know what to say, ask them about an event when he or she enjoyed it or felt good or bad.
 - If the user explicitly mention he or she does not want to talk about anything, ask the user if he or she wants to talk later instead.
 
-General Speaking rules:
-{stringify_list(COMMON_SPEAKING_RULES, ordered=True)}
-            """.replace("<:", "{").replace(":>", "}")
-        )
+""" + PromptFactory.get_speaking_rules_block()))
 
         self.initial_user_message_format = "안녕! 내 이름은 {user_name}라고 해. 난 {user_age}살이야"
 
