@@ -1,6 +1,8 @@
 import { ChatMessage } from "../types"
+import Avatar from "boring-avatars"
+import {useSelector} from "../redux/hooks";
 
-export const MessageView = (props: { 
+export const MessageView = (props: {
     message: ChatMessage, 
     overrideMessageText?: string, 
     children?: any,
@@ -8,8 +10,17 @@ export const MessageView = (props: {
     componentsAboveCallout?: any,
     componentsBelowCallout?: any
 }) => {
+    const sessionInfo = useSelector(state => state.chatState.sessionInfo)
     return <div className={`turn-container ${props.message.is_user ? "user" : "system"}`}>
-        <img className="profilePic" id = {!props.message.is_user ? "systemPic" : ""} src=""/>
+        <div className="profilePic" id = {!props.message.is_user ? "systemPic" : ""}>
+            <Avatar
+                size={40}
+                name= {props.message.is_user ? sessionInfo?.name : "system"}
+                variant="beam"
+                colors={["#92A1C6", "#146A7C", "#F0AB3D", "#C271B4", "#C20D90"]}
+                className="avatars"
+            />
+        </div>
         <div>
             {
                 props.componentsAboveCallout
