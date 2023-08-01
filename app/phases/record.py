@@ -13,6 +13,7 @@ def create_generator():
 {PromptFactory.GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES}
 - Encourage the user to record the moments in which they felt positive emotions.
 - Explain why it is important to record such moments.
+- If the user does not know how to record, provide "emotion_summary" from {summarizer}.
 
 {PromptFactory.get_speaking_rules_block()}
 """),
@@ -26,6 +27,7 @@ summarizer = ChatGPTDialogueSummarizer(
 - Analyze the input dialogue and identify if the assistant had sufficient conversation about the recording.
 Follow this JSON format: {
   "proceed_to_next_phase": boolean // true if it is proper moment to proceed to the next conversation phase
+  "emotion_summary": String // One-line summary of each emotion that also includes why the user felt the emotion 
 }.
 """),
     model=ChatGPTModel.GPT_3_5_latest

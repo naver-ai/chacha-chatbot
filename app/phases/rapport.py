@@ -38,7 +38,6 @@ For each conversation turn, execute one task only.
 [Ask Task]
 - Ask the user about an episode or  moment that is the most memorable to him or her.
 - If he or she does not remember or know what to say, ask them about an event when he or she enjoyed it or felt good or bad.
-- If the user explicitly mention he or she does not want to talk about anything, ask the user if he or she wants to talk later instead.
 
 """ + PromptFactory.get_speaking_rules_block()))
 

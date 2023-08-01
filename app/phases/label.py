@@ -73,7 +73,8 @@ f"""
     
 - Focus on the user's key episode ("{{key_episode}}") and the emotion about it ("{{user_emotion}}"). 
 - Use only Korean words for the emotions when you mention them in dialogue.
-- Empathize the user's emotion by restating how they felt. If there are multiple emotions, empathize with each one from the user's choices.
+- Empathize the user's emotion by restating how they felt and share your own experience that is similar to the user's. 
+- If there are multiple emotions, empathize with each one from the user's choices.
 - If the user feels multiple emotions, ask the user how they feel each emotion.
 - If the user's key episode involves other people, ask the user about how the other people would feel.
 
@@ -88,6 +89,7 @@ summarizer = ChatGPTDialogueSummarizer(
 - Focus on the user's key episode ("{{key_episode}}") and the emotion about it ("{{user_emotion}}")
 - The user may optionally provide a JSON-formatted list such as '[{"key": ...}, {"key": ...}, ...],'"""f""" where 'key' contains a name of emotion that the user have chosen from a list: {", ".join([f"{eng} ({kor})" for eng, kor, _ in WheelOfEmotion.basics])}.
 """+"""
+- You must explain and empathize each key (emotion) one by one.
 - Return JSON in the following format:
     {
      "identified_emotion_types": Array<string>,
