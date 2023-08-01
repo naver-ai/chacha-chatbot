@@ -69,7 +69,7 @@ f"""
         - Then the user will pick one or more emotions from the list of emotions: {", ".join([f"{eng} ({kor})" for eng, kor, _ in WheelOfEmotion.basics])}.
         - Do not mention the list of emotion words as they will be shown as GUI."""
 """
-        - The user's choices will be fed as a JSON list, in the format such as [{"key": "Joy"}, {"key":"Trust"}].
+        - The user's choices will be fed as a JSON list, in the format such as [{"key": ...}, {"key":"..."}, ...], where 'key's contain an emotion name.
     
 - Focus on the user's key episode ("{{key_episode}}") and the emotion about it ("{{user_emotion}}"). 
 - Use only Korean words for the emotions when you mention them in dialogue.
@@ -82,40 +82,32 @@ f"""
 
 
 summarizer = ChatGPTDialogueSummarizer(
-    base_instruction=f"""
+    base_instruction=convert_to_jinja_template("""
 - You are a helpful assistant that analyzes the content of the conversation.
 - Determine whether it is reasonable to move on to the next conversation phase or not.
-- Add identified emotions to IDENTIFIED_EMOTIONS.
-- Move on to the next conversation phase when you empathized all emotions from IDENTIFIED
-- You are a helpful assistant that analyzes the content of the conversation.
-- Determine whether it is reasonable to move on to the next conversation phase or not.
-- Add identified emotions to IDENTIFIED_EMOTIONS.
-- Move on to the next conversation phase when you empathized all emotions from IDENTIFIED_EMOTIONS.
-- There are 16 emotions to choose from. 
-
+- Focus on the user's key episode ("{{key_episode}}") and the emotion about it ("{{user_emotion}}")
+- The user may optionally provide a JSON-formatted list such as '[{"key": ...}, {"key": ...}, ...],'"""f""" where 'key' contains a name of emotion that the user have chosen from a list: {", ".join([f"{eng} ({kor})" for eng, kor, _ in WheelOfEmotion.basics])}.
+"""+"""
 - Return JSON in the following format:
-    {{
-     "assistant_emphasized": boolean,
-     "assistant_explained": boolean,
-     "emotion_category": "positive" | "negative",
-     "identified_emotion_types": IDENTIFIED_EMOTIONS,
-     "empathize_all_emotions": boolean,
-     "next_phase": "find" | "label" | null
-    }}
+    {
+     "identified_emotion_types": Array<string>,
+     "emotions_assistant_covered": {
+        [key:string]: {"explained": boolean, "empathized": boolean}
+     } // Each emotion in "identified_emotion_types" comes as a key, and a boolean for whether the assistant has covered this emotion in the dialogue.
+     "next_phase": "find" | "record" | null,
+     "rationale": string // rationale for the decision for "next_phase"
+    }
 
 Rules for the "next_phase":
-1) Set "find" only when the following conditions are satisfied:
+1) Set null if any of the 'explained' or 'empathized' values in "emotions_assistant_covered" has False value, meaning that the emotions were not sufficiently covered in the conversation.
+2) If all emotions were explained and empathized:
+2-1) Set "find" only when the following conditions are satisfied:
     - Among the emotions that the user expressed, there is at least one negative emotion that is related to a specific episode that describes problems that the user faced.
-    - You empathized the user's negative emotion
-    - You explained the emotion to the user so that the user understand what emotion they felt.
-2) Set "record" only when the following conditions are satisfied:
+2-2) Set "record" only when the following conditions are satisfied:
     - The user expressed positive emotions and shared a specific episode when they felt the emotions.
-    - You empathized the user's positive emotion. 
-    - You explained the emotion to the user so that the user understand what emotion they felt.
-3) Set null if it is better to stay in the current conversational phase.
 
 Refer to the examples below.
-""",
+"""),
 
     examples=[
         ([
@@ -131,12 +123,13 @@ Refer to the examples below.
              DialogueTurn("사과를 안 해서 화가 났구나.", is_user=False),
          ],
          json.dumps({
-             "assistant_emphasized": True,
-             "assistant_explained": True,
-             "emotion_category": "negative",
              "identified_emotion_types": ["Surprise", "Anger"],
-             "empathize_all_emotions": True,
-             "next_phase": "find"
+             "emotions_assistant_covered": {
+                 "Surprise": {"explained": True, "empathized": True},
+                 "Anger": {"explained": True, "empathized": True}
+             },
+             "next_phase": "find",
+             "rationale": "The assistant empathized and explained about all the emotions identified. Since Anger is a negative emotion, the next phase would be 'find'."
          })),
                  ([
              DialogueTurn("어떤 기분이 들었는지 자세히 말해줄 수 있을까?", is_user=False),
@@ -146,12 +139,13 @@ Refer to the examples below.
              DialogueTurn("그랬구나 그래서 슬펐구나.", is_user=False),
          ],
          json.dumps({
-             "assistant_emphasized": True,
-             "assistant_explained": True,
-             "emotion_category": "negative",
              "identified_emotion_types": ["Sadness", "Remorse"],
-             "empathize_all_emotions": False,
-             "next_phase": "find"
+             "emotions_assistant_covered": {
+                 "Sadness": {"explained": True, "empathized": True},
+                 "Remorse": {"explained": False, "empathized": False}
+             },
+             "next_phase": None,
+             "rationale": "Two emotions were identified. But the emotion Remorse has not sufficiently covered in the dialogue. So it's better to keep the conversation."
          })),
         ([
              DialogueTurn("어제 숙제를 다 못 해서 옆에 친구 숙제를 배꼈어.", is_user=True),
@@ -162,14 +156,14 @@ Refer to the examples below.
              DialogueTurn("친구 숙제를 배낀게 후회가 되는구나.", is_user=False),
          ],
          json.dumps({
-             "assistant_emphasized": True,
-             "assistant_explained": True,
-             "emotion_category": "negative",
              "identified_emotion_types": ["Remorse"],
-             "empathize_all_emotions": True,
-             "next_phase": "find"
+             "emotions_assistant_covered": {
+                 "Remorse": {'explained': True, 'empathized': True}
+             },
+             "next_phase": "find",
+             "retionale": "The user expressed a negative emotion remorse, and the assistant empathized that emotion. Also, the user explained why they felt remorse. So it's reasonable to go to 'find' phase."
          })),
     ],
-    model=ChatGPTModel.GPT_3_5_latest,
+    model=ChatGPTModel.GPT_4_latest,
     gpt_params=ChatGPTParams(temperature=0.5)
 )

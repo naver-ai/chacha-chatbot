@@ -24,8 +24,10 @@ summarizer = ChatGPTDialogueSummarizer(
     base_instruction="""
 - You are a helpful assistant that analyzes the content of the dialogue history.
 - Analyze the input dialogue and identify if the assistant had sufficient conversation about the sensitive topics.
-Follow this JSON format: {{
+Follow this JSON format: 
+{
   "sensitive_topic": boolean // true if the user expressed indication of self-harm, suicide, or death
+}
 """,
     model=ChatGPTModel.GPT_3_5_latest
 )

@@ -9,11 +9,13 @@ from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpec
 # Encourage the user to record the moments in which they felt positive emotions.
 def create_generator():
     return ChatGPTResponseGenerator(
-        base_instruction=convert_to_jinja_template("""
-- In the previous conversation, the user shared his/her episode ({{key_episode}}) and corresponding emotions ({{identified_emotion_types}}).
+        base_instruction=convert_to_jinja_template(f"""
+{PromptFactory.GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES}
 - Encourage the user to record the moments in which they felt positive emotions.
 - Explain why it is important to record such moments.
-""" + PromptFactory.get_speaking_rules_block()),
+
+{PromptFactory.get_speaking_rules_block()}
+"""),
     )
 
 summarizer = ChatGPTDialogueSummarizer(

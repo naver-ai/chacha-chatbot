@@ -51,14 +51,17 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
             )
         return generator
 
-    async def calc_next_state_info(self, current: EmotionChatbotPhase, dialog: Dialogue) -> tuple[
-                                   
-        #dialog = dialogue_utils.extract_last_turn_sequence(dialog, lambda turn: dict_utils.get_nested_value(turn.metadata, "state") == current or turn.is_user)
+    async def calc_next_state_info(self, current: EmotionChatbotPhase, dialog: Dialogue) -> tuple[EmotionChatbotPhase, dict | None] | None:
 
+        # dialog = dialogue_utils.extract_last_turn_sequence(dialog, lambda turn: dict_utils.get_nested_value(turn.metadata, "state") == current or turn.is_user)
+
+        if len(dialog) == 0:
+            return None
         # Check if the user expressed sensitive topics
         phase_suggestion = await help.summarizer.run(dialog)
         if "sensitive_topic" in phase_suggestion and phase_suggestion["sensitive_topic"] is True:
             return EmotionChatbotPhase.Help, None
+
         # Rapport --> Label
         if current == EmotionChatbotPhase.Rapport:
             # Minimum 3 rapport building conversation turns
@@ -72,7 +75,12 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
                     return None
         # Label --> Find OR Record
         elif current == EmotionChatbotPhase.Label:
-            phase_suggestion = await label.summarizer.run(dialog)
+            phase_suggestion = await label.summarizer.run(dialog, ChatGPTDialogSummarizerParams(instruction_params=dict(
+                                                        key_episode=self._get_memoized_payload(EmotionChatbotPhase.Rapport)[
+                                                                "key_episode"],
+                                                        user_emotion=self._get_memoized_payload(EmotionChatbotPhase.Rapport)[
+                                                                "user_emotion"],
+                                                    )))
             print(phase_suggestion)
             next_phase = dict_utils.get_nested_value(phase_suggestion, "next_phase")
             if next_phase == "find":

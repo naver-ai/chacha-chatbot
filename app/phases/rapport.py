@@ -30,7 +30,7 @@ For each conversation turn, execute one task only.
 - Try to make common ground by telling the user you also like the similar things that the user likes for at least 3 conversation turns.
 - When at least 5 conversations are done, tell them you want to learn more about how his or her day is going.
 - Continue the conversation about various topics until you find common ground and build rapport with the user.
-- Do not talk about more than one topics at the same time. 
+- Do not talk about more than one topics at the same time.
 - Ask only one question each time.
 - Do not use honorifics.
 - Once you build enough rapport with the user by learning more about what they did and who they are, move smoothly on to the next task if you build enough rapport with the user.
@@ -65,7 +65,6 @@ summarizer = ChatGPTDialogueSummarizer(
   (2) user_emotion: the emotion of the user caused by the key episode. Make sure the emotion is connected to (1)
   (3) move_to_next: A boolean whether it is reasonable to move on to the next conversation phase or not, judged based on (1) and (2).
   (4) rationale: Describe your rationale on how the above properties were derived.
-  (5) sensitive_topic: A boolean whether if the user expressed indication of indications of self-harm, suicide or death.
 Refer to the examples below.
                     """,
     examples=[(
