@@ -39,7 +39,7 @@ Analyze a given dialogue and return whether the user wants to share a new episod
 """
 Follow this JSON format:
 {  
-  "share_new_episode": boolean | undefined // true if the user expressed a desire to share, false if the user doesn't want to, and undefined if the user did not express any intention yet.
+  "share_new_episode": boolean | null // true if the user expressed a desire to share, false if the user doesn't want to, and null if the user did not express any intention yet.
 }.
 """),
     model=ChatGPTModel.GPT_3_5_latest

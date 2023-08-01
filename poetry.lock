@@ -289,7 +289,7 @@ yaspin = "^2.3.0"
 type = "git"
 url = "https://github.com/yghokim/chatlib.git"
 reference = "HEAD"
-resolved_reference = "eacf23f5cbf2a245bc14a5f185e1b83c20efd7b6"
+resolved_reference = "653dc6ee5dc978240b77fd1bae2a546bbfc89756"
 
 [[package]]
 name = "click"
