@@ -17,7 +17,7 @@ export const MessageView = (props: {
                 size={40}
                 name= {props.message.is_user ? sessionInfo?.name : "system"}
                 variant="beam"
-                colors={["#92A1C6", "#146A7C", "#F0AB3D", "#C271B4", "#C20D90"]}
+                colors={["#FD8A8A", "#F1F7B5", "#A8D1D1", "#9EA1D4", "#FAF3F0", "#D4E2D4", "#FFCACC", "#DBC4F0"]}
                 className="avatars"
             />
         </div>

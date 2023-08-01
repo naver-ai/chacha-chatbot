@@ -51,7 +51,7 @@ body {
     }
 
     .turn-container {
-        @apply px-2 py-4 flex flex-col scroll-m-2 snap-end;
+        @apply -mx-2 px-2 py-4 flex flex-col scroll-m-2 snap-end;
     }
 
     .turn-container .callout {
@@ -85,20 +85,20 @@ body {
     }
 
     .profilePic {
-        @apply shadow-lg rounded-full border-2 border-slate-400;
+        @apply shadow-xl rounded-full ring-1 ring-slate-400;
     }
 }
 
 .emolist {
-    @apply sticky mt-5 aria-disabled:pointer-events-none;
+    @apply sticky mt-5 aria-disabled:pointer-events-none mx-10;
 }
 
 .emolist > .emotion {
-    @apply mx-1 my-1.5 inline-block relative;
+    @apply mx-1 my-3 inline-block relative;
 }
 
 .emotion > input + label {
-    @apply h-auto py-1 cursor-pointer disabled:cursor-default;
+    @apply h-auto py-2 cursor-pointer disabled:cursor-default;
 }
 
 .emotion > input:checked + label, .emotion.view-only[aria-selected=true] {
@@ -110,9 +110,9 @@ body {
 }
 
 .emotion > label, .emotion.view-only {
-    @apply rounded-lg text-slate-500 font-medium border-slate-300 hover:bg-slate-200 border px-2 py-1 shadow-sm bg-slate-100 aria-disabled:pointer-events-none;
+    @apply rounded-lg text-slate-500 font-medium border-slate-300 hover:bg-slate-200 border px-2 py-1 drop-shadow-sm bg-slate-100 aria-disabled:pointer-events-none;
 }
 
 #submitEmotion {
-    @apply absolute rounded-lg font-bold px-2 py-1 shadow-lg;
+    @apply inline-block rounded-lg font-bold mx-1 my-4 px-4 py-1 shadow-lg text-lg;
 }
