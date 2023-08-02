@@ -77,6 +77,7 @@ f"""
 - If there are multiple emotions, empathize with each one from the user's choices.
 - If the user feels multiple emotions, ask the user how they feel each emotion.
 - If the user's key episode involves other people, ask the user about how the other people would feel.
+- Continue the conversation until all emotions that the user expressed are covered.
 
 """ + PromptFactory.get_speaking_rules_block()),
             special_tokens=[(EmotionChatbotSpecialTokens.EmotionSelect, "select_emotion", True)])
@@ -95,13 +96,13 @@ summarizer = ChatGPTDialogueSummarizer(
      "identified_emotion_types": Array<string>,
      "emotions_assistant_covered": {
         [key:string]: {"explained": boolean, "empathized": boolean}
-     } // Each emotion in "identified_emotion_types" comes as a key, and a boolean for whether the assistant has covered this emotion in the dialogue.
+     } // Each emotion in "identified_emotion_types" comes as a key, and a boolean for whether the assistant has empathized this emotion and identified the reason for the emotion in the dialogue.
      "next_phase": "find" | "record" | null,
      "rationale": string // rationale for the decision for "next_phase"
     }
 
 Rules for the "next_phase":
-1) Set null if any of the 'explained' or 'empathized' values in "emotions_assistant_covered" has False value, meaning that the emotions were not sufficiently covered in the conversation.
+1) Set null if any of the 'explained' or 'empathized' values in "emotions_assistant_covered" has False value, meaning that the emotions were not sufficiently covered or empathized in the conversation.
 2) If all emotions were explained and empathized:
 2-1) Set "find" only when the following conditions are satisfied:
     - Among the emotions that the user expressed, there is at least one negative emotion that is related to a specific episode that describes problems that the user faced.
