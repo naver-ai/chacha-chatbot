@@ -65,23 +65,23 @@ def create_generator():
 - Based on the previous dialog history about the user’s interests, ask them to elaborate more about their emotions and what makes them feel that way.
 - Only when they explicitly mention that they do not know how to describe their emotions or vaguely expressed their emotions (e.g., feels good/bad), tell the user that they can pick as many emotions as they feel at the moment.
 """
-                                                                               f"""
+f"""
     - When you ask the user to pick emotions, append a special token {EmotionChatbotSpecialTokens.EmotionSelect} at the end.
         - With the special token, the user will pick one or more emotions from the list of emotions: {", ".join([f"{eng} ({kor})" for eng, kor, _ in WheelOfEmotion.basics])}.
         - Do not mention the list of emotion words as they will be shown as GUI."""
-                                                                               """
-                                                                                       - The user's choices will be fed as a JSON list, in the format such as [{"key": ...}, {"key":"..."}, ...], where 'key's contain an emotion name.
-                                                                                   
-                                                                               - Focus on the user's key episode ("{{key_episode}}") and the emotion about it ("{{user_emotion}}"). 
-                                                                               - Use only Korean words for the emotions when you mention them in dialogue.
-                                                                               - Empathize the user's emotion by restating how they felt and share your own experience that is similar to the user's. 
-                                                                               - If there are multiple emotions, empathize with each one from the user's choices.
-                                                                               - If the user feels multiple emotions, ask the user how they feel each emotion.
-                                                                               - If the user's key episode involves other people, ask the user about how the other people would feel.
-                                                                               
-                                                                               """ + PromptFactory.get_speaking_rules_block()),
-                                    special_tokens=[
-                                        (EmotionChatbotSpecialTokens.EmotionSelect, "select_emotion", True)])
+"""
+        - The user's choices will be fed as a JSON list, in the format such as [{"key": ...}, {"key":"..."}, ...], where 'key's contain an emotion name.
+    
+- Focus on the user's key episode ("{{key_episode}}") and the emotion about it ("{{user_emotion}}"). 
+- Use only Korean words for the emotions when you mention them in dialogue.
+- Empathize the user's emotion by restating how they felt and share your own experience that is similar to the user's. 
+- If there are multiple emotions, empathize with each one from the user's choices.
+- If the user feels multiple emotions, ask the user how they feel each emotion.
+- If the user's key episode involves other people, ask the user about how the other people would feel.
+- Continue the conversation until all emotions that the user expressed are covered.
+
+""" + PromptFactory.get_speaking_rules_block()),
+            special_tokens=[(EmotionChatbotSpecialTokens.EmotionSelect, "select_emotion", True)])
 
 
 class LabelSummarizer(ChatGPTDialogueSummarizer):

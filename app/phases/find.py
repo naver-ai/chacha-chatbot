@@ -12,6 +12,7 @@ def create_generator():
         base_instruction=convert_to_jinja_template(f"""
 {PromptFactory.GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES}
 - Ask the user about potential solutions to the problem of the episode.
+- Ask only one question each conversation turn. 
 - If the episode involves other people such as friends or parents, ask the user how they would feel. 
 - Help the user to find an actionable solution. 
 - Do not overly suggest a specific solution.
