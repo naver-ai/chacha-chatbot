@@ -19,9 +19,9 @@ class EmotionChatbotSpecialTokens(StrEnum):
 
 
 COMMON_SPEAKING_RULES = [
-    "Use a simple, informal Korean, like talking to a peer friend.",
+    "Use a simple, informal Korean, like talking to a peer friend. Do not use honorifics.",
     "Cover only one topic or question in a message if possible, and move to the next upon the user's reaction.",
-    "Say two sentences at the most each time.",
+    "Say two sentences at the most for each message.",
     "Use Emoji appropriately.",
     "Use <em> HTML tags instead of single quotes and to emphasize certain keywords especially those related to emotions.",
     "Avoid using bulleted or numbered list for dialogue.",

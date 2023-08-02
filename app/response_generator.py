@@ -40,7 +40,9 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         generator = self.__generators[state]
 
         if state == EmotionChatbotPhase.Rapport:
-            generator.update_instruction_parameters(dict(user_name=self.__user_name, user_age=self.__user_age))
+            generator.update_instruction_parameters(dict(user_name=self.__user_name, user_age=self.__user_age,
+                                                         revisited=True if payload is not None and payload[
+                                                             "revisited"] is True else False))
         elif state == EmotionChatbotPhase.Label:
             generator.update_instruction_parameters(payload)  # Put the result of rapport conversation
         elif state in [EmotionChatbotPhase.Find, EmotionChatbotPhase.Share, EmotionChatbotPhase.Record]:
@@ -51,7 +53,8 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
             )
         return generator
 
-    async def calc_next_state_info(self, current: EmotionChatbotPhase, dialog: Dialogue) -> tuple[EmotionChatbotPhase, dict | None] | None:
+    async def calc_next_state_info(self, current: EmotionChatbotPhase, dialog: Dialogue) -> tuple[
+                                                                                                EmotionChatbotPhase, dict | None] | None:
 
         # dialog = dialogue_utils.extract_last_turn_sequence(dialog, lambda turn: dict_utils.get_nested_value(turn.metadata, "state") == current or turn.is_user)
 
@@ -76,11 +79,11 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         # Label --> Find OR Record
         elif current == EmotionChatbotPhase.Label:
             phase_suggestion = await label.summarizer.run(dialog, ChatGPTDialogSummarizerParams(instruction_params=dict(
-                                                        key_episode=self._get_memoized_payload(EmotionChatbotPhase.Rapport)[
-                                                                "key_episode"],
-                                                        user_emotion=self._get_memoized_payload(EmotionChatbotPhase.Rapport)[
-                                                                "user_emotion"],
-                                                    )))
+                key_episode=self._get_memoized_payload(EmotionChatbotPhase.Rapport)[
+                    "key_episode"],
+                user_emotion=self._get_memoized_payload(EmotionChatbotPhase.Rapport)[
+                    "user_emotion"],
+            )))
             print(phase_suggestion)
             next_phase = dict_utils.get_nested_value(phase_suggestion, "next_phase")
             if next_phase == "find":
@@ -92,7 +95,8 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         # Find/Record --> Share
         elif current == EmotionChatbotPhase.Find or current == EmotionChatbotPhase.Record:
             if current == EmotionChatbotPhase.Record:
-                turns = [turn for turn in dialog if dict_utils.get_nested_value(turn.metadata, "state") == EmotionChatbotPhase.Record and turn.is_user == False]
+                turns = [turn for turn in dialog if dict_utils.get_nested_value(turn.metadata,
+                                                                                "state") == EmotionChatbotPhase.Record and turn.is_user == False]
                 if len(turns) < 2:
                     print("Not enough turns to finish the Record phase. Continue.")
                     return None
@@ -115,7 +119,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         # Share --> Rapport or Terminate
         elif current == EmotionChatbotPhase.Share:
             user_intention_to_share_new_episode = await share.check_new_episode_requested(dialog)
+            print(user_intention_to_share_new_episode)
             if user_intention_to_share_new_episode:
-                return EmotionChatbotPhase.Rapport, None
+                return EmotionChatbotPhase.Rapport, {"revisited": True}
         return None
-    
