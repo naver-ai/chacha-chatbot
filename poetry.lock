@@ -269,7 +269,7 @@ files = [
 
 [[package]]
 name = "chatlib"
-version = "0.5.19"
+version = "0.5.20"
 description = "A generalizable Python Chatbot Library"
 optional = false
 python-versions = "^3.10"
@@ -289,7 +289,7 @@ yaspin = "^2.3.0"
 type = "git"
 url = "https://github.com/yghokim/chatlib.git"
 reference = "HEAD"
-resolved_reference = "c9c7dd4486d79bead3dd13e0b1de574d522434cf"
+resolved_reference = "83ffdf9769b88a96ae1725cf0ab1c24da7099459"
 
 [[package]]
 name = "click"

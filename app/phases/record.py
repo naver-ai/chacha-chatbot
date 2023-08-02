@@ -1,4 +1,4 @@
-from chatlib.chatbot.generators import ChatGPTResponseGenerator
+from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
 from chatlib.jinja_utils import convert_to_jinja_template
 from chatlib.mapper import ChatGPTDialogueSummarizer
 from chatlib.openai_utils import ChatGPTModel
@@ -30,5 +30,6 @@ Follow this JSON format: {
   "emotion_summary": String // One-line summary of each emotion that also includes why the user felt the emotion 
 }.
 """),
-    model=ChatGPTModel.GPT_3_5_latest
+    model=ChatGPTModel.GPT_3_5_latest,
+    dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(dialogue, 3)
 )

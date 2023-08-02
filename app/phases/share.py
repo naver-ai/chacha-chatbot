@@ -2,7 +2,7 @@ import json
 
 from chatlib import dialogue_utils, dict_utils
 from chatlib.chatbot import Dialogue
-from chatlib.chatbot.generators import ChatGPTResponseGenerator
+from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
 from chatlib.jinja_utils import convert_to_jinja_template
 from chatlib.mapper import ChatGPTDialogueSummarizer
 from chatlib.openai_utils import ChatGPTParams, ChatGPTModel
@@ -18,11 +18,12 @@ def create_generator():
 - Ask the user if they have already shared their emotions and the episode with their parents. 
 - If not, explain why it is important to share with them and encourage sharing.
 - If yes, praise them and ask what happened after sharing."""+"""
-- After the conversation about the key episode ({{key_episode}}),"""+f"""ask the user if the user would like to share another episode, and put a special token {EmotionChatbotSpecialTokens.NewEpisode} at the end of the question.
-  - If the user has nothing to share or byes, bye the user and append a special token {EmotionChatbotSpecialTokens.Terminate} at the end of the message.
-
-{PromptFactory.get_speaking_rules_block()}
-"""),
+- After the conversation about the key episode ({{key_episode}}),"""+f"""ask the user if the user would like to share another episode, and put a special token {EmotionChatbotSpecialTokens.NewEpisode} at the end of the question."""
+#"""  - If the user has nothing to share or byes, bye the user and append a special token {EmotionChatbotSpecialTokens.Terminate} at the end of the message."""
+"""
+        
+"""
++ PromptFactory.get_speaking_rules_block()),
         special_tokens=[
             (EmotionChatbotSpecialTokens.NewEpisode, "new_episode_requested", True),
             (EmotionChatbotSpecialTokens.Terminate, "terminate", True),
@@ -42,7 +43,8 @@ Follow this JSON format:
   "share_new_episode": boolean | null // true if the user expressed a desire to share, false if the user doesn't want to, and null if the user did not express any intention yet.
 }.
 """),
-    model=ChatGPTModel.GPT_3_5_latest
+    model=ChatGPTModel.GPT_3_5_latest,
+    dialogue_filter=lambda dialogue, params: StateBasedResponseGenerator.trim_dialogue_recent_n_states(dialogue, N=1)
 )
 
 async def check_new_episode_requested(dialogue: Dialogue)->bool | None:

@@ -1,6 +1,6 @@
 import json
 
-from chatlib.chatbot.generators import ChatGPTResponseGenerator
+from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
 from chatlib.jinja_utils import convert_to_jinja_template
 
 from app.common import PromptFactory
@@ -79,5 +79,6 @@ Refer to the examples below.
             'rationale': "We can proceed to the next phase since the key episode and user's emotion are identified."
         })
     )],
-    gpt_params=ChatGPTParams(temperature=0.1)
+    gpt_params=ChatGPTParams(temperature=0.1),
+    dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(dialogue, 1)
 )
