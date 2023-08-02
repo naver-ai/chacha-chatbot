@@ -43,7 +43,13 @@ export const IntroView = (props: {
     }, [getFieldState, setFocus])
 
     return <div className="flex flex-col justify-between h-screen">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col container-sm my-auto mx-auto">
+        <div className="my-auto mx-auto chachaContainer">
+            <div className="chachaTextBox">
+                <span>ChaCha</span>
+            </div>
+            <img src=""/>
+        </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col container-sm my-auto mx-auto introViewChat">
         <input {...register("user_name")} type="text" placeholder={"너의 이름은 뭐야? (성 빼고)"} 
         autoComplete="off"
         className=""

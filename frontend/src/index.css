@@ -14,10 +14,13 @@ body {
     -moz-osx-font-smoothing: grayscale;
     @apply text-gray-700 text-base font-semibold;
 }
-
 .background-panel {
     @apply bg-background;
     /*background: linear-gradient(121deg, rgb(233, 235, 237) 0%, rgb(214, 241, 232) 100%);*/
+}
+
+.introViewChat {
+    @apply bg-white px-5 py-7 rounded-2xl;
 }
 
 @layer components {
@@ -27,7 +30,7 @@ body {
     }
 
     .button-main{
-        @apply bg-gradient-to-r from-indigo-800 to-clova-blue p-3 py-1.5 rounded-md text-white shadow-md cursor-pointer hover:opacity-90 active:ring active:ring-clova-blue/50 disabled:opacity-50;
+        @apply bg-gradient-to-r from-indigo-500 to-violet-500 p-3 py-1.5 rounded-md text-white shadow-md cursor-pointer hover:opacity-90 active:ring active:ring-clova-blue/50 disabled:opacity-50;
     }
 
     .button-clear{
@@ -81,12 +84,39 @@ body {
     }
 
     .turn-container.user .callout {
-        @apply text-white bg-gradient-to-r mr-12 -mt-4 from-indigo-800 to-clova-blue rounded-tr-none border-[1px];
+        @apply text-black bg-violet-200/[.7] mr-12 -mt-4 rounded-tr-none border-[1px];
     }
 
     .profilePic {
-        @apply shadow-xl rounded-full ring-1 ring-slate-400;
+        @apply shadow-lg rounded-full ring-1 ring-slate-400;
     }
+
+    .introViewChat {
+        @apply  -mt-0.5 !important;
+    }
+
+    .chachaContainer {
+        @apply h-auto w-24 pt-16 pb-0 -mb-16 !important;
+    }
+
+    .chachaTextBox {
+        @apply mx-auto my-auto pb-4;
+    }
+
+    .chachaTextBox > span {
+        @apply -ml-4 my-auto text-4xl;
+        color: #9FA1D0;
+        font-family: Bradley Hand;
+        font-style: fantasy;
+    }
+
+    .chachaContainer > img {
+        content:url(../src/CHACHA.png);
+    }
+}
+
+a {
+  @apply text-blue-600 font-semibold;
 }
 
 .emolist {
