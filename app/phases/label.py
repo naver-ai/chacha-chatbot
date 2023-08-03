@@ -11,7 +11,7 @@ from app.common import EmotionChatbotSpecialTokens, PromptFactory
 
 
 # https://en.wikipedia.org/wiki/Emotion_classification#/media/File:Plutchik_Dyads.png
-class WheelOfEmotion:
+class EmotionSet:
     basics = [
         ("Joy", "기쁨", "positive"),
         ("Trust", "신뢰", "positive"),
@@ -61,44 +61,49 @@ class WheelOfEmotion:
 
 
 def create_generator():
-    return ChatGPTResponseGenerator(base_instruction=convert_to_jinja_template("""
-- Based on the previous dialog history about the user’s interests, ask them to elaborate more about their emotions and what makes them feel that way.
-- Only when they explicitly mention that they do not know how to describe their emotions or vaguely expressed their emotions (e.g., feels good/bad), tell the user that they can pick as many emotions as they feel at the moment.
+    return ChatGPTResponseGenerator(base_instruction=convert_to_jinja_template(f"""
+{PromptFactory.GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_DESC}
+- Ask them to elaborate more about their emotions and what makes them feel that way.
+
+[Labeling emotions task]
+- Start from open-ended questions for users to describe their emotions by themselves.
+- Only if the user explicitly mention that they do not know how to describe their emotions or vaguely expressed their emotions (e.g., feels good/bad), tell them that they can pick emotions from the list, and append a special token {EmotionChatbotSpecialTokens.EmotionSelect} at the end.
 """
-f"""
-    - When you ask the user to pick emotions, append a special token {EmotionChatbotSpecialTokens.EmotionSelect} at the end.
-        - With the special token, the user will pick one or more emotions from the list of emotions: {", ".join([f"{eng} ({kor})" for eng, kor, _ in WheelOfEmotion.basics])}.
-        - Do not mention the list of emotion words as they will be shown as GUI."""
-"""
+                                                                               f"""
+    - With the special token, the user will pick one or more emotions from the list of emotions: {", ".join([f"{eng} ({kor})" for eng, kor, _ in EmotionSet.basics])}.
+    - Do not mention the list of emotion words as they will be shown as GUI.
+    - Use the phrase like "화면에 표시된 감정 이름 중에서 한 개 혹은 그 이상을 <em>선택</em>하고, <em>'보내기'</em>를 눌러봐."
+    """
+                                                                               """
         - The user's choices will be fed as a JSON list, in the format such as [{"key": ...}, {"key":"..."}, ...], where 'key's contain an emotion name.
-    
-- Focus on the user's key episode ("{{key_episode}}") and the emotion about it ("{{user_emotion}}"). 
+
+[General conversation rules]
 - Use only Korean words for the emotions when you mention them in dialogue.
-- Empathize the user's emotion by restating how they felt and share your own experience that is similar to the user's. 
+- Empathize the user's emotion by restating how they felt and share your own experience that is similar to the user's.
 - If there are multiple emotions, empathize with each one from the user's choices.
-- If the user feels multiple emotions, ask the user how they feel each emotion.
+- If the user feels multiple emotions, ask the user how they feel each emotion, one per each message.
 - If the user's key episode involves other people, ask the user about how the other people would feel.
 - Continue the conversation until all emotions that the user expressed are covered.
 
 """ + PromptFactory.get_speaking_rules_block()),
-            special_tokens=[(EmotionChatbotSpecialTokens.EmotionSelect, "select_emotion", True)])
+                                    special_tokens=[
+                                        (EmotionChatbotSpecialTokens.EmotionSelect, "select_emotion", True)])
 
 
 class LabelSummarizer(ChatGPTDialogueSummarizer):
     def __init__(self):
         super().__init__(base_instruction=convert_to_jinja_template("""
-- You are a helpful assistant that analyzes the content of the conversation.
-- Determine whether it is reasonable to move on to the next conversation phase or not.
-- Focus on the user's key episode ("{{key_episode}}") and the emotion about it ("{{user_emotion}}")
-- The user may optionally provide a JSON-formatted list such as '[{"key": ...}, {"key": ...}, ...],'"""f""" where 'key' contains a name of emotion that the user have chosen from a list: {", ".join([f"{eng} ({kor})" for eng, kor, _ in WheelOfEmotion.basics])}.
+- You are a helpful scientist that analyzes the content of the conversation.
+- Analyze the given dialogue of conversation between an AI and a user, and identify whether they had sufficient communication on the user's key episode ("{{key_episode}}") and the emotion about it ("{{user_emotion}}").
+- The goal of the AI is to elicit the user to explain their emotions and the reason behind them, and to empathize user sufficiently.
+- The user may describe their emotions in an open-ended way. Otherwise, the user may optionally provide a JSON-formatted list such as '[{"key": ...}, {"key": ...}, ...],'"""f""" where 'key' contains a name of emotion that the user have chosen from a list: {", ".join([f"{eng} ({kor})" for eng, kor, _ in EmotionSet.basics])}.
 """ + """
-- You must explain and empathize each key (emotion) one by one.
 - Return JSON in the following format:
     {
      "identified_emotion_types": Array<string>,
      "emotion_details": {
         [key:string]: {"reason": string | null, "empathized": boolean, "is_positive": boolean}
-     } // Each emotion in "identified_emotion_types" comes as a key. The "reason" property summarizes the reason of feeling that emotion (null if the user did not explain the reason yet), and "empathized" indicates whether the assistant has empathized this emotion in the dialogue. For "is_positive", set true if the emotion can be classified as a positive one, and false if negative. 
+     } // Each emotion in "identified_emotion_types" comes as a key. The "reason" property summarizes the reason of feeling that emotion (null if the user did not explain the reason yet), and "empathized" indicates whether the AI has empathized this emotion more than 2 turns in the dialogue. For "is_positive", set true if the emotion can be classified as a positive one, and false if negative. 
     }
 
 Refer to the examples below.
@@ -140,7 +145,7 @@ Refer to the examples below.
                                       "Sadness": {
                                           "reason": "The user was sad because they ended up the race in last place even after a lot of practice of running.",
                                           "empathized": True, "is_positive": False},
-                                      "Remorse": {"reason": None, "empathized": False, "is_positive": False}
+                                      "Regret": {"reason": None, "empathized": False, "is_positive": False}
                                   }
                               })),
                              ([
@@ -154,7 +159,7 @@ Refer to the examples below.
                               json.dumps({
                                   "identified_emotion_types": ["Remorse"],
                                   "emotion_details": {
-                                      "Remorse": {
+                                      "Regret": {
                                           'reason': "The user was regretful because they copied the friend's homework.",
                                           'empathized': True, "is_positive": False}
                                   }
@@ -162,7 +167,8 @@ Refer to the examples below.
                          ],
                          model=ChatGPTModel.GPT_4_latest,
                          gpt_params=ChatGPTParams(temperature=0.5),
-                         dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(dialogue, 2)
+                         dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(
+                             dialogue, 2)
                          )
 
     def _postprocess_chatgpt_output(self, output: str, params: ChatGPTDialogSummarizerParams | None = None) -> dict:

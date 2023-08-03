@@ -41,4 +41,5 @@ class PromptFactory:
 General Speaking rules:
 {stringify_list(COMMON_SPEAKING_RULES, ordered=True)}"""
 
+    GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_DESC = "- In the previous conversation, the user shared his/her episode ({{key_episode}}) and corresponding emotion ({{user_emotion}})."
     GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES = "- In the previous conversation, the user shared his/her episode ({{key_episode}}) and corresponding emotions ({{identified_emotion_types}})."
