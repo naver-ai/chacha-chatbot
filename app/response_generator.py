@@ -4,20 +4,20 @@ from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedRespo
 from chatlib.mapper import ChatGPTDialogSummarizerParams
 
 from app.common import EmotionChatbotPhase
-from app.phases import rapport, label, find, record, share, help
+from app.phases import explore, label, find, record, share, help
 
 
 class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbotPhase]):
 
     def __init__(self, user_name: str | None = None, user_age: int = None, verbose: bool = False):
-        super().__init__(initial_state=EmotionChatbotPhase.Rapport, verbose=verbose)
+        super().__init__(initial_state=EmotionChatbotPhase.Explore, verbose=verbose)
 
         self.__user_name = user_name
         self.__user_age = user_age
 
         self.__generators: dict[EmotionChatbotPhase, ChatGPTResponseGenerator] = dict()
 
-        self.__generators[EmotionChatbotPhase.Rapport] = rapport.create_generator()
+        self.__generators[EmotionChatbotPhase.Explore] = explore.create_generator()
         self.__generators[EmotionChatbotPhase.Label] = label.create_generator()
         self.__generators[EmotionChatbotPhase.Find] = find.create_generator()
         self.__generators[EmotionChatbotPhase.Record] = record.create_generator()
@@ -39,7 +39,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         # Get generator caches
         generator = self.__generators[state]
 
-        if state == EmotionChatbotPhase.Rapport:
+        if state == EmotionChatbotPhase.Explore:
             generator.update_instruction_parameters(dict(user_name=self.__user_name, user_age=self.__user_age,
                                                          revisited=True if payload is not None and payload[
                                                              "revisited"] is True else False))
@@ -47,7 +47,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
             generator.update_instruction_parameters(payload)  # Put the result of rapport conversation
         elif state in [EmotionChatbotPhase.Find, EmotionChatbotPhase.Share, EmotionChatbotPhase.Record]:
             generator.update_instruction_parameters(
-                dict(key_episode=self._get_memoized_payload(EmotionChatbotPhase.Rapport)["key_episode"],
+                dict(key_episode=self._get_memoized_payload(EmotionChatbotPhase.Explore)["key_episode"],
                      identified_emotion_types=", ".join(
                          self._get_memoized_payload(EmotionChatbotPhase.Label)["identified_emotion_types"]))
             )
@@ -65,11 +65,11 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         if "sensitive_topic" in phase_suggestion and phase_suggestion["sensitive_topic"] is True:
             return EmotionChatbotPhase.Help, None
 
-        # Rapport --> Label
-        if current == EmotionChatbotPhase.Rapport:
+        # Explore --> Label
+        if current == EmotionChatbotPhase.Explore:
             # Minimum 3 rapport building conversation turns
             if len(dialog) > 3:
-                phase_suggestion = await rapport.summarizer.run(dialog)
+                phase_suggestion = await explore.summarizer.run(dialog)
                 print(phase_suggestion)
                 # print(f"Phase suggestion: {phase_suggestion}")
                 if "move_to_next" in phase_suggestion and phase_suggestion["move_to_next"] is True:
@@ -79,9 +79,9 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         # Label --> Find OR Record
         elif current == EmotionChatbotPhase.Label:
             phase_suggestion = await label.summarizer.run(dialog, ChatGPTDialogSummarizerParams(instruction_params=dict(
-                key_episode=self._get_memoized_payload(EmotionChatbotPhase.Rapport)[
+                key_episode=self._get_memoized_payload(EmotionChatbotPhase.Explore)[
                     "key_episode"],
-                user_emotion=self._get_memoized_payload(EmotionChatbotPhase.Rapport)[
+                user_emotion=self._get_memoized_payload(EmotionChatbotPhase.Explore)[
                     "user_emotion"],
             )))
             print(phase_suggestion)
@@ -106,7 +106,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
                                                     ChatGPTDialogSummarizerParams(
                                                         instruction_params=dict(
                                                             key_episode=
-                                                            self._get_memoized_payload(EmotionChatbotPhase.Rapport)[
+                                                            self._get_memoized_payload(EmotionChatbotPhase.Explore)[
                                                                 "key_episode"],
                                                             identified_emotion_types=", ".join(
                                                                 self._get_memoized_payload(EmotionChatbotPhase.Label)[
@@ -116,10 +116,10 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
                 return EmotionChatbotPhase.Share, phase_suggestion
             else:
                 return None
-        # Share --> Rapport or Terminate
+        # Share --> Explore or Terminate
         elif current == EmotionChatbotPhase.Share:
             user_intention_to_share_new_episode = await share.check_new_episode_requested(dialog)
             print(user_intention_to_share_new_episode)
             if user_intention_to_share_new_episode:
-                return EmotionChatbotPhase.Rapport, {"revisited": True}
+                return EmotionChatbotPhase.Explore, {"revisited": True}
         return None

@@ -9,7 +9,7 @@ from chatlib.mapper import ChatGPTDialogueSummarizer
 from chatlib.openai_utils import ChatGPTParams
 
 # Build rapport with the user. Ask about the most memorable episode. Ask about what happened and what the user felt.
-class RapportGenerator(ChatGPTResponseGenerator):
+class ExploreGenerator(ChatGPTResponseGenerator):
     def __init__(self):
         super().__init__(
             base_instruction=convert_to_jinja_template("""
@@ -49,7 +49,7 @@ For each conversation turn, execute one task only.
 
 
 def create_generator():
-    return RapportGenerator()
+    return ExploreGenerator()
 
 
 summarizer = ChatGPTDialogueSummarizer(

@@ -4,7 +4,7 @@ from app.prompt_builder import PromptBuilder
 
 
 class EmotionChatbotPhase(StrEnum):
-    Rapport = "rapport"
+    Explore = "rapport"
     Label = "label"
     Find = "find"
     Record = "record"
