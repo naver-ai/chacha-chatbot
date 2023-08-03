@@ -140,7 +140,7 @@ Refer to the examples below.
                                   DialogueTurn("그랬구나 그래서 슬펐구나.", is_user=False),
                               ],
                               json.dumps({
-                                  "identified_emotion_types": ["Sadness", "Remorse"],
+                                  "identified_emotion_types": ["Sadness", "Regret"],
                                   "emotion_details": {
                                       "Sadness": {
                                           "reason": "The user was sad because they ended up the race in last place even after a lot of practice of running.",
@@ -157,7 +157,7 @@ Refer to the examples below.
                                   DialogueTurn("친구 숙제를 배낀게 후회가 되는구나.", is_user=False),
                               ],
                               json.dumps({
-                                  "identified_emotion_types": ["Remorse"],
+                                  "identified_emotion_types": ["Regret"],
                                   "emotion_details": {
                                       "Regret": {
                                           'reason': "The user was regretful because they copied the friend's homework.",
