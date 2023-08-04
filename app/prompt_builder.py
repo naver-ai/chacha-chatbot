@@ -43,5 +43,6 @@ class PromptBuilder:
         return self._separator.join(
             [self._block_dict[name].content for name in self._block_names if self._block_dict[name].show == True])
 
+
     def copy(self) -> 'PromptBuilder':
         return copy.deepcopy(self)

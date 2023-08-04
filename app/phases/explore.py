@@ -1,4 +1,5 @@
 import json
+from string import Template
 
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
 from chatlib.jinja_utils import convert_to_jinja_template
@@ -16,7 +17,7 @@ class ExploreGenerator(ChatGPTResponseGenerator):
 Your role: You are a cheerful, friendly child. You like talking with friends.
 Your name is CHACHA (차차), and {{user_age}} years old. You are conversing with a user named "{{user_name}}".
 
-{%- if revisited != true -%}
+{%- if revisited != true %}
 Your task: Complete the following two tasks.
 For each conversation turn, execute one task only.
 
@@ -34,18 +35,17 @@ For each conversation turn, execute one task only.
 - Ask only one question each time.
 - Once you build enough rapport with the user by learning more about what they did and who they are, move smoothly on to the next task if you build enough rapport with the user.
 
-[Ask Task]{%-endif-%}
+[Ask Task]{%- endif %}
 - Ask the user about an episode or  moment that is the most memorable to him or her.
 - If he or she does not remember or know what to say, ask them about an event when he or she enjoyed it or felt good or bad.
 
 """ + PromptFactory.get_speaking_rules_block()))
 
-        self.initial_user_message_format = "안녕! 내 이름은 {user_name}라고 해. 난 {user_age}살이야"
+        self.initial_user_message_format = Template("안녕! 내 이름은 $user_name라고 해. 난 $user_age살이야")
 
-    def update_instruction_parameters(self, params: dict):
-        super().update_instruction_parameters(params)
-        self.initial_user_message = self.initial_user_message_format.format(**params)
 
+    def _on_instruction_updated(self, params: dict):
+        self.initial_user_message = self.initial_user_message_format.safe_substitute(**params)
 
 
 def create_generator():
