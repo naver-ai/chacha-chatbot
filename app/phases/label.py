@@ -1,4 +1,5 @@
 import json
+from os import getcwd, path
 
 from chatlib.chatbot import DialogueTurn, RegenerateRequestException
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
@@ -9,55 +10,16 @@ from chatlib.openai_utils import ChatGPTParams, ChatGPTModel
 
 from app.common import EmotionChatbotSpecialTokens, PromptFactory
 
-
-# https://en.wikipedia.org/wiki/Emotion_classification#/media/File:Plutchik_Dyads.png
-class EmotionSet:
-    basics = [
-        ("Joy", "기쁨", "positive"),
-        ("Trust", "신뢰", "positive"),
-        ("Surprise", "놀람", "positive"),
-        ("Anticipation", "기대", "positive"),
-        ("Fear", "두려움", "negative"),
-        ("Sadness", "슬픔", "negative"),
-        ("Disgust", "불쾌함", "negative"),
-        ("Anger", "화남", "negative"),
-        ("Optimism", "낙관", "positive"),
-        ("Love", "사랑", "positive"),
-        ("Submission", "굴복감", "negative"),
-        ("Awe", "경외감", "positive"),
-        ("Disapproval", "못마땅함", "negative"),
-        ("Remorse", "후회", "negative"),
-        ("Contempt", "경멸", "negative"),
-        ("Aggressiveness", "공격성", "negative")
-    ]
+emotion_list = None
 
 
-# combinations = [
-# ("Anticipation", "Joy", ("Optimism", "낙관")),
-# ("Joy", "Trust", ("Love", "사랑")),
-# ("Trust", "Fear", ("Submission", "굴복감")),
-# ("Fear", "Surprise", ("Awe", "경외감")),
-# ("Surprise", "Sadness", ("Disapproval", "못마땅함")),
-# ("Sadness", "Disgust", ("Remorse", "후회")),
-# ("Disgust", "Anger", ("Contempt", "경멸")),
-# ("Anger", "Anticipation", ("Aggressiveness", "공격성"))
-# ("Joy", "Fear", ("Guilt", "죄책감")),
-# ("Fear", "Sadness", ("Despair", "절망감")),
-# ("Sadness", "Anger", ("Envy", "질투심")),
-# ("Anger", "Joy", ("Pride", "자존심")),
-# ("Trust", "Surprise", ("Curiosity", "호기심")),
-# ("Surprise", "Disgust", ("Unbelief", "불신")),
-# ("Disgust", "Anticipation", ("Cynicism", "냉소적임")),
-# ("Anticipation", "Trust", ("Hope", "희망감")),
-# ("Joy", "Surprise", ("Delight", "큰 기쁨")),
-# ("Surprise", "Anger", ("Outrage", "격분함")),
-# ("Anger", "Trust", ("Dominance", "우월감")),
-# ("Trust", "Sadness", ("Sentimentality", "감상에 잠긴")),
-# ("Sadness", "Anticipation", ("Pessimism", "비관적")),
-# ("Anticipation", "Fear", ("Anxiety", "불안함")),
-# ("Fear", "Disgust", ("Shame", "부끄러움")),
-# ("Disgust", "Joy", ("Morbidness", "소름끼침"))
-# ]
+def _get_emotion_list() -> list[dict]:
+    global emotion_list
+    if emotion_list is None:
+        with open(path.join(getcwd(), "app/emotions.json")) as f:
+            emotion_list = json.load(f)
+
+    return emotion_list
 
 
 def create_generator():
@@ -70,7 +32,7 @@ def create_generator():
 - Only if the user explicitly mention that they do not know how to describe their emotions or vaguely expressed their emotions (e.g., feels good/bad), tell them that they can pick emotions from the list, and append a special token {EmotionChatbotSpecialTokens.EmotionSelect} at the end.
 """
                                                                                f"""
-    - With the special token, the user will pick one or more emotions from the list of emotions: {", ".join([f"{eng} ({kor})" for eng, kor, _ in EmotionSet.basics])}.
+    - With the special token, the user will pick one or more emotions from the list of emotions: {", ".join([f"{emotion['en']} ({emotion['kr']})" for emotion in _get_emotion_list()])}.
     - Do not mention the list of emotion words as they will be shown as GUI.
     - Use the phrase like "화면에 표시된 감정 이름 중에서 한 개 혹은 그 이상을 <em>선택</em>하고, <em>'보내기'</em>를 눌러봐."
     """
@@ -103,13 +65,14 @@ def create_generator():
                                         (EmotionChatbotSpecialTokens.EmotionSelect, "select_emotion", True)])
 
 
+
 class LabelSummarizer(ChatGPTDialogueSummarizer):
     def __init__(self):
         super().__init__(base_instruction=convert_to_jinja_template("""
 - You are a helpful scientist that analyzes the content of the conversation.
 - Analyze the given dialogue of conversation between an AI and a user, and identify whether they had sufficient communication on the user's key episode ("{{key_episode}}") and the emotion about it ("{{user_emotion}}").
 - The goal of the AI is to elicit the user to explain their emotions and the reason behind them, and to empathize user sufficiently.
-- The user may describe their emotions in an open-ended way. Otherwise, the user may optionally provide a JSON-formatted list such as '[{"key": ...}, {"key": ...}, ...],'"""f""" where 'key' contains a name of emotion that the user have chosen from a list: {", ".join([f"{eng} ({kor})" for eng, kor, _ in EmotionSet.basics])}.
+- The user may describe their emotions in an open-ended way. Otherwise, the user may optionally provide a JSON-formatted list such as '[{"key": ...}, {"key": ...}, ...],'"""f""" where 'key' contains a name of emotion that the user have chosen from a list: {", ".join([f"{em['en']} ({em['kr']})" for em in _get_emotion_list()])}.
 """ + """
 - Return JSON in the following format:
     {

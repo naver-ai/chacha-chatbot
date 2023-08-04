@@ -47,7 +47,7 @@ const EmotionSelectionView = (props: { selected: Array<string> }) => {
     return <div className="emolist">
         {
             EMOTION_LIST.map(em => {
-                return <span className="emotion view-only" aria-disabled={true} aria-selected={props.selected.indexOf(em.key) >= 0} key={em.key}>{em.label}</span>
+                return <span className="emotion view-only" aria-disabled={true} aria-selected={props.selected.indexOf(em.en) >= 0} key={em.en}>{em.kr} {em.emoji}</span>
             })
         }      
     </div>

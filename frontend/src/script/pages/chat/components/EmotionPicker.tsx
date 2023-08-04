@@ -43,10 +43,10 @@ export const EmotionPicker = (props: { messageId: EntityId, disabled?: boolean }
     return <form className="emolist" onSubmit={handleSubmit(onSubmit)} aria-disabled={props.disabled}>
         {
             EMOTION_LIST.map(em => {
-                const id = props.messageId + "_" + em.key
-                return <span className="emotion" key={em.key}>
-                    <input type="checkbox" disabled={props.disabled} id={id} {...register(`emotions.${em.key}` as any)} />
-                    <label htmlFor={id}>{em.label}</label>
+                const id = props.messageId + "_" + em.en
+                return <span className="emotion" key={em.en}>
+                    <input type="checkbox" disabled={props.disabled} id={id} {...register(`emotions.${em.en}` as any)} />
+                    <label htmlFor={id}>{em.kr} {em.emoji}</label>
                 </span>
             })
         }
