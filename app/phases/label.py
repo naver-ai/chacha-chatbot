@@ -84,7 +84,7 @@ def create_generator():
 {% if emotion_without_reason is not none %}
   - However, {{emotion_without_reason.emotion}} needs more explanation. Therefore, elicit the user to explain the reason of feeling {{emotion_without_reason.emotion}}. 
 {% else %}
-{%- set emotion_without_empathy = summarizer_result.identified_emotions | selectattr("empathized", False) | first | default(None) -%}
+{%- set emotion_without_empathy = summarizer_result.identified_emotions | selectattr("empathized", false) | first | default(None) -%}
 {% if emotion_without_empathy is not none %}
 - However, you have not empathized with the user's {{emotion_without_empathy.emotion}}. Theretore, empathize with the user's emotion, "{{emotion_without_empathy.emotion}} more explicitly."{% endif %}
 {% endif %}
@@ -117,7 +117,8 @@ class LabelSummarizer(ChatGPTDialogueSummarizer):
         {
             "name": string, // name of emotion
             "reason": string | null, // summarizes the reason of feeling that emotion (null if the user did not explain the reason yet)
-            "empathized": boolean, // whether the AI has empathized this emotion more than 2 turns in the dialogue.
+            "ai_empathy": string | null, // how the AI has commented on this emotion.
+            "empathized": boolean, // whether the AI has commented on this emotion by explicitly .
             "is_positive": boolean // true if the emotion can be classified as a positive one, and false if negative.
         }
      > 
@@ -140,10 +141,16 @@ Refer to the examples below.
                               ],
                               json.dumps({
                                   "identified_emotions": [
-                                      {"emotion": "Surprise", "reason": "The user suddenly heard a loud noise beside.",
-                                                   "empathized": True, "is_positive": True},
-                                      {"emotion": "Anger", "reason": "The user felt angry because the friend kept making noise without apology.",
-                                          "empathized": False, "is_positive": False}
+                                      {
+                                          "emotion": "Surprise",
+                                          "reason": "The user suddenly heard a loud noise beside.",
+                                          "empathized": True,
+                                          "ai_empathy": "The AI empathized by saying like \"그랬구나 놀라고 화가 많이 났구나\" or \"그랬구나 그래서 놀랐구나.\".",
+                                          "is_positive": True},
+                                      {"emotion": "Anger",
+                                       "reason": "The user felt angry because the friend kept making noise without apology.",
+                                       "ai_empathy": None,
+                                       "empathized": False, "is_positive": False}
                                   ],
                               })),
                              ([
@@ -151,13 +158,18 @@ Refer to the examples below.
                                   DialogueTurn("슬프고 후회돼", is_user=True),
                                   DialogueTurn("그랬구나 슬프고 후회됐구나. 어떤 상황이 슬펐어?", is_user=False),
                                   DialogueTurn("달리기 연습을 많이 했는데 넘어져서 꼴등을 한게 슬퍼", is_user=True),
-                                  DialogueTurn("그랬구나,꼴찌를 해서 슬픈 거였구나.", is_user=False),
+                                  DialogueTurn("그랬구나, 꼴찌를 해서 슬픈 거였구나.", is_user=False),
                               ],
                               json.dumps({
                                   "identified_emotions": [
-                                      {"emotion": "Sadness", "reason": "The user was sad because they ended up the race in last place even after a lot of practice of running.",
-                                          "empathized": True, "is_positive": False},
-                                      {"emotion": "Regret", "reason": None, "empathized": False, "is_positive": False}]
+                                      {
+                                          "emotion": "Sadness",
+                                          "reason": "The user was sad because they ended up the race in last place even after a lot of practice of running.",
+                                          "empathized": True,
+                                          "ai_empathy": "The AI empathized with the user's sadness by saying like \"그랬구나, 꼴찌를 해서 슬픈 거였구나.\"",
+                                          "is_positive": False},
+                                      {"emotion": "Regret", "reason": None, "empathized": False, "ai_empathy": None,
+                                       "is_positive": False}]
                               })),
                              ([
                                   DialogueTurn("어제 숙제를 다 못 해서 옆에 친구 숙제를 배꼈어.", is_user=True),
@@ -167,8 +179,10 @@ Refer to the examples below.
                                   DialogueTurn("뭔가 후회돼", is_user=True),
                               ],
                               json.dumps({
-                                  "identified_emotions": [{"emotion": "Regret", 'reason': "The user was regretful because they copied the friend's homework.",
-                                          'empathized': False, "is_positive": False}]
+                                  "identified_emotions": [{"emotion": "Regret",
+                                                           'reason': "The user was regretful because they copied the friend's homework.",
+                                                           'empathized': False, "ai_empathy": None,
+                                                           "is_positive": False}]
                               })),
                          ],
                          model=ChatGPTModel.GPT_4_latest,
