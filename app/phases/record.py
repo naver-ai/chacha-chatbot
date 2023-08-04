@@ -22,7 +22,8 @@ def create_generator():
 summarizer = ChatGPTDialogueSummarizer(
     base_instruction=convert_to_jinja_template("""
 - You are a helpful assistant that analyzes the content of the dialogue history.
-- The dialogue is between a child user and an assistant regarding the key episode ({{key_episode}}) and corresponding emotions ({{identified_emotion_types}}).
+"""+
+PromptFactory.SUMMARIZER_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES + """
 - The assistant in the dialogue is encouraging the user to record the moments in which they felt positive emotions.
 - Analyze the input dialogue and identify if the assistant had sufficient conversation about the recording.
 Follow this JSON format: {

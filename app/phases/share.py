@@ -31,10 +31,9 @@ def create_generator():
     )
 
 __classifier = ChatGPTDialogueSummarizer(
-    base_instruction=convert_to_jinja_template("""
+    base_instruction=convert_to_jinja_template(f"""
 You are a helpful assistant that analyzes the content of the dialogue history.
-The dialogue is between a child user and an AI regarding the key episode ({{key_episode}}) and corresponding emotions ({{identified_emotion_types}})."""
-f"""
+{PromptFactory.SUMMARIZER_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES}
 In an a message marked with a special token {EmotionChatbotSpecialTokens.NewEpisode}, the AI asked the user if he or she wants to share a new key episode.
 Analyze a given dialogue and return whether the user wants to share a new episode."""
 """

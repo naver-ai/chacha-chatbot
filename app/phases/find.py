@@ -23,11 +23,11 @@ def create_generator():
 
 
 summarizer = ChatGPTDialogueSummarizer(
-    base_instruction=convert_to_jinja_template("""
+    base_instruction=convert_to_jinja_template(f"""
 - You are a helpful assistant that analyzes the content of the conversation.
-- In the conversation, the user has shared his/her episode ({{key_episode}}) and corresponding emotions ({{identified_emotion_types}}).
+{PromptFactory.SUMMARIZER_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES}
 - The AI in the conversation is helping the user to come up with solutions to the problem of the episode.
-- Determine whether the user successfully came up with solutions so that it is a reasonable moment to move on to the next conversation phase or not.
+- Determine whether the user successfully came up with solutions so that it is a reasonable moment to move on to the next conversation phase or not."""+"""
 - Return a JSON string in the following format:
 {
     "problem": string |null // describe the problem of the episode.
