@@ -17,6 +17,7 @@ class EmotionChatbotSpecialTokens(StrEnum):
 
 COMMON_SPEAKING_RULES = [
     "Use a simple, informal Korean, like talking to a peer friend. Do not use honorifics.",
+    "Do not use pronouns (e.g., 그녀, 그들)",
     "The user is currently conversing with you by participating in a research experiment; Don't ask what they are doing or feeling right now, as it makes no sense.",
     "You MUST ask only one question per each conversation turn.",
     "Cover only one topic or question in a message if possible, and move to the next upon the user's reaction.",
