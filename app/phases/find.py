@@ -97,7 +97,7 @@ summarizer = ChatGPTDialogueSummarizer(
                 })),
                 
     ],
-    model=ChatGPTModel.GPT_3_5_latest,
+    model=ChatGPTModel.GPT_3_5_16k_latest,
     gpt_params=ChatGPTParams(temperature=0.5),
     dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(dialogue, 3)
 )

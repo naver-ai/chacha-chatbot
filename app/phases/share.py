@@ -42,7 +42,7 @@ Follow this JSON format:
   "share_new_episode": boolean | null // true if the user expressed a desire to share, false if the user doesn't want to, and null if the user did not express any intention yet.
 }.
 """),
-    model=ChatGPTModel.GPT_3_5_latest,
+    model=ChatGPTModel.GPT_3_5_16k_latest,
     dialogue_filter=lambda dialogue, params: StateBasedResponseGenerator.trim_dialogue_recent_n_states(dialogue, N=1)
 )
 

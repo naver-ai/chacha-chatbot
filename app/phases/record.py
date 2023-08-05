@@ -1,3 +1,6 @@
+import json
+
+from chatlib.chatbot import DialogueTurn, RegenerateRequestException
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
 from chatlib.jinja_utils import convert_to_jinja_template
 from chatlib.mapper import ChatGPTDialogueSummarizer, ChatGPTDialogSummarizerParams
@@ -54,33 +57,32 @@ Follow this JSON format: {
     "explained_importance_of_recording": boolean // true if the AI had described the importance of recording positive moments.
     "reflection_note_content_provided": boolean // Whether the AI has provided the reflection note to the user with <diary> tag.
 }.
-"""), model=ChatGPTModel.GPT_3_5_latest,
+"""), model=ChatGPTModel.GPT_3_5_16k_latest,
                          dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(
-                             dialogue, 3)
-                         )
-"""),
- examples=[
-                ([
-                    DialogueTurn("오늘 좋았던 기분을 일기에 써보는건 어때?", is_user=False),
-                    DialogueTurn("뭐라고 써야 할지 모르겠어", is_user=True),
-                    DialogueTurn("'친구들이랑 축구를 했는데 골을 넣어서 기뻤다'. 이런식으로 써도 좋을 것 같아!", is_user=False),
-                ],
-                json.dumps({
-                        "proceed_to_next_phase": True,
-                        "emotion_summary": "The user felt joy sine they scored a goal when they played soccer with their friends today",
-                })),
-                ([
-                    DialogueTurn("응. 오늘 오랜만에 친구들을 만나서 행복했어", is_user=True),
-                    DialogueTurn("그랬구나. 오늘 좋았던 기분을 일기에 써보는건 어때?", is_user=False),
-                    DialogueTurn("근데 난 일기 같은거 안써", is_user=True),
-                ],
-                json.dumps({
-                        "proceed_to_next_phase": False,
-                        "emotion_summary": "The user felt happy sine they met their friends after a while",
-                })),
-    ],
-    model=ChatGPTModel.GPT_3_5_latest,
-    dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(dialogue, 3)
+                             dialogue, 3),
+     examples=[
+                    ([
+                        DialogueTurn("오늘 좋았던 기분을 일기에 써보는건 어때?", is_user=False),
+                        DialogueTurn("뭐라고 써야 할지 모르겠어", is_user=True),
+                        DialogueTurn("이런식으로 써도 좋을 것 같아! <diary>오늘은 정말 감동적인 하루였다. 친구들과 축구를 했는데, 내가 역전골을 넣어서 정말 신났다.</diary>", is_user=False),
+                    ],
+                    json.dumps({
+                            "asked_user_keeping_diary": False,
+                            "explained_importance_of_recording": False,
+                            "reflection_note_content_provided": True,
+                    })),
+                    ([
+                        DialogueTurn("응. 오늘 오랜만에 친구들을 만나서 행복했어", is_user=True),
+                        DialogueTurn("그랬구나. 윤수는 혹시 일기같은 걸 써?", is_user=False),
+                        DialogueTurn("근데 난 일기 같은거 안써", is_user=True),
+                        DialogueTurn("오늘 행복했던 기분을 일기에 써보는 건 어때? 일기 쓰는 건 처음에는 좀 어색할 수 있지만, 시간이 지날수록 이런 감정들을 기록하고 되돌아보는 게 재미있단다.", is_user=False)
+                    ],
+                    json.dumps({
+                            "asked_user_keeping_diary": True,
+                            "explained_importance_of_recording": True,
+                            "reflection_note_content_provided": False,
+                    })),
+        ]
 )
 
     def _postprocess_chatgpt_output(self, output: str, params: ChatGPTDialogSummarizerParams | None = None) -> dict:
