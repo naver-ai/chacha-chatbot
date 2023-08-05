@@ -1,16 +1,24 @@
+from typing import re
+
 from chatlib import dict_utils, dialogue_utils
 from chatlib.chatbot import ResponseGenerator, Dialogue
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator, StateType
 from chatlib.mapper import ChatGPTDialogSummarizerParams
+from chatlib.message_transformer import SpecialTokenExtractionTransformer
 
-from app.common import EmotionChatbotPhase
+from app.common import EmotionChatbotPhase, SPECIAL_TOKEN_REGEX
 from app.phases import explore, label, find, record, share, help
 
 
 class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbotPhase]):
 
     def __init__(self, user_name: str | None = None, user_age: int = None, verbose: bool = False):
-        super().__init__(initial_state=EmotionChatbotPhase.Explore, verbose=verbose)
+        super().__init__(initial_state=EmotionChatbotPhase.Explore,
+                         verbose=verbose,
+                         message_transformers=[
+                             SpecialTokenExtractionTransformer.remove_all_regex("clean_special_tokens", SPECIAL_TOKEN_REGEX)
+                         ]
+                         )
 
         self.__user_name = user_name
         self.__user_age = user_age
@@ -74,7 +82,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
 
         # Explore --> Label
         if current == EmotionChatbotPhase.Explore:
-            # Minimum 4 rapport building conversation turns
+            # Minimum 3 rapport building conversation turns
             if len(current_state_ai_turns) >= 2:
                 summarizer_result = await explore.summarizer.run(dialog)
                 print(summarizer_result)

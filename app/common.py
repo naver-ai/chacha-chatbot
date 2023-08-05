@@ -10,10 +10,11 @@ class EmotionChatbotPhase(StrEnum):
 
 
 class EmotionChatbotSpecialTokens(StrEnum):
-    Terminate = "<|Terminate|>"
-    NewEpisode = "<|AskNewEpisode|>"
-    EmotionSelect = "<|EmotionSelect|>"
+    Terminate = "<:Terminate:>"
+    NewEpisode = "<:AskNewEpisode:>"
+    EmotionSelect = "<:EmotionSelect:>"
 
+SPECIAL_TOKEN_REGEX = r"<:[a-zA-Z0-9-_]+:>"
 
 COMMON_SPEAKING_RULES = [
     "Use a simple, informal Korean, like talking to a peer friend. Do not use honorifics.",

@@ -46,7 +46,7 @@ def create_generator():
 {% if emotion_without_reason is not none %}
   - However, {{emotion_without_reason.emotion}} needs more explanation. Therefore, elicit the user to explain the reason of feeling {{emotion_without_reason.emotion}}. 
 {% else %}
-{%- set emotion_without_empathy = summarizer_result.identified_emotions | selectattr("empathized", false) | first | default(None) -%}
+{%- set emotion_without_empathy = summarizer_result.identified_emotions | selectattr("empathized", "false") | first | default(None) -%}
 {% if emotion_without_empathy is not none %}
 - However, you have not empathized with the user's {{emotion_without_empathy.emotion}}. Theretore, empathize with the user's emotion, "{{emotion_without_empathy.emotion}} more explicitly."{% endif %}
 {% endif %}
