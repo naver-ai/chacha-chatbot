@@ -16,7 +16,7 @@ export const ChatPage = () => {
   const isInitialized = useSelector(state => state.chatState.sessionInfo != null)
 
 
-  return <div className="h-screen">
+  return <div className="">
     {
       isInitialized ? <ChatView /> : <IntroView sessionId={sessionId!!} />
     }

@@ -36,9 +36,10 @@ export const ChatView = () => {
     })
   }, [messageIds.length])
 
-  return <div className="turn-list-container pt-2 overflow-y-auto justify-end h-full" ref={scrollViewRef}>
+  return <div className="turn-list-container sm:overflow-y-auto justify-end h-screen sm:h-full flex flex-col sm:block" 
+    ref={scrollViewRef}>
     <SessionInfoPanel/>
-    <div className="turn-list container mx-auto px-10">{
+    <div className="turn-list container mx-auto px-3 sm:px-10 flex-1 overflow-y-auto sm:overflow-visible">{
       messageIds.map((id, i) => {
         return <SessionMessageView key={id.toString()} id={id} isLast={messageIds.length - 1 === i}/>
       })
@@ -51,8 +52,8 @@ export const ChatView = () => {
 const SessionInfoPanel = () => {
   const sessionInfo = useSelector(state => state.chatState.sessionInfo)
 
-  return <div className="container bg-slate-400/20 px-1.5 pr-1 py-1 rounded-md flex justify-between">
-          <span>세션 ID: {sessionInfo?.sessionId} ({sessionInfo?.name}, {sessionInfo?.age}세)</span>
+  return <div className="container bg-slate-400/20 px-1.5 pr-1 py-1 flex items-center justify-between text-xs sm:text-sm sm:mt-2 sm:rounded-md border-collapse border-b-2 sm:border-none border-slate-300">
+          <div>세션: {sessionInfo?.sessionId} ({sessionInfo?.name}, {sessionInfo?.age}세)</div>
           <ShareButton/>
           </div>
 }
@@ -100,9 +101,9 @@ const TypingPanel = () => {
   }, [setFocus])
 
   return shouldHideTypingPanel ? null : <>
-    <div id="chat-typing-panel" className="fixed z-10 left-4 right-4 bottom-10 lg:left-0 lg:right-0">
+    <div id="chat-typing-panel" className="sm:fixed sm:z-10 sm:left-4 sm:right-4 sm:bottom-10 lg:left-0 lg:right-0">
       <div className="container relative">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-row bg-slate-50 px-3 py-1.5 pl-1.5 rounded-lg shadow-lg">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-row bg-slate-50 px-3 py-1.5 pl-1.5 sm:rounded-lg shadow-lg">
           {
             isSystemMessageLoading
               ? <div className="text-input text-chat-1 animate-pulse-fast flex-1 mr-2">할 말을 생각 중이야. 잠시만 기다려줘!</div>
@@ -118,7 +119,7 @@ const TypingPanel = () => {
 
 
     </div>
-    <div className="bg-background/70 fixed bottom-0 left-10 right-10 h-[50px]" /></>
+    <div className="bg-background/70 fixed bottom-0 left-10 right-10 h-[50px] collapse sm:visible" /></>
 }
 
 

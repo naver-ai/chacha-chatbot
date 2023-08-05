@@ -50,19 +50,19 @@ body {
     }
 
     .turn-list-container{
-        @apply snap-y scroll-pb-[100px]
+        @apply snap-y sm:scroll-pb-[100px]
     }
 
     .turn-list{
-        @apply mb-[100px]
+        @apply sm:mb-[100px]
     }
 
     .turn-container {
-        @apply -mx-2 px-2 py-4 flex flex-col scroll-m-2 snap-end;
+        @apply -mx-2 px-2 py-3 sm:py-4 flex flex-col scroll-m-2 snap-end;
     }
 
     .turn-container .callout {
-        @apply rounded-xl px-6 py-3 shadow-md max-w-xl text-gray-600 font-normal leading-relaxed;
+        @apply rounded-lg sm:rounded-xl px-3 py-2 sm:px-6 sm:py-3 shadow-md max-w-xl text-gray-600 font-normal leading-relaxed;
 
     }
 
@@ -152,4 +152,10 @@ a {
 
 diary {
     @apply bg-[#e1e4d2] block my-2 px-1.5 py-1 italic rounded-lg leading-loose;
+}
+
+@supports(-webkit-touch-callout: none) {
+    .h-screen {
+        height: -webkit-fill-available;
+    }
 }
