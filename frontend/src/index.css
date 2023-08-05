@@ -25,8 +25,12 @@ body {
 
 @layer components {
 
-    .text-input, input[type=text], input[type=number] {
+    .text-input, input[type=text], input[type=number], textarea {
         @apply shadow-inner border-2 bg-white px-2 py-1 rounded-md border-slate-200 disabled:text-gray-400 focus:outline-none focus:border-clova-blue;
+    }
+
+    textarea.chat-type {
+        @apply resize-none
     }
 
     .button-main{
@@ -84,7 +88,7 @@ body {
     }
 
     .turn-container.user .callout {
-        @apply text-white bg-indigo-800/[.8] mr-12 -mt-4 rounded-tr-none border-[1px];
+        @apply  whitespace-break-spaces text-white bg-indigo-800/[.8] mr-12 -mt-4 rounded-tr-none border-[1px];
     }
 
     .profilePic {

@@ -11,6 +11,7 @@ import path from "path"
 import { ClipboardDocumentIcon } from "@heroicons/react/20/solid";
 import { enqueueSnackbar } from "notistack"
 import { EmotionPicker } from "./components/EmotionPicker"
+import TextareaAutosize from 'react-textarea-autosize';
 
 export const ChatView = () => {
 
@@ -58,7 +59,7 @@ const SessionInfoPanel = () => {
 
 
 const schema = yup.object({
-  message: yup.string().required()
+  message: yup.string().trim().transform((text:string) => text.replace(/ +/g, " ").replace(/[\r\n]+/g, "\n")).required()
 }).required()
 
 const TypingPanel = () => {
@@ -105,8 +106,8 @@ const TypingPanel = () => {
           {
             isSystemMessageLoading
               ? <div className="text-input text-chat-1 animate-pulse-fast flex-1 mr-2">할 말을 생각 중이야. 잠시만 기다려줘!</div>
-              : <input {...register("message")} type="text" autoFocus={true} placeholder={"나에게 할 말을 입력해줘!"}
-                className="flex-1 mr-2"
+              : <TextareaAutosize {...register("message")} minRows={1} maxRows={5} autoFocus={true} placeholder={"나에게 할 말을 입력해줘!"}
+                className="chat-type flex-1 mr-2"
                 autoComplete="off"
               />
           }
