@@ -149,3 +149,7 @@ a {
 #submitEmotion {
     @apply inline-block rounded-lg font-bold mx-1 my-4 px-4 py-1 shadow-lg text-lg;
 }
+
+diary {
+    @apply bg-[#e1e4d2] block my-2 px-1.5 py-1 italic rounded-lg leading-loose;
+}
