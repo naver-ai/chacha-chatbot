@@ -116,10 +116,6 @@ body {
         color: #9FA1D0;
         font-family: Bradley Hand;
     }
-
-    .chachaContainer > img {
-        content:url(../src/ChaCha.png);
-    }
 }
 
 a {
