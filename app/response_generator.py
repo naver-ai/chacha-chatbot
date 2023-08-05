@@ -1,6 +1,4 @@
-from typing import re
-
-from chatlib import dict_utils, dialogue_utils
+from chatlib import dict_utils
 from chatlib.chatbot import ResponseGenerator, Dialogue
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator, StateType
 from chatlib.mapper import ChatGPTDialogSummarizerParams
@@ -16,7 +14,8 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         super().__init__(initial_state=EmotionChatbotPhase.Explore,
                          verbose=verbose,
                          message_transformers=[
-                             SpecialTokenExtractionTransformer.remove_all_regex("clean_special_tokens", SPECIAL_TOKEN_REGEX)
+                             SpecialTokenExtractionTransformer.remove_all_regex("clean_special_tokens",
+                                                                                SPECIAL_TOKEN_REGEX)
                          ]
                          )
 
@@ -94,43 +93,46 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         # Label --> Find OR Record
         elif current == EmotionChatbotPhase.Label:
             print("Current AI turns: ", len(current_state_ai_turns))
-            if len(current_state_ai_turns) >= 2:
-                summarizer_result = await label.summarizer.run(dialog,
-                                                               ChatGPTDialogSummarizerParams(instruction_params=dict(
-                                                                   key_episode=self._get_memoized_payload(
-                                                                       EmotionChatbotPhase.Explore)[
-                                                                       "key_episode"],
-                                                                   user_emotion=self._get_memoized_payload(
-                                                                       EmotionChatbotPhase.Explore)[
-                                                                       "user_emotion"],
-                                                               )))
-                print(summarizer_result)
-                next_phase = dict_utils.get_nested_value(summarizer_result, "next_phase")
-                if next_phase == "find":
+            summarizer_result = await label.summarizer.run(dialog,
+                                                           ChatGPTDialogSummarizerParams(instruction_params=dict(
+                                                               key_episode=self._get_memoized_payload(
+                                                                   EmotionChatbotPhase.Explore)[
+                                                                   "key_episode"],
+                                                               user_emotion=self._get_memoized_payload(
+                                                                   EmotionChatbotPhase.Explore)[
+                                                                   "user_emotion"],
+                                                           )))
+            print(summarizer_result)
+
+            next_phase = dict_utils.get_nested_value(summarizer_result, "next_phase")
+            if next_phase == "find":
+                if len(current_state_ai_turns) >= 3:
                     return EmotionChatbotPhase.Find, summarizer_result
-                elif next_phase == "record":
+            elif next_phase == "record":
+                if len(current_state_ai_turns) >= 3:
                     return EmotionChatbotPhase.Record, summarizer_result
-                else:
-                    return None, summarizer_result
+            else:
+                return None, summarizer_result
         # Find/Record --> Share
         elif current == EmotionChatbotPhase.Find or current == EmotionChatbotPhase.Record:
-            if len(current_state_ai_turns) >= 2:
-                summarizer = find.summarizer if current == EmotionChatbotPhase.Find else record.summarizer
-                summarizer_result = await summarizer.run(dialog,
-                                                         ChatGPTDialogSummarizerParams(
-                                                             instruction_params=dict(
-                                                                 key_episode=
-                                                                 self._get_memoized_payload(
-                                                                     EmotionChatbotPhase.Explore)[
-                                                                     "key_episode"],
-                                                                 identified_emotions=self._get_memoized_payload(
-                                                                         EmotionChatbotPhase.Label)[
-                                                                         "identified_emotions"])))
-                print(summarizer_result)
-                if dict_utils.get_nested_value(summarizer_result, "proceed_to_next_phase") is True:
-                    return EmotionChatbotPhase.Share, summarizer_result
-                else:
-                    return None, summarizer_result
+
+            summarizer = find.summarizer if current == EmotionChatbotPhase.Find else record.summarizer
+            summarizer_result = await summarizer.run(dialog,
+                                                     ChatGPTDialogSummarizerParams(
+                                                         instruction_params=dict(
+                                                             key_episode=
+                                                             self._get_memoized_payload(
+                                                                 EmotionChatbotPhase.Explore)[
+                                                                 "key_episode"],
+                                                             identified_emotions=self._get_memoized_payload(
+                                                                 EmotionChatbotPhase.Label)[
+                                                                 "identified_emotions"])))
+            print(summarizer_result)
+            if dict_utils.get_nested_value(summarizer_result, "proceed_to_next_phase") is True and len(
+                    current_state_ai_turns) >= 2:
+                return EmotionChatbotPhase.Share, summarizer_result
+            else:
+                return None, summarizer_result
         # Share --> Explore or Terminate
         elif current == EmotionChatbotPhase.Share:
             user_intention_to_share_new_episode = await share.check_new_episode_requested(dialog)

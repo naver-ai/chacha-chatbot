@@ -30,10 +30,10 @@ summarizer = ChatGPTDialogueSummarizer(
 - Determine whether the user successfully came up with solutions so that it is a reasonable moment to move on to the next conversation phase or not."""+"""
 - Return a JSON string in the following format:
 {
-    "problem": string |null // describe the problem of the episode.
-    "identified_solutions": string | null // describe the solutions that the user and the AI have discussed. Set null if no solutions appeared yet.
-    "is_actionable": boolean // whether the solution is developed to be sufficiently actionable for the user.
-    "ai_comment_to_solution": string | null // how the AI commented on the solutions identified, especially when the solution was raised by the user. Set null if the AI had not commented yet.
+    "problem": string |null // Describe the problem of the episode.
+    "identified_solutions": string | null // Describe the solutions that the user and the AI have discussed. Set null if no solutions appeared yet.
+    "is_actionable": boolean // Whether the solution is developed to be sufficiently actionable for the user.
+    "ai_comment_to_solution": string | null // How the AI commented on the solutions identified, especially when the solution was raised by the user. Set null if the AI had not commented yet.
     "proceed_to_next_phase": boolean // True if the problem was clearly specified && the solution was identified && the solution is developed actionable && the AI have commented on the solutions.
 }
 """),
