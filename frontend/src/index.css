@@ -14,6 +14,10 @@ body {
     -moz-osx-font-smoothing: grayscale;
     @apply text-gray-700 text-base font-semibold;
 }
+html, body{
+    height: 100vh;
+}
+
 .background-panel {
     @apply bg-background;
     /*background: linear-gradient(121deg, rgb(233, 235, 237) 0%, rgb(214, 241, 232) 100%);*/
@@ -24,6 +28,10 @@ body {
 }
 
 @layer components {
+
+    #app{
+        @apply absolute left-0 right-0 bottom-0 top-0 inset-0 overflow-hidden;
+    }
 
     .text-input, input[type=text], input[type=number], textarea {
         @apply shadow-inner border-2 bg-white px-2 py-1 rounded-md border-slate-200 disabled:text-gray-400 focus:outline-none focus:border-clova-blue;

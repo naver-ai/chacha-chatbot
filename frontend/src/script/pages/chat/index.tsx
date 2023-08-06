@@ -16,10 +16,10 @@ export const ChatPage = () => {
   const isInitialized = useSelector(state => state.chatState.sessionInfo != null)
 
 
-  return <div className="">
+  return <>
     {
       isInitialized ? <ChatView /> : <IntroView sessionId={sessionId!!} />
     }
     <BackgroundPanel />
-  </div>
+  </>
 }

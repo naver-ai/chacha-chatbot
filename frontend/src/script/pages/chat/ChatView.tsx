@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup"
 import { EntityId, nanoid } from "@reduxjs/toolkit"
-import { useCallback, useEffect, useMemo, useRef, useState, KeyboardEvent } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, KeyboardEvent, FocusEvent } from "react"
 import { useForm } from "react-hook-form"
 import { useDispatch, useSelector } from "src/script/redux/hooks"
 import * as yup from "yup"
@@ -13,10 +13,11 @@ import { enqueueSnackbar } from "notistack"
 import { EmotionPicker } from "./components/EmotionPicker"
 import TextareaAutosize from 'react-textarea-autosize';
 import { useMediaQuery } from "react-responsive"
+import { useOnScreenKeyboardScrollFix, useViewportSize } from "src/script/mobile-utils"
 
 const mobileMediaQuery = { minWidth: 640 }
 function useIsMobile(): boolean{
-  return !useMediaQuery(mobileMediaQuery)
+  return useMediaQuery(mobileMediaQuery) === false
 }
 
 export const ChatView = () => {
@@ -25,8 +26,14 @@ export const ChatView = () => {
   const mobileScrollViewRef = useRef<HTMLDivElement>(null)
 
   const isMobile = useIsMobile()
+  console.log(isMobile)
+
+  useOnScreenKeyboardScrollFix(isMobile)
+
 
   const messageIds = useSelector(state => state.chatState.messages.ids)
+
+  const [_, viewPortHeight] = useViewportSize()
 
   const scrollToBottom = useCallback(() => {
 
@@ -41,13 +48,19 @@ export const ChatView = () => {
     }
   }, [isMobile])
 
+  const onTypingPanelFocus = useCallback(()=>{
+    requestAnimationFrame(()=>{
+      scrollToBottom()
+    })
+  }, [scrollToBottom])
+
   useEffect(() => {
     requestAnimationFrame(() => {
       scrollToBottom()
     })
   }, [messageIds.length])
 
-  return <div className="turn-list-container sm:overflow-y-auto justify-end h-screen sm:h-full flex flex-col sm:block" 
+  return <div style={isMobile === true ? {maxHeight: viewPortHeight, height: viewPortHeight, minHeight: viewPortHeight} : undefined} className="overflow-hidden turn-list-container sm:overflow-y-auto justify-end h-screen sm:h-full flex flex-col sm:block" 
     ref={desktopScrollViewRef}>
     <SessionInfoPanel/>
     <div className="turn-list container mx-auto px-3 sm:px-10 flex-1 overflow-y-auto sm:overflow-visible"
@@ -58,7 +71,7 @@ export const ChatView = () => {
       })
     }
     </div>
-    <TypingPanel />
+    <TypingPanel onFocus={onTypingPanelFocus}/>
   </div>
 }
 
@@ -76,7 +89,10 @@ const schema = yup.object({
   message: yup.string().trim().transform((text:string) => text.replace(/ +/g, " ").replace(/[\r\n]+/g, "\n")).required()
 }).required()
 
-const TypingPanel = () => {
+const TypingPanel = (props: {
+  onFocus?: ()=>void,
+  onBlur?: ()=>void
+}) => {
 
   const isSystemMessageLoading = useSelector(state => state.chatState.isLoadingMessage)
 
@@ -119,6 +135,14 @@ const TypingPanel = () => {
     }
 }, [isMobile, handleSubmit, onSubmit])
 
+  const onTypingViewFocusIn = useCallback((ev: FocusEvent<HTMLTextAreaElement, Element>)=>{
+    props.onFocus?.()
+  }, [props.onFocus])
+
+  const onTypingViewFocusOut = useCallback((ev: FocusEvent<HTMLTextAreaElement, Element>)=>{
+    props.onBlur?.()
+  }, [props.onBlur])
+
   useEffect(() => {
     setFocus('message')
   }, [setFocus])
@@ -133,6 +157,8 @@ const TypingPanel = () => {
               : <TextareaAutosize {...register("message")} minRows={1} maxRows={5} autoFocus={true} placeholder={"나에게 할 말을 입력해줘!"}
                 className="chat-type flex-1 mr-2"
                 autoComplete="off"
+                onFocus={onTypingViewFocusIn}
+                onBlur={onTypingViewFocusOut}
                 onKeyDown={handleKeyDownOnNameField}
               />
           }
