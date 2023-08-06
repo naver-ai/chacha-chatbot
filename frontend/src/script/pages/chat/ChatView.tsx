@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup"
 import { EntityId, nanoid } from "@reduxjs/toolkit"
-import { useCallback, useEffect, useMemo, useRef } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, KeyboardEvent } from "react"
 import { useForm } from "react-hook-form"
 import { useDispatch, useSelector } from "src/script/redux/hooks"
 import * as yup from "yup"
@@ -8,18 +8,29 @@ import { sendUserMessage } from "./reducer"
 import { MessageView } from "src/script/components/messages"
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import path from "path"
-import { ClipboardDocumentIcon } from "@heroicons/react/20/solid";
+import { ClipboardDocumentIcon, PaperAirplaneIcon } from "@heroicons/react/20/solid";
 import { enqueueSnackbar } from "notistack"
 import { EmotionPicker } from "./components/EmotionPicker"
 import TextareaAutosize from 'react-textarea-autosize';
+import { useMediaQuery } from "react-responsive"
+
+const mobileMediaQuery = { minWidth: 640 }
+function useIsMobile(): boolean{
+  return !useMediaQuery(mobileMediaQuery)
+}
 
 export const ChatView = () => {
 
-  const scrollViewRef = useRef<HTMLDivElement>(null)
+  const desktopScrollViewRef = useRef<HTMLDivElement>(null)
+  const mobileScrollViewRef = useRef<HTMLDivElement>(null)
+
+  const isMobile = useIsMobile()
 
   const messageIds = useSelector(state => state.chatState.messages.ids)
 
   const scrollToBottom = useCallback(() => {
+
+    const scrollViewRef = isMobile === true ? mobileScrollViewRef : desktopScrollViewRef
     if (scrollViewRef?.current != null) {
       const scroll = scrollViewRef.current.scrollHeight -
         scrollViewRef.current.clientHeight;
@@ -28,7 +39,7 @@ export const ChatView = () => {
         top: scroll
       })
     }
-  }, [])
+  }, [isMobile])
 
   useEffect(() => {
     requestAnimationFrame(() => {
@@ -37,9 +48,11 @@ export const ChatView = () => {
   }, [messageIds.length])
 
   return <div className="turn-list-container sm:overflow-y-auto justify-end h-screen sm:h-full flex flex-col sm:block" 
-    ref={scrollViewRef}>
+    ref={desktopScrollViewRef}>
     <SessionInfoPanel/>
-    <div className="turn-list container mx-auto px-3 sm:px-10 flex-1 overflow-y-auto sm:overflow-visible">{
+    <div className="turn-list container mx-auto px-3 sm:px-10 flex-1 overflow-y-auto sm:overflow-visible"
+    ref={mobileScrollViewRef}
+    >{
       messageIds.map((id, i) => {
         return <SessionMessageView key={id.toString()} id={id} isLast={messageIds.length - 1 === i}/>
       })
@@ -76,6 +89,8 @@ const TypingPanel = () => {
     }else return false
   })
 
+  const isMobile = useIsMobile()
+
   const dispatch = useDispatch()
 
   const {
@@ -96,6 +111,14 @@ const TypingPanel = () => {
     }
   }, [isSystemMessageLoading])
 
+
+  const handleKeyDownOnNameField = useCallback((ev: KeyboardEvent<HTMLTextAreaElement>)=>{
+    if(isMobile === false && ev.key == 'Enter' && ev.shiftKey === false){
+      ev.preventDefault()
+      handleSubmit(onSubmit)()
+    }
+}, [isMobile, handleSubmit, onSubmit])
+
   useEffect(() => {
     setFocus('message')
   }, [setFocus])
@@ -110,9 +133,14 @@ const TypingPanel = () => {
               : <TextareaAutosize {...register("message")} minRows={1} maxRows={5} autoFocus={true} placeholder={"나에게 할 말을 입력해줘!"}
                 className="chat-type flex-1 mr-2"
                 autoComplete="off"
+                onKeyDown={handleKeyDownOnNameField}
               />
           }
-          <input type="submit" value="보내기" className="button-main" disabled={isSystemMessageLoading} />
+          <button type="submit" className="button-main" disabled={isSystemMessageLoading}>
+            {
+              isMobile ? <PaperAirplaneIcon className="w-5"/> : <span>보내기</span>
+            }
+          </button>
 
         </form>
       </div>

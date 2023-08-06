@@ -153,9 +153,3 @@ a {
 diary {
     @apply bg-[#e1e4d2] block my-2 px-1.5 py-1 italic rounded-lg leading-loose;
 }
-
-@supports(-webkit-touch-callout: none) {
-    .h-screen {
-        height: -webkit-fill-available;
-    }
-}

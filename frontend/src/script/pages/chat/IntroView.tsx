@@ -36,6 +36,7 @@ export const IntroView = (props: {
 
     const handleKeyDownOnNameField = useCallback((ev: KeyboardEvent<HTMLInputElement>)=>{
         if(ev.key == 'Enter'){
+            ev.preventDefault()
             if(!getFieldState("user_name").invalid){
                 setFocus("user_age")
             }
