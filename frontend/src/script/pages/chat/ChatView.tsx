@@ -52,7 +52,7 @@ export const ChatView = () => {
     
     requestAnimationFrame(()=>{
       if(isMobile === true){
-        setTimeout(scrollToBottom, 1010)
+        setTimeout(scrollToBottom, 200)
       }
     })
   }, [scrollToBottom, isMobile])
