@@ -49,10 +49,13 @@ export const ChatView = () => {
   }, [isMobile])
 
   const onTypingPanelFocus = useCallback(()=>{
+    
     requestAnimationFrame(()=>{
-      scrollToBottom()
+      if(isMobile === true){
+        setTimeout(scrollToBottom, 1010)
+      }
     })
-  }, [scrollToBottom])
+  }, [scrollToBottom, isMobile])
 
   useEffect(() => {
     requestAnimationFrame(() => {
