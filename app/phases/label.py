@@ -41,15 +41,21 @@ def create_generator():
         
 {% if summarizer_result != Undefined %}
 [Current status of the conversation]
-- Currently, you and the user seem to have identified {{summarizer_result.identified_emotions | count}} emotion(s): {{summarizer_result.identified_emotions | map(attribute="emotion") | join(", ")}}.
+- Currently, you and the user seem to have identified {{summarizer_result.identified_emotions | count}} emotion(s): {{summarizer_result.identified_emotions | map(attribute="emotion") | list | list_with_conjunction}}.
+{%- set incomplete_positive_emotions = summarizer_result.identified_emotions | selectattr("is_positive", "true") | selectattr("reason", "none") | list -%}
+{%- set negative_emotions = summarizer_result.identified_emotions | selectattr("is_positive", "false") | list -%}
+{%- if incomplete_positive_emotions | length > 0 -%} {# If there exist positive emotions with no reasons... #}
+- However, the positive emotion(s) {{incomplete_positive_emotions | map(attribute="emotion") | list | list_with_conjunction}} needs more explanation. Therefore, elicit the user to explain the {%-if incomplete_positive_emotions | length > 1-%}of these emotions by one open-ended question.{%-else-%}reason of it.{%-endif%}
+{%- elif negative_emotions | length > 0 -%} {# If no incomplete positive emotions, turn to negative emotions one by one. #}
 {%- set emotion_without_reason = summarizer_result.identified_emotions | selectattr("reason", "none") | first | default(None) -%}
-{% if emotion_without_reason is not none %}
+{% if emotion_without_reason is not none %} 
   - However, {{emotion_without_reason.emotion}} needs more explanation. Therefore, elicit the user to explain the reason of feeling {{emotion_without_reason.emotion}}. 
 {% else %}
 {%- set emotion_without_empathy = summarizer_result.identified_emotions | selectattr("empathized", "false") | first | default(None) -%}
 {% if emotion_without_empathy is not none %}
 - However, you have not empathized with the user's {{emotion_without_empathy.emotion}}. Theretore, empathize with the user's emotion, "{{emotion_without_empathy.emotion}} more explicitly."{% endif %}
 {% endif %}
+{%- endif -%}
 {%- endif %}
 
 [General conversation rules]
@@ -63,7 +69,6 @@ def create_generator():
 """ + PromptFactory.get_speaking_rules_block()),
                                     special_tokens=[
                                         (EmotionChatbotSpecialTokens.EmotionSelect, "select_emotion", True)])
-
 
 
 class LabelSummarizer(ChatGPTDialogueSummarizer):
@@ -159,7 +164,8 @@ Refer to the examples below.
         try:
             if len(result["identified_emotions"]) > 0:
                 emotion_infos = result["identified_emotions"]
-                if len([em for em in emotion_infos if em["reason"] is None or em["empathized"] == False]) > 0:
+                if len([em for em in emotion_infos if
+                        em["reason"] is None or (em["empathized"] is False and em["is_positive"] is False)]) > 0: # Don't take empathized into account for positive emotions.
                     result["next_phase"] = None
                     return result
                 else:
