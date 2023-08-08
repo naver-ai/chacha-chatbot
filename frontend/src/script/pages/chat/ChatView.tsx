@@ -14,6 +14,7 @@ import { EmotionPicker } from "./components/EmotionPicker"
 import TextareaAutosize from 'react-textarea-autosize';
 import { useMediaQuery } from "react-responsive"
 import { useOnScreenKeyboardScrollFix, useViewportSize } from "src/script/mobile-utils"
+import { SessionInfoPanel } from "../../components/SessionInfoPanel"
 
 const mobileMediaQuery = { minWidth: 640 }
 function useIsMobile(): boolean{
@@ -65,7 +66,7 @@ export const ChatView = () => {
 
   return <div style={isMobile === true ? {maxHeight: viewPortHeight, height: viewPortHeight, minHeight: viewPortHeight} : undefined} className="overflow-hidden turn-list-container sm:overflow-y-auto justify-end h-screen sm:h-full flex flex-col sm:block" 
     ref={desktopScrollViewRef}>
-    <SessionInfoPanel/>
+    <ChatSessionInfoPanel/>
     <div className="turn-list container mx-auto px-3 sm:px-10 flex-1 overflow-y-auto sm:overflow-visible"
     ref={mobileScrollViewRef}
     >{
@@ -78,13 +79,12 @@ export const ChatView = () => {
   </div>
 }
 
-const SessionInfoPanel = () => {
+const ChatSessionInfoPanel = () => {
   const sessionInfo = useSelector(state => state.chatState.sessionInfo)
 
-  return <div className="container bg-slate-400/20 px-1.5 pr-1 py-1 flex items-center justify-between text-xs sm:text-sm sm:mt-2 sm:rounded-md border-collapse border-b-2 sm:border-none border-slate-300">
-          <div>세션: {sessionInfo?.sessionId} ({sessionInfo?.name}, {sessionInfo?.age}세)</div>
-          <ShareButton/>
-          </div>
+  return <SessionInfoPanel sessionId={sessionInfo!.sessionId} name={sessionInfo!.name} age={sessionInfo!.age}>
+    <ShareButton/>
+  </SessionInfoPanel>
 }
 
 
@@ -205,13 +205,16 @@ const ShareButton = () => {
 }
 
 const SessionMessageView = (props: { id: EntityId, isLast: boolean }) => {
+
+  const userName = useSelector(state => state.chatState.sessionInfo?.name!)
+
   const turn = useSelector(state => state.chatState.messages.entities[props.id]!)
 
   const hideMessage = turn.metadata?.hide === true
 
   const isEmotionSelectionTurn = turn.metadata?.select_emotion === true
 
-  return hideMessage ? null : <MessageView message={turn} componentsBelowCallout={
+  return hideMessage ? null : <MessageView avatarHash={turn.is_user === true ? userName : "system"} message={turn} componentsBelowCallout={
       !isEmotionSelectionTurn
         ? null : <EmotionPicker messageId={props.id} disabled={!props.isLast}/>
     }/>

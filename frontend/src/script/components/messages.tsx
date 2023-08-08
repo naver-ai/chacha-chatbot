@@ -3,22 +3,23 @@ import Avatar from "boring-avatars"
 import {useSelector} from "../redux/hooks";
 
 export const MessageView = (props: {
-    message: ChatMessage, 
+    avatarHash: string,
+    message: ChatMessage,
     overrideMessageText?: string, 
     children?: any,
     hideCallout?: boolean,
     componentsAboveCallout?: any,
-    componentsBelowCallout?: any
+    componentsBelowCallout?: any,
+    onThumbnailDoubleClick?: () => void
 }) => {
-    const sessionInfo = useSelector(state => state.chatState.sessionInfo)
+
     return <div className={`turn-container ${props.message.is_user ? "user" : "system"}`}>
-        <div className="profilePic" id = {!props.message.is_user ? "systemPic" : ""}>
+        <div className="profilePic" id = {!props.message.is_user ? "systemPic" : ""} onDoubleClick={props.onThumbnailDoubleClick}>
             <Avatar
                 size={40}
-                name= {props.message.is_user ? sessionInfo?.name : "system"}
+                name= {props.avatarHash}
                 variant="beam"
                 colors={["#A8D1D1","#F1F7B5", "#9EA1D4", "#6495ED"]}
-                className="avatars"
             />
         </div>
         <div>

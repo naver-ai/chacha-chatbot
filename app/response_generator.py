@@ -42,6 +42,14 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
 
         super().restore_from_json(parcel)
 
+    @property
+    def user_name(self)->str:
+        return self.__user_name
+
+    @property
+    def user_age(self)->int:
+        return self.__user_age
+
     async def get_generator(self, state: StateType, payload: dict | None) -> ResponseGenerator:
         # Get generator caches
         generator = self.__generators[state]

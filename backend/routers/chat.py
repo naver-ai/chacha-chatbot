@@ -64,12 +64,16 @@ class ChatSessionInitializeArgs(BaseModel):
     user_name: str
     user_age: int
 
+@router.get("/sessions/{session_id}/info", response_model=ChatSessionInitializeArgs)
+def get_messages(session_id: str = Path(...)):
+    session = _assert_get_session(session_id)
+    gen: EmotionChatbotResponseGenerator = session.response_generator
+    return ChatSessionInitializeArgs(user_age=gen.user_age, user_name=gen.user_name)
 
 @router.get("/sessions/{session_id}/messages")
 async def get_messages(session_id: str = Path(...)) -> list[ChatMessage]:
     session = _assert_get_session(session_id)
     return [ChatMessage.from_turn(turn) for turn in session.dialog]
-
 
 @router.post("/sessions/{session_id}/initialize", response_model=ChatMessage)
 async def _initialize_chat_session(args: ChatSessionInitializeArgs, session_id: str = Path(...)):
@@ -95,7 +99,6 @@ def _terminate_chat_session(session_id: str = Path(...)):
     if session_id in active_sessions:
         del active_sessions[session_id]
 
-
 @router.post("/sessions/{session_id}/message", response_model=ChatMessage)
 async def user_message(args: ChatMessage, session_id:str = Path(...)):
     session = _assert_get_session(session_id)
@@ -108,3 +111,13 @@ async def user_message(args: ChatMessage, session_id:str = Path(...)):
         processing_time=args.processing_time
     ))
     return ChatMessage.from_turn(system_turn)
+
+@router.post("/sessions/{session_id}/regenerate", response_model=ChatMessage)
+async def regenerate_last_system_message(session_id:str = Path(...)):
+    session = _assert_get_session(session_id)
+
+    system_turn = await session.regenerate_last_system_message()
+    if system_turn is not None:
+        return ChatMessage.from_turn(system_turn) if system_turn is not None else None
+    else:
+        return None

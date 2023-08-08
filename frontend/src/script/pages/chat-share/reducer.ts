@@ -10,12 +10,16 @@ const INITIAL_MESSAGES_STATE = messagesAdapter.getInitialState()
 export interface ChatShareState{
     sessionId: string | undefined
     isLoading: boolean
+    userName: string | undefined,
+    userAge: number | undefined,
     messages: typeof INITIAL_MESSAGES_STATE
 }
 
 const INITIAL_CHAT_STATE: ChatShareState = {
     sessionId: undefined,
     isLoading: false,
+    userName: undefined,
+    userAge: undefined,
     messages: INITIAL_MESSAGES_STATE
 }
 
@@ -26,6 +30,11 @@ const chatSlice = createSlice({
         initialize: (state, action: PayloadAction<string>) => {
             state.sessionId = action.payload
             messagesAdapter.removeAll(state.messages)
+        },
+
+        setUserInfo: (state, action: PayloadAction<{userName: string, userAge: number}>) => {
+            state.userAge = action.payload.userAge
+            state.userName = action.payload.userName
         },
 
         setLoadingState: (state, action: PayloadAction<boolean>) => {
@@ -43,9 +52,12 @@ export function loadChatSession(sessionId: string): (dispatch: AppDispatch, getS
     return async (dispatch: AppDispatch) => {
         dispatch(chatSlice.actions.initialize(sessionId))
         dispatch(chatSlice.actions.setLoadingState(true))
-        const messages = await NetworkHelper.loadSessionChatMessages(sessionId)
+        
+        const [messages, info] = await Promise.all([NetworkHelper.loadSessionChatMessages(sessionId), NetworkHelper.loadSessionInfo(sessionId)])
+        
         dispatch(chatSlice.actions.setLoadingState(false))
         dispatch(chatSlice.actions.setMessages(messages))
+        dispatch(chatSlice.actions.setUserInfo({userAge: info.user_age, userName: info.user_name}))
     }
 }
 
