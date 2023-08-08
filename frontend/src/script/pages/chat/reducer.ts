@@ -46,6 +46,10 @@ const chatSlice = createSlice({
         addMessage: (state, action) => {
             messagesAdapter.addOne(state.messages, action)
         },
+
+        removeMessage: (state, action) => {
+            messagesAdapter.removeOne(state.messages, action)
+        }
     }
 })
 
@@ -67,6 +71,23 @@ export function sendUserMessage(message: ChatMessage): (dispatch: AppDispatch, g
             dispatch(chatSlice.actions.addMessage(message))
             dispatch(chatSlice.actions.setLoadingState(true))
             const agentResponse = await NetworkHelper.sendUserMessage(sessionId, message)
+            dispatch(chatSlice.actions.setLoadingState(false))
+            dispatch(chatSlice.actions.addMessage(agentResponse))
+        }
+    }
+}
+
+
+export function regenerateLastSystemMessage(): (dispatch: AppDispatch, getState: () => ReduxAppState) => void {
+    return async (dispatch: AppDispatch, getState: ()=>ReduxAppState) => {
+        const chatState = getState().chatState
+        const sessionId = chatState.sessionInfo?.sessionId
+        const numMessages = chatState.messages.ids.length
+        if(sessionId != null && numMessages > 0){
+            const lastMessage = chatState.messages.entities[chatState.messages.ids[numMessages - 1]]!
+            dispatch(chatSlice.actions.removeMessage(lastMessage.id))
+            dispatch(chatSlice.actions.setLoadingState(true))
+            const agentResponse = await NetworkHelper.regenerateLastSystemMessage(sessionId)
             dispatch(chatSlice.actions.setLoadingState(false))
             dispatch(chatSlice.actions.addMessage(agentResponse))
         }

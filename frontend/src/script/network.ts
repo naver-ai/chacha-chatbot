@@ -77,6 +77,20 @@ export class NetworkHelper{
         )
         if(resp.status === 200){
             return resp.json()
-        }else throw Error(`Session initialization error - ${resp.status}`)
+        }else throw Error(`Send user message error - ${resp.status}`)
+    }
+
+
+
+    static async regenerateLastSystemMessage(sessionId: string): Promise<ChatMessage | undefined>{
+        const resp = await fetch(this.makeEndpoint(sessionId, this.ENDPOINT_REGENERATE),
+            {
+                method: 'POST',
+                headers: NetworkHelper.JSON_HEADERS
+            }
+        )
+        if(resp.status === 200){
+            return resp.json()
+        }else throw Error(`regeneration error - ${resp.status}`)
     }
 }

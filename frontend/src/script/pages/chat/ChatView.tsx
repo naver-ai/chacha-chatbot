@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, KeyboardEvent, Focus
 import { useForm } from "react-hook-form"
 import { useDispatch, useSelector } from "src/script/redux/hooks"
 import * as yup from "yup"
-import { sendUserMessage } from "./reducer"
+import { regenerateLastSystemMessage, sendUserMessage } from "./reducer"
 import { MessageView } from "src/script/components/messages"
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import path from "path"
@@ -27,7 +27,6 @@ export const ChatView = () => {
   const mobileScrollViewRef = useRef<HTMLDivElement>(null)
 
   const isMobile = useIsMobile()
-  console.log(isMobile)
 
   useOnScreenKeyboardScrollFix(isMobile)
 
@@ -206,6 +205,8 @@ const ShareButton = () => {
 
 const SessionMessageView = (props: { id: EntityId, isLast: boolean }) => {
 
+  const dispatch = useDispatch()
+
   const userName = useSelector(state => state.chatState.sessionInfo?.name!)
 
   const turn = useSelector(state => state.chatState.messages.entities[props.id]!)
@@ -214,7 +215,15 @@ const SessionMessageView = (props: { id: EntityId, isLast: boolean }) => {
 
   const isEmotionSelectionTurn = turn.metadata?.select_emotion === true
 
-  return hideMessage ? null : <MessageView avatarHash={turn.is_user === true ? userName : "system"} message={turn} componentsBelowCallout={
+  const onDoubleClick = useCallback(()=>{
+    if(turn.is_user === false && props.isLast === true){
+      if(confirm("차차의 마지막 메시지를 다시 요청할래?")){
+        dispatch(regenerateLastSystemMessage())
+      }
+    }
+  }, [turn.is_user, props.isLast])
+
+  return hideMessage ? null : <MessageView avatarHash={turn.is_user === true ? userName : "system"} message={turn} onThumbnailDoubleClick={onDoubleClick} componentsBelowCallout={
       !isEmotionSelectionTurn
         ? null : <EmotionPicker messageId={props.id} disabled={!props.isLast}/>
     }/>
