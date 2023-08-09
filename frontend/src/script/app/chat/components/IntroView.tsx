@@ -2,8 +2,9 @@ import * as yup from "yup"
 import {useForm} from "react-hook-form";
 import {yupResolver} from "@hookform/resolvers/yup";
 import {KeyboardEvent, useCallback, useEffect} from "react";
-import {useDispatch} from "../../redux/hooks";
-import {initializeChatSession} from "./reducer";
+import {useDispatch} from "../../../redux/hooks";
+import {initializeChatSession} from "../reducer";
+import { IntroFormFrame } from "./IntroFormFrame";
 
 const schema = yup.object({
     user_name: yup.string().required(),
@@ -43,14 +44,8 @@ export const IntroView = (props: {
         }
     }, [getFieldState, setFocus])
 
-    return <div className="flex flex-col justify-between h-screen">
-        <div className="my-auto mx-auto chachaContainer">
-            <div className="chachaTextBox">
-                <span>ChaCha</span>
-            </div>
-            <img src={require('../../../CHACHA.png')}/>
-        </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col container-sm my-auto mx-auto introViewChat">
+    return <IntroFormFrame>
+        <form onSubmit={handleSubmit(onSubmit)}>
         <input {...register("user_name")} type="text" placeholder={"너의 이름은 뭐야? (성 빼고)"} 
         autoComplete="off"
         className=""
@@ -62,5 +57,5 @@ export const IntroView = (props: {
             isValid ? <input type={"submit"} value={"대화 시작하기!"} className="button-main mt-2"/> : undefined
         }
         
-    </form></div>
+    </form></IntroFormFrame>
 }

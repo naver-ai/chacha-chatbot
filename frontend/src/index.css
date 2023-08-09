@@ -37,6 +37,12 @@ html, body{
         @apply shadow-inner border-2 bg-white px-2 py-1 rounded-md border-slate-200 disabled:text-gray-400 focus:outline-none focus:border-clova-blue;
     }
 
+
+
+    .intro-form-frame form {
+        @apply flex flex-col my-auto mx-auto w-64 introViewChat;
+    }
+
     textarea.chat-type {
         @apply resize-none
     }
