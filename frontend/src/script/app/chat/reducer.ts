@@ -49,9 +49,28 @@ const chatSlice = createSlice({
 
         removeMessage: (state, action) => {
             messagesAdapter.removeOne(state.messages, action)
-        }
+        },
+
+        setMessages: (state, action) => {
+            messagesAdapter.removeAll(state.messages)
+            messagesAdapter.addMany(state.messages, action)
+        },
     }
 })
+
+
+export function loadChatSession(sessionId: string): (dispatch: AppDispatch, getState: () => ReduxAppState) => void {
+    return async (dispatch: AppDispatch) => {
+        dispatch(chatSlice.actions.setLoadingState(true))
+        
+        const [messages, info] = await Promise.all([NetworkHelper.loadSessionChatMessages(sessionId), NetworkHelper.loadSessionInfo(sessionId)])
+        
+        dispatch(chatSlice.actions.setLoadingState(false))
+        dispatch(chatSlice.actions.initialize({ sessionId, userAge: info.user_age, userName: info.user_name}))
+        dispatch(chatSlice.actions.setMessages(messages))
+    }
+}
+
 
 export function initializeChatSession(sessionId: string, userName: string, userAge: number): (dispatch: AppDispatch, getState: () => ReduxAppState) => void {
     return async (dispatch: AppDispatch) => {

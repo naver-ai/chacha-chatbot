@@ -1,8 +1,8 @@
-import { IntroView } from "./IntroView";
+import { IntroView } from "../IntroView";
 import { useEffect, useRef, useState } from "react";
 import { nanoid } from "nanoid";
-import { useSelector } from "../../redux/hooks";
-import { ChatView } from "./ChatView";
+import { useSelector } from "../../../redux/hooks";
+import { ChatView } from "../ChatView";
 import { BackgroundPanel } from "src/script/components/background";
 
 export const ChatPage = () => {

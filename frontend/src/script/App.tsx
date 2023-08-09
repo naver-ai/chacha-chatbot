@@ -1,8 +1,8 @@
 import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
-import {ChatPage} from "./pages/chat";
+import {ChatPage} from "./app/chat/pages/ChatPage";
 import {store} from "./redux/store";
 import {Provider} from "react-redux";
-import { ChatSharePage } from "./pages/chat-share";
+import { ChatSharePage } from "./app/chat/pages/ChatShare";
 import {SnackbarProvider} from 'notistack';
 
 export function App() {

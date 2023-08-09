@@ -2,18 +2,18 @@ import { useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { BackgroundPanel } from "src/script/components/background"
 import { useSelector, useDispatch } from "src/script/redux/hooks"
-import { loadChatSession } from "./reducer"
 import { EntityId } from "@reduxjs/toolkit"
 import { MessageView } from "src/script/components/messages"
 import { EMOTION_LIST } from "src/script/concepts"
-import { SessionInfoPanel } from "../../components/SessionInfoPanel"
+import { SessionInfoPanel } from "../../../components/SessionInfoPanel"
+import { loadChatSession } from "../reducer"
 
 export const ChatSharePage = () => {
     const { sessionId } = useParams()
 
-    const isLoading = useSelector(state => state.chatShareState.isLoading)
+    const isLoading = useSelector(state => state.chatState.isLoadingMessage)
 
-    const messageIds = useSelector(state => state.chatShareState.messages.ids)
+    const messageIds = useSelector(state => state.chatState.messages.ids)
 
     const dispatch = useDispatch()
 
@@ -40,8 +40,8 @@ export const ChatSharePage = () => {
 
 
 const SessionMessageView = (props: { id: EntityId }) => {
-    const userName = useSelector(state => state.chatShareState.userName!)
-    const turn = useSelector(state => state.chatShareState.messages.entities[props.id]!)
+    const userName = useSelector(state => state.chatState.sessionInfo!.name!)
+    const turn = useSelector(state => state.chatState.messages.entities[props.id]!)
 
     const isEmotionAnswerTurn = Array.isArray(turn.metadata?.selected_emotions) && turn.is_user === true
 
@@ -50,9 +50,9 @@ const SessionMessageView = (props: { id: EntityId }) => {
 }
 
 const ChatSessionInfoPanel = () => {
-    const sessionId = useSelector(state => state.chatShareState.sessionId!)
-    const userName = useSelector(state => state.chatShareState.userName!)
-    const userAge = useSelector(state => state.chatShareState.userAge!)
+    const sessionId = useSelector(state => state.chatState.sessionInfo?.sessionId!)
+    const userName = useSelector(state => state.chatState.sessionInfo?.name!)
+    const userAge = useSelector(state => state.chatState.sessionInfo?.age!)
     
   
     return <SessionInfoPanel sessionId={sessionId} name={userName} age={userAge}/>
