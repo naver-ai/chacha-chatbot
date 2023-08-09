@@ -47,9 +47,6 @@ export const ChatPage = () => {
 }, [sessionId])
 
 
-  const isLoading = useSelector(state => state.chatState.isLoadingMessage)
-
-
   return <>
     {
       sessionInfoExists ? <ChatView /> : <IntroView sessionId={sessionId!}/>
