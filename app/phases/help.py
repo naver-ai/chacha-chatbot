@@ -2,8 +2,7 @@ from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedRespo
 from chatlib.mapper import ChatGPTDialogueSummarizer
 from chatlib.openai_utils import ChatGPTModel
 
-from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens
-
+from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens, SPECIAL_TOKEN_CONFIG
 
 
 # Emergency situation: Provide relevant resources to the user
@@ -17,7 +16,7 @@ def create_generator():
 
 General Speaking rules:
 {stringify_list(COMMON_SPEAKING_RULES, ordered=True)}
-                    """
+                    """, special_tokens=SPECIAL_TOKEN_CONFIG
         )
 
 summarizer = ChatGPTDialogueSummarizer(

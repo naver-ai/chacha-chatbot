@@ -8,7 +8,7 @@ from chatlib.jinja_utils import convert_to_jinja_template
 from chatlib.mapper import ChatGPTDialogueSummarizer, ChatGPTDialogSummarizerParams
 from chatlib.openai_utils import ChatGPTParams, ChatGPTModel
 
-from app.common import EmotionChatbotSpecialTokens, PromptFactory
+from app.common import EmotionChatbotSpecialTokens, PromptFactory, SPECIAL_TOKEN_CONFIG
 
 emotion_list = None
 
@@ -67,8 +67,7 @@ def create_generator():
 - Continue the conversation until all emotions that the user expressed are covered.
 
 """ + PromptFactory.get_speaking_rules_block()),
-                                    special_tokens=[
-                                        (EmotionChatbotSpecialTokens.EmotionSelect, "select_emotion", True)])
+                                    special_tokens=SPECIAL_TOKEN_CONFIG)
 
 
 class LabelSummarizer(ChatGPTDialogueSummarizer):

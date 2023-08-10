@@ -5,7 +5,7 @@ from chatlib.jinja_utils import convert_to_jinja_template
 from chatlib.chatbot import DialogueTurn
 
 import json
-from app.common import PromptFactory
+from app.common import PromptFactory, SPECIAL_TOKEN_CONFIG
 
 
 # Help the user find solution to the situation in which they felt negative emotions.
@@ -20,7 +20,7 @@ def create_generator():
 - Do not overly suggest a specific solution.
  
 {PromptFactory.get_speaking_rules_block()}
-""")
+"""), special_tokens=SPECIAL_TOKEN_CONFIG
     )
 
 

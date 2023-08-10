@@ -4,7 +4,7 @@ from string import Template
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
 from chatlib.jinja_utils import convert_to_jinja_template
 
-from app.common import PromptFactory
+from app.common import PromptFactory, SPECIAL_TOKEN_CONFIG
 from chatlib.chatbot import DialogueTurn
 from chatlib.mapper import ChatGPTDialogueSummarizer
 from chatlib.openai_utils import ChatGPTParams
@@ -39,7 +39,7 @@ For each conversation turn, execute one task only.
 - Ask the user about an episode or  moment that is the most memorable to him or her.
 - If he or she does not remember or know what to say, ask them about an event when he or she enjoyed it or felt good or bad.
 
-""" + PromptFactory.get_speaking_rules_block()))
+""" + PromptFactory.get_speaking_rules_block()), special_tokens=SPECIAL_TOKEN_CONFIG)
 
         self.initial_user_message_format = Template("안녕! 내 이름은 $user_name라고 해. 난 $user_age살이야")
 

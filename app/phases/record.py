@@ -6,7 +6,7 @@ from chatlib.jinja_utils import convert_to_jinja_template
 from chatlib.mapper import ChatGPTDialogueSummarizer, ChatGPTDialogSummarizerParams
 from chatlib.openai_utils import ChatGPTModel
 
-from app.common import PromptFactory
+from app.common import PromptFactory, SPECIAL_TOKEN_CONFIG
 
 
 # Encourage the user to record the moments in which they felt positive emotions.
@@ -39,7 +39,7 @@ def create_generator():
 {%- endif %}
 {%- endif %}
 
-""" + PromptFactory.get_speaking_rules_block()),
+""" + PromptFactory.get_speaking_rules_block()), special_tokens=SPECIAL_TOKEN_CONFIG
     )
 
 

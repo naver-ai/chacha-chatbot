@@ -7,7 +7,8 @@ from chatlib.jinja_utils import convert_to_jinja_template
 from chatlib.mapper import ChatGPTDialogueSummarizer
 from chatlib.openai_utils import ChatGPTParams, ChatGPTModel
 
-from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens, PromptFactory
+from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens, PromptFactory, \
+    SPECIAL_TOKEN_CONFIG
 
 
 # Encourage the user to share their emotion and the episode with their parents. Ask if they want to talk about other episodes.
@@ -24,10 +25,7 @@ def create_generator():
         
 """
 + PromptFactory.get_speaking_rules_block()),
-        special_tokens=[
-            (EmotionChatbotSpecialTokens.NewEpisode, "new_episode_requested", True),
-            (EmotionChatbotSpecialTokens.Terminate, "terminate", True),
-        ]
+        special_tokens=SPECIAL_TOKEN_CONFIG
     )
 
 __classifier = ChatGPTDialogueSummarizer(

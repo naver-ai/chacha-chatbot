@@ -16,6 +16,12 @@ class EmotionChatbotSpecialTokens(StrEnum):
 
 SPECIAL_TOKEN_REGEX = r"<\|[a-zA-Z0-9-_]+\|>"
 
+SPECIAL_TOKEN_CONFIG = [
+    (EmotionChatbotSpecialTokens.EmotionSelect, "select_emotion", True),
+    (EmotionChatbotSpecialTokens.NewEpisode, "new_episode_requested", True),
+    (EmotionChatbotSpecialTokens.Terminate, "terminate", True),
+]
+
 COMMON_SPEAKING_RULES = [
     "Use a simple, informal Korean, like talking to a peer friend. Do not use honorifics.",
     "Do not use pronouns (e.g., 그녀, 그들)",
