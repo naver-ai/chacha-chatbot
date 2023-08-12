@@ -1,5 +1,5 @@
-import { useEffect } from "react"
-import { useParams } from "react-router-dom"
+import { useCallback, useEffect } from "react"
+import { useNavigate, useParams } from "react-router-dom"
 import { BackgroundPanel } from "src/script/components/background"
 import { useSelector, useDispatch } from "src/script/redux/hooks"
 import { EntityId } from "@reduxjs/toolkit"
@@ -7,6 +7,9 @@ import { MessageView } from "src/script/components/messages"
 import { EMOTION_LIST } from "src/script/concepts"
 import { SessionInfoPanel } from "../../../components/SessionInfoPanel"
 import { loadChatSession } from "../reducer"
+import { TableCellsIcon } from "@heroicons/react/20/solid"
+import { NetworkHelper } from "src/script/network"
+import FileSaver from 'file-saver'
 
 export const ChatSharePage = () => {
     const { sessionId } = useParams()
@@ -53,9 +56,23 @@ const ChatSessionInfoPanel = () => {
     const sessionId = useSelector(state => state.chatState.sessionInfo?.sessionId!)
     const userName = useSelector(state => state.chatState.sessionInfo?.name!)
     const userAge = useSelector(state => state.chatState.sessionInfo?.age!)
-    
+
+    const onDownloadClick = useCallback(async ()=>{
+        const resp = await fetch(NetworkHelper.makeEndpoint(sessionId, NetworkHelper.ENDPOINT_DOWNLOAD_CSV),
+        {
+            method: 'GET'
+        })
+        const blob = await resp.blob()
+        FileSaver.saveAs(blob, `session_${sessionId}.csv`)
+    }, [])
   
-    return <SessionInfoPanel sessionId={sessionId} name={userName} age={userAge}/>
+    return <SessionInfoPanel sessionId={sessionId} name={userName} age={userAge}>
+            
+        <button className="button-clear button-tiny button-with-icon opacity-70" onClick={onDownloadClick}>
+            <TableCellsIcon className="w-4 mr-1 opacity-70" />
+            <span>CSV로 저장</span>
+        </button>
+    </SessionInfoPanel>
   }
 
 const EmotionSelectionView = (props: { selected: Array<string> }) => {

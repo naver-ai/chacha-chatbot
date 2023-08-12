@@ -8,6 +8,8 @@ export class NetworkHelper{
     static readonly ENDPOINT_REGENERATE = "/regenerate"
     static readonly ENDPOINT_TERMINATE = "/terminate"
     static readonly ENDPOINT_MESSAGE = "/message"
+
+    static readonly ENDPOINT_DOWNLOAD_CSV = "/download_csv"
     
     static readonly JSON_HEADERS = {
         "Content-Type": "application/json"

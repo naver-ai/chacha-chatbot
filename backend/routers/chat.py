@@ -1,8 +1,10 @@
+from io import StringIO
 from typing import Optional, Any
 
 from fastapi import APIRouter, HTTPException, Body, Path
 from pydantic import BaseModel
 from starlette import status
+from fastapi.responses import StreamingResponse
 
 from app.response_generator import EmotionChatbotResponseGenerator
 from chatlib.chatbot import TurnTakingChatSession, Dialogue, session_writer, DialogueTurn
@@ -49,7 +51,7 @@ class ChatMessage(BaseModel):
     timestamp: int
 
     @staticmethod
-    def from_turn(turn: DialogueTurn)->Any:
+    def from_turn(turn: DialogueTurn) -> Any:
         return ChatMessage(
             id=turn.id,
             message=turn.message,
@@ -64,16 +66,19 @@ class ChatSessionInitializeArgs(BaseModel):
     user_name: str
     user_age: int
 
+
 @router.get("/sessions/{session_id}/info", response_model=ChatSessionInitializeArgs)
 def get_messages(session_id: str = Path(...)):
     session = _assert_get_session(session_id)
     gen: EmotionChatbotResponseGenerator = session.response_generator
     return ChatSessionInitializeArgs(user_age=gen.user_age, user_name=gen.user_name)
 
+
 @router.get("/sessions/{session_id}/messages")
 async def get_messages(session_id: str = Path(...)) -> list[ChatMessage]:
     session = _assert_get_session(session_id)
     return [ChatMessage.from_turn(turn) for turn in session.dialog]
+
 
 @router.post("/sessions/{session_id}/initialize", response_model=ChatMessage)
 async def _initialize_chat_session(args: ChatSessionInitializeArgs, session_id: str = Path(...)):
@@ -99,8 +104,9 @@ def _terminate_chat_session(session_id: str = Path(...)):
     if session_id in active_sessions:
         del active_sessions[session_id]
 
+
 @router.post("/sessions/{session_id}/message", response_model=ChatMessage)
-async def user_message(args: ChatMessage, session_id:str = Path(...)):
+async def user_message(args: ChatMessage, session_id: str = Path(...)):
     session = _assert_get_session(session_id)
 
     system_turn = await session.push_user_message(DialogueTurn(
@@ -112,8 +118,9 @@ async def user_message(args: ChatMessage, session_id:str = Path(...)):
     ))
     return ChatMessage.from_turn(system_turn)
 
+
 @router.post("/sessions/{session_id}/regenerate", response_model=ChatMessage)
-async def regenerate_last_system_message(session_id:str = Path(...)):
+async def regenerate_last_system_message(session_id: str = Path(...)):
     session = _assert_get_session(session_id)
 
     system_turn = await session.regenerate_last_system_message()
@@ -121,3 +128,20 @@ async def regenerate_last_system_message(session_id:str = Path(...)):
         return ChatMessage.from_turn(system_turn) if system_turn is not None else None
     else:
         return None
+
+
+@router.get("/sessions/{session_id}/download_csv")
+async def download_csv(session_id: str = Path(...), timezone: str | None = None):
+    session = _assert_get_session(session_id)
+
+    writer = EmotionChatbotResponseGenerator.get_csv_writer(session_id)
+    csv_string = writer.to_csv_string(session.dialog, dict(timezone=timezone))
+
+    def stream():
+        csv_io = StringIO(csv_string.encode(encoding='UTF-8').decode(encoding='UTF-8'))
+        yield from csv_io
+
+    response = StreamingResponse(stream(), media_type='text/csv')
+    response.headers['Content-Disposition'] = f'attachment; filename=chacha_session_{session_id}.csv'
+
+    return response

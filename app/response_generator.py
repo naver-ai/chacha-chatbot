@@ -1,10 +1,11 @@
 from chatlib import dict_utils
 from chatlib.chatbot import ResponseGenerator, Dialogue
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator, StateType
+from chatlib.dialogue_to_csv import DialogueCSVWriter, TurnValueExtractor
 from chatlib.mapper import ChatGPTDialogSummarizerParams
 from chatlib.message_transformer import SpecialTokenExtractionTransformer
 
-from app.common import EmotionChatbotPhase, SPECIAL_TOKEN_REGEX
+from app.common import EmotionChatbotPhase, SPECIAL_TOKEN_REGEX, SPECIAL_TOKEN_CONFIG
 from app.phases import explore, label, find, record, share, help
 
 
@@ -149,3 +150,13 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
                 return EmotionChatbotPhase.Explore, {"revisited": True}
 
         return None
+
+    @staticmethod
+    def get_csv_writer(session_id: str)->DialogueCSVWriter:
+        return DialogueCSVWriter(
+            columns=["state", *[key for token, key, _ in SPECIAL_TOKEN_CONFIG]],
+            column_extractors=[
+                TurnValueExtractor(["metadata", "state"]),
+                *[TurnValueExtractor(["metadata", key]) for token, key, value in SPECIAL_TOKEN_CONFIG]
+            ]
+        ).insertColumn("session", lambda turn, index, params: session_id, 0)
