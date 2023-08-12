@@ -3,8 +3,8 @@
 
 ## System Requirements
 1. Python 3.11.2 or higher
-2. [Poetry](https://python-poetry.org/docs/)
-3. Paid OpenAI API key
+2. [Poetry](https://python-poetry.org/docs/) - Python project dependency manager
+3. Paid OpenAI API key (ChaCha uses GPT-3.5 and GPT-4 models internally).
 
 ## How To Run
 ### Installation
@@ -13,7 +13,7 @@
 > poetry install
 ```
 
-2. Run the setup script and follow the steps.
+2. Run the setup script and follow the steps. It would help if you prepared the OpenAI API Key ready.
 ```shell
 > python setup.py
 ```
@@ -69,5 +69,5 @@ Then run the backend server:
 Access http://localhost on web browser.
 
 ## Author
-* Woosuk Seo (Intern at NAVER AI Lab, PhD candidate at University of Michigan)
 * Young-Ho Kim (NAVER AI Lab)
+* Woosuk Seo (Intern at NAVER AI Lab, PhD candidate at University of Michigan)
