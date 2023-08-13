@@ -154,9 +154,12 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
     @staticmethod
     def get_csv_writer(session_id: str)->DialogueCSVWriter:
         return DialogueCSVWriter(
-            columns=["state", *[key for token, key, _ in SPECIAL_TOKEN_CONFIG]],
+            columns=["state", *[key for token, key, _ in SPECIAL_TOKEN_CONFIG], "model", "prompt_tokens", "message_tokens"],
             column_extractors=[
                 TurnValueExtractor(["metadata", "state"]),
-                *[TurnValueExtractor(["metadata", key]) for token, key, value in SPECIAL_TOKEN_CONFIG]
+                *[TurnValueExtractor(["metadata", key]) for token, key, value in SPECIAL_TOKEN_CONFIG],
+                TurnValueExtractor(["metadata", "chatgpt", "model"]),
+                TurnValueExtractor(["metadata", "chatgpt", "usage", "prompt_tokens"]),
+                TurnValueExtractor(["metadata", "chatgpt", "usage", "completion_tokens"])
             ]
         ).insertColumn("session", lambda turn, index, params: session_id, 0)
