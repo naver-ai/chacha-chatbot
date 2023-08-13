@@ -1,10 +1,10 @@
-# LLM-Driven Chatbot for Enhancing Emotional Awareness in Children
+# ChaCha (CHAtbot for CHildren's emotion Awareness): LLM-Driven Chatbot for Enhancing Emotional Awareness in Children
 
 
 ## System Requirements
-1. Python 3.10 or higher
-2. [Poetry](https://python-poetry.org/docs/)
-3. Paid OpenAI API key
+1. Python 3.11.2 or higher
+2. [Poetry](https://python-poetry.org/docs/) - Python project dependency manager
+3. Paid OpenAI API key (ChaCha uses GPT-3.5 and GPT-4 models internally).
 
 ## How To Run
 ### Installation
@@ -13,20 +13,20 @@
 > poetry install
 ```
 
-2. Run the setup script and follow the steps.
+2. Run the setup script and follow the steps. It would help if you prepared the OpenAI API Key ready.
 ```shell
 > python setup.py
 ```
 
 ### Testing Chatbot on Command Line
-3. Run chat.py on command line:
+3. Run chat.py on the command line:
 ```shell
 > python chat.py
 ```
 
 ### Testing Chatbot on Web
 
-#### Running on development mode
+#### Running in development mode
 1. **Run backend server**
     ```shell
     > py main.py
@@ -51,9 +51,9 @@ You can perform the above steps using a shell script:
 ```
 
 
-#### Running on production mode
+#### Running in production mode
 
-The backend server can serve the frontend web under the hood, via the same port.
+The backend server can serve the frontend web under the hood via the same port.
 To activate this, build the frontend code once:
 
 ```shell
@@ -69,5 +69,5 @@ Then run the backend server:
 Access http://localhost on web browser.
 
 ## Author
-* Woosuk Seo (Intern at NAVER AI Lab, PhD candidate at University of Michigan)
 * Young-Ho Kim (NAVER AI Lab)
+* Woosuk Seo (Intern at NAVER AI Lab, PhD candidate at University of Michigan)
