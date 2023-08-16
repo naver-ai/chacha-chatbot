@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { EntityId, nanoid } from "@reduxjs/toolkit"
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from 'yup';
 import { sendUserMessage } from "../reducer";
@@ -16,15 +16,21 @@ const schema = yup.object({
         })
 }) 
 
-export const EmotionPicker = (props: { messageId: EntityId, disabled?: boolean }) => {
+export const EmotionPicker = (props: { messageId: EntityId, disabled?: boolean, value?: {[key:string]: boolean} }) => {
 
     const dispatch = useDispatch()
 
-    const { register, handleSubmit, formState: {errors, isValid} } = useForm({
+    const { register, handleSubmit, formState: {errors, isValid}, reset } = useForm({
         resolver: yupResolver(schema),
         mode: 'onChange',
         reValidateMode: 'onChange'
     })
+
+    useEffect(()=>{
+        if(props.value != null){
+            reset({emotions: props.value})
+        }
+    }, [props.value])
 
     const onSubmit = useCallback((data: {emotions: {[key:string]: boolean}})=>{
         const selectedEmotions = Object.keys(data.emotions).filter(key => data.emotions[key] === true)

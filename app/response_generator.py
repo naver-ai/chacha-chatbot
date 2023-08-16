@@ -51,7 +51,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
     def user_age(self)->int:
         return self.__user_age
 
-    async def get_generator(self, state: StateType, payload: dict | None) -> ResponseGenerator:
+    def get_generator(self, state: StateType, payload: dict | None) -> ResponseGenerator:
         # Get generator caches
         generator = self.__generators[state]
 
