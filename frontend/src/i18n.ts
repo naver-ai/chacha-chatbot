@@ -41,21 +41,21 @@ const kr = {
 const en = {
     SIGN_IN: {
         ERROR:{
-            SESSION_ID: "You can use only roman alphabets, numbers, hyphens, and under bars, without whitespace."},
-        SESSION_NAME: "Session Name",
-        USER_NAME_PLACEHOLDER: "How can I call you?",
+            SESSION_ID: "Only letters, numbers, hyphens, and underscores can be used. No spaces, okay?"},
+        SESSION_NAME: "What's the session name?",
+        USER_NAME_PLACEHOLDER: "What's your first name?",
         USER_AGE_PLACEHOLDER: "How old are you?",
-        START: "Start conversation!"
+        START: "Let's Chat!"
     },
     SHARE: {
-        SAVE: "Download to CSV"
+        SAVE: "Save as CSV"
     },
     CHAT: {
-        PROCESSING: "Thinking what to say... Please wait for a second!",
-        INPUT_PLACEHOLDER: "Enter what you want to tell me",
+        PROCESSING: "Thinking... Hang on!",
+        INPUT_PLACEHOLDER: "Type what you want to say here!",
         SHARE_LINK: "Share Link",
-        LINK_COPIED: "Copied URL to clipboard.",
-        CONFIRM_REGEN_LAST_MESSAGE: "Do you want to request Chacha to rethink this message?"
+        LINK_COPIED: "Link copied! You can paste it now.",
+        CONFIRM_REGEN_LAST_MESSAGE: "Want Chacha to say that again differently?"
     },
     EMOTION_PICKER: {
         ERROR: {
@@ -65,7 +65,7 @@ const en = {
 
     SESSION_INFO: {
         SESSION: "Session",
-        PROFILE_FORMAT: "{name}, {age}"
+        PROFILE_FORMAT: "{name}, {age} years old"
     },
 
     LABEL: {
