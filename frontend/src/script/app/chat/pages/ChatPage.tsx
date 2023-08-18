@@ -23,6 +23,7 @@ import { SessionInfoPanel } from "../../../components/SessionInfoPanel"
 import { EmotionPicker } from "../components/EmotionPicker";
 import useAsyncEffect from 'use-async-effect';
 import { NetworkHelper } from "src/script/network";
+import { useTranslation } from "react-i18next";
 
 export const ChatPage = () => {
 
@@ -185,6 +186,8 @@ const TypingPanel = (props: {
     props.onBlur?.()
   }, [props.onBlur])
 
+  const [t] = useTranslation()
+
   useEffect(() => {
     setFocus('message')
   }, [setFocus])
@@ -195,8 +198,8 @@ const TypingPanel = (props: {
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-row bg-slate-50 px-3 py-1.5 pl-1.5 sm:rounded-lg shadow-lg">
           {
             isSystemMessageLoading
-              ? <div className="text-input text-chat-1 animate-pulse-fast flex-1 mr-2">할 말을 생각 중이야. 잠시만 기다려줘!</div>
-              : <TextareaAutosize {...register("message")} minRows={1} maxRows={5} autoFocus={true} placeholder={"나에게 할 말을 입력해줘!"}
+              ? <div className="text-input text-chat-1 animate-pulse-fast flex-1 mr-2">{t("CHAT.PROCESSING")}</div>
+              : <TextareaAutosize {...register("message")} minRows={1} maxRows={5} autoFocus={true} placeholder={t("CHAT.INPUT_PLACEHOLDER")}
                 className="chat-type flex-1 mr-2"
                 autoComplete="off"
                 onFocus={onTypingViewFocusIn}
@@ -206,7 +209,7 @@ const TypingPanel = (props: {
           }
           <button type="submit" className="button-main" disabled={isSystemMessageLoading}>
             {
-              isMobile ? <PaperAirplaneIcon className="w-5"/> : <span>보내기</span>
+              isMobile ? <PaperAirplaneIcon className="w-5"/> : <span>{t("LABEL.SEND")}</span>
             }
           </button>
 
@@ -229,17 +232,19 @@ const ShareButton = () => {
     return path.join(urlOrigin, "share", sessionId)
   }, [urlOrigin, sessionId])
 
+  const [t] = useTranslation()
+
   const onCopy = useCallback((text: string, result: boolean) => {
-    enqueueSnackbar('링크가 클립보드에 복사되었습니다.', {
+    enqueueSnackbar(t("CHAT.LINK_COPIED"), {
       autoHideDuration: 1000,
       preventDuplicate: true
     })
-  }, [])
+  }, [t])
 
   return <CopyToClipboard text={shareURL} onCopy={onCopy}>
     <button className="button-clear button-tiny button-with-icon opacity-70">
       <ClipboardDocumentIcon className="w-4 mr-1 opacity-70" />
-      <span>링크 공유하기</span>
+      <span>{t("CHAT.SHARE_LINK")}</span>
     </button></CopyToClipboard>
 }
 
@@ -272,14 +277,15 @@ const SessionMessageView = (props: { id: EntityId, isLast: boolean }) => {
 
   const isSystemBusy = useSelector(state => state.chatState.isLoadingMessage)
 
+  const [t] = useTranslation()
 
   const onDoubleClick = useCallback(()=>{
     if(turn.is_user === false && props.isLast === true){
-      if(confirm("차차의 마지막 메시지를 다시 요청할래?")){
+      if(confirm(t("CHAT.CONFIRM_REGEN_LAST_MESSAGE"))){
         dispatch(regenerateLastSystemMessage())
       }
     }
-  }, [turn.is_user, props.isLast])
+  }, [turn.is_user, props.isLast, t])
 
   return hideMessage ? null : <MessageView avatarHash={turn.is_user === true ? userName : "system"} message={turn} onThumbnailDoubleClick={onDoubleClick} componentsBelowCallout={
       !isEmotionSelectionTurn

@@ -10,6 +10,7 @@ import { loadChatSession } from "../reducer"
 import { TableCellsIcon } from "@heroicons/react/20/solid"
 import { NetworkHelper } from "src/script/network"
 import FileSaver from 'file-saver'
+import { useTranslation } from "react-i18next"
 
 export const ChatSharePage = () => {
     const { sessionId } = useParams()
@@ -65,12 +66,14 @@ const ChatSessionInfoPanel = () => {
         const blob = await resp.blob()
         FileSaver.saveAs(blob, `session_${sessionId}.csv`)
     }, [])
+
+    const [t] = useTranslation()
   
     return <SessionInfoPanel sessionId={sessionId} name={userName} age={userAge}>
             
         <button className="button-clear button-tiny button-with-icon opacity-70" onClick={onDownloadClick}>
             <TableCellsIcon className="w-4 mr-1 opacity-70" />
-            <span>CSV로 저장</span>
+            <span>{t("SHARE.SAVE")}</span>
         </button>
     </SessionInfoPanel>
   }
