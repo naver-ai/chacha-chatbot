@@ -74,19 +74,19 @@ const en = {
     }
 }
 
-export const LANGUAGE_LIST = ["kr", "en"]
+export const LANGUAGE_LIST = ["한국어", "English"]
 
 i18n.use(initReactI18next)
     .init({
         resources: {
-            en: {
+            English: {
                 translation: en
             },
-            kr: {
+            한국어: {
                 translation: kr
             }
         },
-        lng: 'kr',
+        lng: '한국어',
 
         interpolation: {
             escapeValue: false
