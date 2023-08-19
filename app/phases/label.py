@@ -33,8 +33,9 @@ def create_generator():
 """
                                                                                f"""
     - With the special token, the user will pick one or more emotions from the list of emotions: {", ".join([f"{emotion['en']} ({emotion['kr']})" for emotion in _get_emotion_list()])}.
+"""+"""
     - Do not mention the list of emotion words as they will be shown as GUI.
-    - Use the phrase like "화면에 표시된 감정 이름 중에서 한 개 혹은 그 이상을 <em>선택</em>하고, <em>'보내기'</em>를 눌러봐."
+    {%- if locale == 'kr' %}- Use the phrase like "화면에 표시된 감정 이름 중에서 한 개 혹은 그 이상을 <em>선택</em>하고, <em>'보내기'</em>를 눌러봐.{%- endif %}"
     """
                                                                                """
         - The user's choices will be fed as a JSON list, in the format such as [{"key": ...}, {"key":"..."}, ...], where 'key's contain an emotion name.

@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from starlette import status
 from fastapi.responses import StreamingResponse
 
+from app.common import ChatbotLocale
 from app.response_generator import EmotionChatbotResponseGenerator
 from chatlib.chatbot import TurnTakingChatSession, Dialogue, session_writer, DialogueTurn
 
@@ -65,13 +66,14 @@ class ChatMessage(BaseModel):
 class ChatSessionInitializeArgs(BaseModel):
     user_name: str
     user_age: int
+    locale: ChatbotLocale = ChatbotLocale.Korean
 
 
 @router.get("/sessions/{session_id}/info", response_model=ChatSessionInitializeArgs)
 def get_messages(session_id: str = Path(...)):
     session = _assert_get_session(session_id)
     gen: EmotionChatbotResponseGenerator = session.response_generator
-    return ChatSessionInitializeArgs(user_age=gen.user_age, user_name=gen.user_name)
+    return ChatSessionInitializeArgs(user_age=gen.user_age, user_name=gen.user_name, locale=gen.locale)
 
 
 @router.get("/sessions/{session_id}/messages")
@@ -90,7 +92,8 @@ async def _initialize_chat_session(args: ChatSessionInitializeArgs, session_id: 
     else:
         new_session = TurnTakingChatSession(session_id,
                                             EmotionChatbotResponseGenerator(user_name=args.user_name,
-                                                                            user_age=args.user_age))
+                                                                            user_age=args.user_age,
+                                                                            locale=args.locale))
         active_sessions[session_id] = new_session
         system_turn = await new_session.initialize()
 
