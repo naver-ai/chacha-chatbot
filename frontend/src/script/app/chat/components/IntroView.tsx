@@ -6,6 +6,7 @@ import {useDispatch} from "../../../redux/hooks";
 import {initializeChatSession} from "../reducer";
 import { IntroFormFrame } from "./IntroFormFrame";
 import { useTranslation } from "react-i18next";
+import { LanguageSelector } from "./LanguageSelector";
 
 const schema = yup.object({
     user_name: yup.string().required(),
@@ -28,9 +29,12 @@ export const IntroView = (props: {
 
     const dispatch = useDispatch()
 
+
+    const [t, i18n] = useTranslation()
+
     const onSubmit = useCallback((data: {user_name: string, user_age: number}) => {
-        dispatch(initializeChatSession(props.sessionId, data.user_name, data.user_age))
-    }, [props.sessionId])
+        dispatch(initializeChatSession(props.sessionId, data.user_name, data.user_age, i18n.language))
+    }, [props.sessionId, i18n])
 
     useEffect(()=>{
         setFocus("user_name")
@@ -45,10 +49,10 @@ export const IntroView = (props: {
         }
     }, [getFieldState, setFocus])
 
-    const [t] = useTranslation()
-
     return <IntroFormFrame>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="panel">
+            <LanguageSelector className="self-end mb-2"/>
+            <form onSubmit={handleSubmit(onSubmit)}>
         <input {...register("user_name")} type="text" placeholder={t("SIGN_IN.USER_NAME_PLACEHOLDER")} 
         autoComplete="off"
         className=""
@@ -60,5 +64,7 @@ export const IntroView = (props: {
             isValid ? <input type={"submit"} value={t("SIGN_IN.START")} className="button-main mt-2"/> : undefined
         }
         
-    </form></IntroFormFrame>
+    </form>
+        </div>
+        </IntroFormFrame>
 }

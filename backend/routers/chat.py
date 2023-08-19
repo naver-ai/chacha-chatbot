@@ -90,6 +90,7 @@ async def _initialize_chat_session(args: ChatSessionInitializeArgs, session_id: 
             detail="Duplicate active session ID."
         )
     else:
+        print(f"Initialize session - ID: {session_id} // Name: {args.user_name} // Age: {args.user_age} // Locale: {args.locale}")
         new_session = TurnTakingChatSession(session_id,
                                             EmotionChatbotResponseGenerator(user_name=args.user_name,
                                                                             user_age=args.user_age,

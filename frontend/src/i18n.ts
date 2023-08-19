@@ -2,10 +2,12 @@ import * as i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 const kr = {
+    LANGUAGE_NAME: "한국어",
     SIGN_IN: {
         ERROR:{
             SESSION_ID: "세션 아이디는 공백 없는 대소문자와 숫자, 하이픈, 언더바만 가능해."
         },
+        LANG: "언어",
         SESSION_NAME: "세션 이름",
         USER_NAME_PLACEHOLDER: "너의 이름은 뭐야? (성 빼고)",
         USER_AGE_PLACEHOLDER: "몇 살이야?",
@@ -39,9 +41,11 @@ const kr = {
 }
 
 const en = {
+    LANGUAGE_NAME: "English",
     SIGN_IN: {
         ERROR:{
             SESSION_ID: "Only letters, numbers, hyphens, and underscores can be used. No spaces, okay?"},
+        LANG: "Language",
         SESSION_NAME: "What's the session name?",
         USER_NAME_PLACEHOLDER: "What's your first name?",
         USER_AGE_PLACEHOLDER: "How old are you?",
@@ -74,19 +78,19 @@ const en = {
     }
 }
 
-export const LANGUAGE_LIST = ["한국어", "English"]
+export const LANGUAGE_LIST = ["kr", "en"]
 
 i18n.use(initReactI18next)
     .init({
         resources: {
-            English: {
+            en: {
                 translation: en
             },
-            한국어: {
+            kr: {
                 translation: kr
             }
         },
-        lng: '한국어',
+        lng: 'kr',
 
         interpolation: {
             escapeValue: false

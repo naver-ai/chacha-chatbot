@@ -39,8 +39,11 @@ html, body{
 
 
 
+    .intro-form-frame .panel {
+        @apply flex flex-col justify-stretch my-auto mx-auto w-72 introViewChat;
+    }
     .intro-form-frame form {
-        @apply flex flex-col my-auto mx-auto w-64 introViewChat;
+        @apply flex flex-col justify-stretch;
     }
 
     textarea.chat-type {
@@ -53,6 +56,10 @@ html, body{
 
     .button-clear{
         @apply bg-transparent text-gray-700;
+    }
+
+    .button-outline{
+        @apply button-clear border-slate-400 border-[1px];
     }
 
     .button-tiny{
