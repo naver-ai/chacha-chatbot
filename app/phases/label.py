@@ -53,7 +53,7 @@ def create_generator():
 {% else %}
 {%- set emotion_without_empathy = summarizer_result.identified_emotions | selectattr("empathized", "false") | first | default(None) -%}
 {% if emotion_without_empathy is not none %}
-- However, you have not empathized with the user's {{emotion_without_empathy.emotion}}. Theretore, empathize with the user's emotion, "{{emotion_without_empathy.emotion}} more explicitly."{% endif %}
+- However, you have not empathized with the user's {{emotion_without_empathy.emotion}}. Therefore, empathize with the user's emotion, "{{emotion_without_empathy.emotion}} more explicitly."{% endif %}
 {% endif %}
 {%- endif -%}
 {%- endif %}
