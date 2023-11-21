@@ -1,7 +1,9 @@
 import { AppDispatch, ReduxAppState } from "../../redux/store";
 import {ChatMessage} from "../../types";
-import {createEntityAdapter, createSlice, Draft, PayloadAction} from "@reduxjs/toolkit";
+import {createEntityAdapter, createSlice, Draft, EntityAdapter, PayloadAction} from "@reduxjs/toolkit";
 import { NetworkHelper } from "../../network";
+import i18n from "src/i18n";
+
 
 const messagesAdapter = createEntityAdapter<ChatMessage>()
 
@@ -11,7 +13,8 @@ export interface ChatState{
     sessionInfo?: {
         sessionId: string,
         name: string,
-        age: number
+        age: number,
+        locale: string
     } | undefined
 
     isLoadingMessage: boolean
@@ -29,11 +32,16 @@ const chatSlice = createSlice({
     name: "chat",
     initialState: INITIAL_CHAT_STATE,
     reducers: {
-        initialize: (state, action: PayloadAction<{
-            userName: string, userAge: number, sessionId: string}>) => {
+        init: (state) => {
+            return INITIAL_CHAT_STATE
+        },
+
+        initialize_session_info: (state, action: PayloadAction<{
+            userName: string, userAge: number, sessionId: string, locale: string}>) => {
             state.sessionInfo = {
                 name: action.payload.userName,
                 age: action.payload.userAge,
+                locale: action.payload.locale,
                 sessionId: action.payload.sessionId
             }
             messagesAdapter.removeAll(state.messages)
@@ -59,24 +67,44 @@ const chatSlice = createSlice({
 })
 
 
-export function loadChatSession(sessionId: string): (dispatch: AppDispatch, getState: () => ReduxAppState) => void {
+export function loadChatSession(sessionId: string, autoReloadSystemMessage: boolean = false): (dispatch: AppDispatch, getState: () => ReduxAppState) => void {
     return async (dispatch: AppDispatch) => {
         dispatch(chatSlice.actions.setLoadingState(true))
         
         const [messages, info] = await Promise.all([NetworkHelper.loadSessionChatMessages(sessionId), NetworkHelper.loadSessionInfo(sessionId)])
         
+        i18n.changeLanguage(info.locale)
+
         dispatch(chatSlice.actions.setLoadingState(false))
-        dispatch(chatSlice.actions.initialize({ sessionId, userAge: info.user_age, userName: info.user_name}))
+        dispatch(chatSlice.actions.initialize_session_info({ sessionId, userAge: info.user_age, userName: info.user_name, locale: info.locale}))
         dispatch(chatSlice.actions.setMessages(messages))
+
+        if(autoReloadSystemMessage === true){
+            if(messages.length > 0 && messages[messages.length - 1].is_user === true){
+                // the last message is a user message
+                console.log("Should process the user message.")
+                const lastMessage = messages[messages.length - 1]
+                requestAnimationFrame(()=>{
+                    dispatch(chatSlice.actions.setLoadingState(true))
+                    dispatch(chatSlice.actions.removeMessage(lastMessage.id))
+                    NetworkHelper.sendUserMessage(sessionId, lastMessage).then(agentResponse => {
+                        dispatch(chatSlice.actions.setLoadingState(false))
+                        dispatch(chatSlice.actions.addMessage(agentResponse))
+                    })
+                })
+            }
+        }
     }
 }
 
 
-export function initializeChatSession(sessionId: string, userName: string, userAge: number): (dispatch: AppDispatch, getState: () => ReduxAppState) => void {
+export function initializeChatSession(sessionId: string, 
+    userName: string, userAge: number, locale: string): (dispatch: AppDispatch, getState: () => ReduxAppState) => void {
     return async (dispatch: AppDispatch) => {
-        dispatch(chatSlice.actions.initialize({userName, userAge, sessionId}))
+        i18n.changeLanguage(locale)
+        dispatch(chatSlice.actions.initialize_session_info({userName, userAge, sessionId, locale}))
         dispatch(chatSlice.actions.setLoadingState(true))
-        const agentResponse = await NetworkHelper.initializeSession(sessionId, userName, userAge)
+        const agentResponse = await NetworkHelper.initializeSession(sessionId, userName, userAge, locale)
         dispatch(chatSlice.actions.setLoadingState(false))
         dispatch(chatSlice.actions.addMessage(agentResponse))
     }
@@ -101,9 +129,8 @@ export function regenerateLastSystemMessage(): (dispatch: AppDispatch, getState:
     return async (dispatch: AppDispatch, getState: ()=>ReduxAppState) => {
         const chatState = getState().chatState
         const sessionId = chatState.sessionInfo?.sessionId
-        const numMessages = chatState.messages.ids.length
-        if(sessionId != null && numMessages > 0){
-            const lastMessage = chatState.messages.entities[chatState.messages.ids[numMessages - 1]]!
+        const lastMessage = getLastSystemMessage(chatState.messages)
+        if(sessionId != null && lastMessage != null && lastMessage.is_user == false){
             dispatch(chatSlice.actions.removeMessage(lastMessage.id))
             dispatch(chatSlice.actions.setLoadingState(true))
             const agentResponse = await NetworkHelper.regenerateLastSystemMessage(sessionId)
@@ -112,5 +139,15 @@ export function regenerateLastSystemMessage(): (dispatch: AppDispatch, getState:
         }
     }
 }
+
+
+function getLastSystemMessage(messagesState: typeof INITIAL_MESSAGES_STATE): ChatMessage | null{
+    const numMessages = messagesState.ids.length
+    if(numMessages > 0){
+        return messagesState.entities[messagesState.ids[messagesState.ids.length - 1]]!
+    }else return null
+}
+
+export const { init } = chatSlice.actions
 
 export default chatSlice.reducer

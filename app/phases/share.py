@@ -1,13 +1,11 @@
-import json
-
 from chatlib import dialogue_utils, dict_utils
 from chatlib.chatbot import Dialogue
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
 from chatlib.jinja_utils import convert_to_jinja_template
 from chatlib.mapper import ChatGPTDialogueSummarizer
-from chatlib.openai_utils import ChatGPTParams, ChatGPTModel
+from chatlib.openai_utils import ChatGPTModel
 
-from app.common import stringify_list, COMMON_SPEAKING_RULES, EmotionChatbotSpecialTokens, PromptFactory, \
+from app.common import EmotionChatbotSpecialTokens, PromptFactory, \
     SPECIAL_TOKEN_CONFIG
 
 

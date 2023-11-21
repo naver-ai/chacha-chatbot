@@ -23,18 +23,19 @@ export class NetworkHelper{
         return this.makeChatAPIEndpointPrefix(sessionId) + endpoint
     }
 
-    static makeInitializeEndpointArgs(userName: string, userAge: number): object {
+    static makeInitializeEndpointArgs(userName: string, userAge: number, locale?: string): object {
         return {
             user_name: userName,
-            user_age: userAge
+            user_age: userAge,
+            locale
         }
     }
 
-    static async initializeSession(sessionId: string, userName: string, userAge: number): Promise<ChatMessage>{
+    static async initializeSession(sessionId: string, userName: string, userAge: number, locale?: string): Promise<ChatMessage>{
         const resp = await fetch(this.makeEndpoint(sessionId, this.ENDPOINT_INITIALIZE),
             {
                 method: 'POST',
-                body: JSON.stringify(this.makeInitializeEndpointArgs(userName, userAge)),
+                body: JSON.stringify(this.makeInitializeEndpointArgs(userName, userAge, locale)),
                 headers: NetworkHelper.JSON_HEADERS
             }
         )
@@ -56,7 +57,7 @@ export class NetworkHelper{
         }else throw Error(`Session initialization error - ${resp.status}`)
     }
 
-    static async loadSessionInfo(sessionId: string): Promise<{user_name: string, user_age: number}>{
+    static async loadSessionInfo(sessionId: string): Promise<{user_name: string, user_age: number, locale: string}>{
         const resp = await fetch(this.makeEndpoint(sessionId, this.ENDPOINT_INFO),
             {
                 method: 'GET',

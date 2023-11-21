@@ -5,13 +5,17 @@ from chatlib.dialogue_to_csv import DialogueCSVWriter, TurnValueExtractor
 from chatlib.mapper import ChatGPTDialogSummarizerParams
 from chatlib.message_transformer import SpecialTokenExtractionTransformer
 
-from app.common import EmotionChatbotPhase, SPECIAL_TOKEN_REGEX, SPECIAL_TOKEN_CONFIG
+from app.common import EmotionChatbotPhase, SPECIAL_TOKEN_REGEX, SPECIAL_TOKEN_CONFIG, ChatbotLocale
 from app.phases import explore, label, find, record, share, help
 
 
 class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbotPhase]):
 
-    def __init__(self, user_name: str | None = None, user_age: int = None, verbose: bool = False):
+    def __init__(self,
+                 user_name: str | None = None,
+                 user_age: int = None,
+                 locale: ChatbotLocale = ChatbotLocale.Korean,
+                 verbose: bool = False):
         super().__init__(initial_state=EmotionChatbotPhase.Explore,
                          verbose=verbose,
                          message_transformers=[
@@ -22,6 +26,7 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
 
         self.__user_name = user_name
         self.__user_age = user_age
+        self.__locale = locale
 
         self.__generators: dict[EmotionChatbotPhase, ChatGPTResponseGenerator] = dict()
 
@@ -36,10 +41,12 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
         super().write_to_json(parcel)
         parcel["user_name"] = self.__user_name
         parcel["user_age"] = self.__user_age
+        parcel["locale"] = self.__locale
 
     def restore_from_json(self, parcel: dict):
         self.__user_name = parcel["user_name"]
         self.__user_age = parcel["user_age"]
+        self.__locale = parcel["locale"] if "locale" in parcel else ChatbotLocale.Korean
 
         super().restore_from_json(parcel)
 
@@ -51,20 +58,32 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
     def user_age(self)->int:
         return self.__user_age
 
-    async def get_generator(self, state: StateType, payload: dict | None) -> ResponseGenerator:
+    @property
+    def locale(self)->ChatbotLocale:
+        return self.__locale
+
+    @locale.setter
+    def locale(self, locale: ChatbotLocale):
+        self.__locale = locale
+        self.__generators[self.current_state].update_instruction_parameters(dict(locale=locale))
+
+    def get_generator(self, state: StateType, payload: dict | None) -> ResponseGenerator:
         # Get generator caches
         generator = self.__generators[state]
 
         if state == EmotionChatbotPhase.Explore:
             generator.update_instruction_parameters(dict(user_name=self.__user_name, user_age=self.__user_age,
+                                                         locale=self.__locale,
                                                          revisited=True if payload is not None and payload[
                                                              "revisited"] is True else False))
         elif state == EmotionChatbotPhase.Label:
-            generator.update_instruction_parameters(payload)  # Put the result of rapport conversation
+            generator.update_instruction_parameters(dict(**payload, locale=self.__locale))  # Put the result of rapport conversation
         elif state in [EmotionChatbotPhase.Find, EmotionChatbotPhase.Share, EmotionChatbotPhase.Record]:
             generator.update_instruction_parameters(
                 dict(key_episode=self._get_memoized_payload(EmotionChatbotPhase.Explore)["key_episode"],
-                     identified_emotions=self._get_memoized_payload(EmotionChatbotPhase.Label)["identified_emotions"])
+                     identified_emotions=self._get_memoized_payload(EmotionChatbotPhase.Label)["identified_emotions"],
+                     locale=self.__locale
+                     )
             )
         return generator
 
@@ -150,6 +169,10 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
                 return EmotionChatbotPhase.Explore, {"revisited": True}
 
         return None
+
+    async def _get_response_impl(self, dialog: Dialogue, dry: bool = False) -> tuple[str, dict | None]:
+        msg, metadata = await super()._get_response_impl(dialog, dry)
+        return msg, dict_utils.set_nested_value(metadata, "locale", self.locale)
 
     @staticmethod
     def get_csv_writer(session_id: str)->DialogueCSVWriter:

@@ -5,6 +5,8 @@ import {KeyboardEvent, useCallback, useEffect} from "react";
 import {useDispatch} from "../../../redux/hooks";
 import {initializeChatSession} from "../reducer";
 import { IntroFormFrame } from "./IntroFormFrame";
+import { useTranslation } from "react-i18next";
+import { LanguageSelector } from "./LanguageSelector";
 
 const schema = yup.object({
     user_name: yup.string().required(),
@@ -27,9 +29,12 @@ export const IntroView = (props: {
 
     const dispatch = useDispatch()
 
+
+    const [t, i18n] = useTranslation()
+
     const onSubmit = useCallback((data: {user_name: string, user_age: number}) => {
-        dispatch(initializeChatSession(props.sessionId, data.user_name, data.user_age))
-    }, [props.sessionId])
+        dispatch(initializeChatSession(props.sessionId, data.user_name, data.user_age, i18n.language))
+    }, [props.sessionId, i18n])
 
     useEffect(()=>{
         setFocus("user_name")
@@ -45,17 +50,21 @@ export const IntroView = (props: {
     }, [getFieldState, setFocus])
 
     return <IntroFormFrame>
-        <form onSubmit={handleSubmit(onSubmit)}>
-        <input {...register("user_name")} type="text" placeholder={"너의 이름은 뭐야? (성 빼고)"} 
+        <div className="panel">
+            <LanguageSelector className="self-end mb-2"/>
+            <form onSubmit={handleSubmit(onSubmit)}>
+        <input {...register("user_name")} type="text" placeholder={t("SIGN_IN.USER_NAME_PLACEHOLDER")} 
         autoComplete="off"
         className=""
         onKeyDown={handleKeyDownOnNameField}
         />
 
-        <input {...register("user_age")} type="number" placeholder={"몇 살이야?"} className="mt-2" autoComplete="off"/>
+        <input {...register("user_age")} type="number" placeholder={t("SIGN_IN.USER_AGE_PLACEHOLDER")} className="mt-2" autoComplete="off"/>
         {
-            isValid ? <input type={"submit"} value={"대화 시작하기!"} className="button-main mt-2"/> : undefined
+            isValid ? <input type={"submit"} value={t("SIGN_IN.START")} className="button-main mt-2"/> : undefined
         }
         
-    </form></IntroFormFrame>
+    </form>
+        </div>
+        </IntroFormFrame>
 }

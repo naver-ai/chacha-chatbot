@@ -1,13 +1,13 @@
 import json
-from string import Template
 
+from chatlib.chatbot import DialogueTurn
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
 from chatlib.jinja_utils import convert_to_jinja_template
-
-from app.common import PromptFactory, SPECIAL_TOKEN_CONFIG
-from chatlib.chatbot import DialogueTurn
 from chatlib.mapper import ChatGPTDialogueSummarizer
 from chatlib.openai_utils import ChatGPTParams
+
+from app.common import PromptFactory, SPECIAL_TOKEN_CONFIG
+
 
 # Build rapport with the user. Ask about the most memorable episode. Ask about what happened and what the user felt.
 class ExploreGenerator(ChatGPTResponseGenerator):
@@ -23,7 +23,9 @@ For each conversation turn, execute one task only.
 
 [Intro Task]
 - Introduce yourself since it is your first time to meet the user.
+{%-if locale == 'kr'%}
 - Ask for an excuse that your Korean may sound awkward sometimes as you started learning Korean recently.
+{%- endif %}
 - Explain who you are and share your interests and stories.
 - Ask the user to introduce himself or herself.
 - After his or her introduction, continue the conversation about the ongoing topic.
@@ -41,11 +43,17 @@ For each conversation turn, execute one task only.
 
 """ + PromptFactory.get_speaking_rules_block()), special_tokens=SPECIAL_TOKEN_CONFIG)
 
-        self.initial_user_message_format = Template("안녕! 내 이름은 $user_name라고 해. 난 $user_age살이야")
+        self.__initial_user_message_format = convert_to_jinja_template("""
+{%-if locale == 'kr'-%}
+안녕! 내 이름은 {{user_name}}라고 해. 난 {{user_age}}살이야.
+{%- else %}
+Hi! My name is {{user_name}}. I'm {{user_age}} years old.
+{%- endif -%}
+        """)
 
 
     def _on_instruction_updated(self, params: dict):
-        self.initial_user_message = self.initial_user_message_format.safe_substitute(**params)
+        self.initial_user_message = self.__initial_user_message_format.render(**params)
 
 
 def create_generator():

@@ -22,9 +22,9 @@ def create_generator():
 - 1. First start with asking the user whether they have been keeping diaries or journals regularly.
 - 2. Then encourage the user to keep diary to record the moments in which they felt positive emotions.
 - 3. Suggest a diary content by explicitly providing an example essay summarizing the above positive emotions and the reason; 
-  for the essay, use '~다' style Korean, such as "~했다." rather than "~했어."; 
+  {%- if locale == 'kr' %}for the essay, use '~다' style Korean, such as "~했다." rather than "~했어.";{%- endif %} 
   put the diary content wrapped with <diary></diary>, at the end of the message;
-  use the phrase like "예를 들어 다음과 같은 내용으로 일기를 써볼 수 있을 거야."
+  {%- if locale == 'kr' %}use the phrase like "예를 들어 다음과 같은 내용으로 일기를 써볼 수 있을 거야."{%- endif %}
   
 - Since the user is currently conversing with you, don't ask them to record now.""" + """
 {% if summarizer_result != Undefined -%}
