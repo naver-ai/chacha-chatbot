@@ -4,7 +4,8 @@
 ## System Requirements
 1. Python 3.11.2 or higher
 2. [Poetry](https://python-poetry.org/docs/) - Python project dependency manager
-3. Paid OpenAI API key (ChaCha uses GPT-3.5 and GPT-4 models internally).
+3. NodeJS and NPM
+4. Paid OpenAI API key (ChaCha uses GPT-3.5 and GPT-4 models internally).
 
 ## How To Run
 ### Installation
@@ -13,15 +14,22 @@
 > poetry install
 ```
 
-2. Run the setup script and follow the steps. It would help if you prepared the OpenAI API Key ready.
+2. Install frontend Node dependencies
 ```shell
-> python setup.py
+> cd frontend
+> npm install
+> cd ..
+```
+
+4. Run the setup script and follow the steps. It would help if you prepared the OpenAI API Key ready.
+```shell
+> poetry run python setup.py
 ```
 
 ### Testing Chatbot on Command Line
 3. Run chat.py on the command line:
 ```shell
-> python chat.py
+> poetry run python chat.py
 ```
 
 ### Testing Chatbot on Web
@@ -29,11 +37,11 @@
 #### Running in development mode
 1. **Run backend server**
     ```shell
-    > py main.py
+    > poetry run python main.py
     ```
     The default port is 8000. You can set `--port` to designate manually.
     ```shell
-    > py main.py --port 3000
+    > poetry run python main.py --port 3000
     ```
 2. **Run frontend server**
    
@@ -64,7 +72,7 @@ To activate this, build the frontend code once:
 Then run the backend server:
 ```shell
 > cd ..
-> python3 main.py --production --port 80
+> poetry run python main.py --production --port 80
 ```
 Access http://localhost on web browser.
 
