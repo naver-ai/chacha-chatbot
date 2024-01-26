@@ -1,6 +1,15 @@
 # ChaCha (CHAtbot for CHildren's emotion Awareness): LLM-Driven Chatbot for Enhancing Emotional Awareness in Children
 
+![image](screens.jpg)
 
+This repository is a source code of the chatbot implementation presented in the ACM CHI 2024 paper, titled "**ChaCha: Leveraging Large Language Models to Prompt Children to Share Their Emotions about Personal Events**."
+
+> Woosuk Seo, Chanmo Yang, and Young-Ho Kim. 2024.<br/>
+> ChaCha: Leveraging Large Language Models to Prompt Children to Share Their Emotions about Personal Events.<br/>
+> In Proceedings of ACM CHI Conference on Human Factors in Computing Systems (CHI'24). To appear.
+
+## Project Website
+https://naver-ai.github.io/chacha/
 
 ## System Requirements
 1. Python 3.11.2 or higher
