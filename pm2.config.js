@@ -1,8 +1,8 @@
 module.exports = {
     apps: [{
-        name: 'llmchat-for-child',
-        script: 'main.py',
-        interpreter: "python3",
+        name: 'chacha-chatbot',
+        script: 'run python main.py',
+        interpreter: "poetry",
         args: '--production --port=80'
     }]
 };
