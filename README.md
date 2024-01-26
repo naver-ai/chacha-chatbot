@@ -76,6 +76,6 @@ Then run the backend server:
 ```
 Access http://localhost on web browser.
 
-## Author
+## Authors of the System
 * Young-Ho Kim (NAVER AI Lab)
 * Woosuk Seo (Intern at NAVER AI Lab, PhD candidate at University of Michigan)
