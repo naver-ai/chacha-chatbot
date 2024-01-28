@@ -1,3 +1,7 @@
+![image](https://img.shields.io/badge/language-Python3%7CTypeScript-blue)
+![image](https://img.shields.io/badge/framework-FastAPI%7CReact-orange)
+![image](https://img.shields.io/github/license/naver-ai/chacha-chatbot)
+
 # ChaCha (CHAtbot for CHildren's emotion Awareness): LLM-Driven Chatbot for Enhancing Emotional Awareness in Children
 
 ![image](screens.jpg)
