@@ -14,7 +14,7 @@ https://naver-ai.github.io/chacha/
 ## System Requirements
 1. Python 3.11.2 or higher
 2. [Poetry](https://python-poetry.org/docs/) - Python project dependency manager
-3. NodeJS and NPM
+3. NodeJS and NPM - tested on 18.17.0
 4. Paid OpenAI API key (ChaCha uses GPT-3.5 and GPT-4 models internally).
 
 ## How To Run
@@ -86,6 +86,46 @@ Then run the backend server:
 ```
 Access http://localhost on web browser.
 
-## Authors of the System
-* Young-Ho Kim (NAVER AI Lab)
+## Analysis of Chat Logs
+
+### Chat Session Reviewing on Web
+A session chat can be reviewed by visiting `[domain]/share/{session_id}`. There, you can also download the chat logs in CSV.
+
+### Log Files
+To keep the framework lightweight, ChaCha leverages a file storage instead of a database. The session information and chat messages are stored in `./data/sessions/{session_name}` in real time.
+
+In the session directory, `info.json` maintains the metadata and the global configuration of the current session. For example:
+
+```json
+{
+  "id": "User_001",
+  "turns": 1,
+  "response_generator": {
+    "state_history": [
+      [
+        "explore",
+        null
+      ]
+    ],
+    "verbose": false,
+    "payload_memory": {},
+    "user_name": "John",
+    "user_age": 12,
+    "locale": "kr"
+  }
+}
+```
+
+In the same location, `dialogue.jsonl` keeps the list of chat messages in a format of [JsonLines](https://jsonlines.org/), where each message is formatted as a single-lined json object.
+
+
+## Authors of the Code
+* Young-Ho Kim (NAVER AI Lab) - Maintainer (yghokim@younghokim.net)
 * Woosuk Seo (Intern at NAVER AI Lab, PhD candidate at University of Michigan)
+
+## Acknowledgments
+* This work was supported by NAVER AI
+Lab through a research internship.
+* The conversational flow design of ChaCha is grounded in Woosuk Seo’s dissertation research, which was supported by National Science Foundation CAREER Grant #1942547 (PI: Sun Young Park), advised by Sun
+Young Park and Mark S. Ackerman, who are instrumental
+in shaping this work.
