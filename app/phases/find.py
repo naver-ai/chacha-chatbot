@@ -1,10 +1,10 @@
 import json
 
-from chatlib.chatbot import DialogueTurn
+from chatlib.chatbot import DialogueTurn, ChatCompletionParams
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
 from chatlib.jinja_utils import convert_to_jinja_template
 from chatlib.mapper import ChatGPTDialogueSummarizer
-from chatlib.openai_utils import ChatGPTParams, ChatGPTModel
+from chatlib.openai_utils import ChatGPTModel
 
 from app.common import PromptFactory, SPECIAL_TOKEN_CONFIG
 
@@ -99,6 +99,6 @@ summarizer = ChatGPTDialogueSummarizer(
                 
     ],
     model=ChatGPTModel.GPT_3_5_16k_latest,
-    gpt_params=ChatGPTParams(temperature=0.5),
+    gpt_params=ChatCompletionParams(temperature=0.5),
     dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(dialogue, 3)
 )

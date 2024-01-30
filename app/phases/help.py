@@ -27,6 +27,6 @@ Follow this JSON format:
   "sensitive_topic": boolean // true if the user expressed indication of self-harm, suicide, or death
 }
 """,
-    model=ChatGPTModel.GPT_3_5_latest,
+    model=ChatGPTModel.GPT_3_5_0613,
     dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(dialogue, 1)
 )

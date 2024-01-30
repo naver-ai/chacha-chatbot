@@ -1,10 +1,9 @@
 import json
 
-from chatlib.chatbot import DialogueTurn
+from chatlib.chatbot import DialogueTurn, ChatCompletionParams
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
 from chatlib.jinja_utils import convert_to_jinja_template
 from chatlib.mapper import ChatGPTDialogueSummarizer
-from chatlib.openai_utils import ChatGPTParams
 
 from app.common import PromptFactory, SPECIAL_TOKEN_CONFIG
 
@@ -86,6 +85,6 @@ Refer to the examples below.
             'rationale': "We can proceed to the next phase since the key episode and user's emotion are identified."
         })
     )],
-    gpt_params=ChatGPTParams(temperature=0.1),
+    gpt_params=ChatCompletionParams(temperature=0.1),
     dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(dialogue, 1)
 )
