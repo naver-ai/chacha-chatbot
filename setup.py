@@ -1,8 +1,16 @@
 from os import path, getcwd
+from typing import Callable
 
 from dotenv import find_dotenv, set_key
+import questionary
+from questionary import prompt
 
-#Create env files if not exist ========================================================
+
+# Create env files if not exist ========================================================
+
+def make_non_empty_string_validator(msg: str) -> Callable:
+    return lambda text: True if len(text.strip()) > 0 else msg
+
 
 env_file = find_dotenv()
 if not path.exists(env_file):
@@ -10,22 +18,43 @@ if not path.exists(env_file):
     env_file.close()
     env_file = find_dotenv()
 
-if __name__ == "__main__":
-    openai_api_key = input("Enter OpenAI API Key: ").strip()
+configure_openai = questionary.confirm("Would you like to configure OpenAI GPT?").ask()
 
-    if openai_api_key is not None and len(openai_api_key) > 0:
-        set_key(env_file, "OPENAI_API_KEY", openai_api_key)
-    else:
-        print("Skip OpenAI configuration.")
+if configure_openai:
+    openai_api_key = questionary.text("Enter OpenAI API Key:",
+                                      validate=make_non_empty_string_validator("Please enter a valid key.")).ask().strip()
+    set_key(env_file, "OPENAI_API_KEY", openai_api_key)
 
-    azure_llama2_host = input("Enter Azure Llama2 target address (Enter empty address to skip): ").strip()
+configure_llama = questionary.confirm("Would you like to configure Azure Llama2?").ask()
 
-    if azure_llama2_host is not None and len(azure_llama2_host) > 0:
-        set_key(env_file, "AZURE_LLAMA2_HOST", azure_llama2_host)
-        azure_llama2_key = input("Enter Azure Llama2 key: ").strip()
-        if azure_llama2_key is not None and len(azure_llama2_key) > 0:
-            set_key(env_file, "AZURE_LLAMA2_KEY", azure_llama2_key)
-    else:
-        print("Skip Azure Llama2 configuration.")
+if configure_llama:
+    llama_questions = [
+        {
+            'type': 'text',
+            'name': 'host',
+            'message': 'Enter Azure Llama2 target address:',
+            'validate': make_non_empty_string_validator("Please enter a valid address.")
+        },
+        {
+            'type': 'text',
+            'name': 'key',
+            'message': 'Enter Azure Llama2 key:',
+            'validate': make_non_empty_string_validator("Please enter a valid key.")
+        },
+    ]
 
-    print("Wrote .env file.")
+    answers = prompt(llama_questions)
+
+    set_key(env_file, "AZURE_LLAMA2_HOST", answers['host'].strip())
+    set_key(env_file, "AZURE_LLAMA2_KEY", answers['key'].strip())
+
+
+configure_google = questionary.confirm("Would you like to configure Google API?").ask()
+
+if configure_google:
+    google_api_key = questionary.text("Enter Google API Key:",
+                                      validate=make_non_empty_string_validator(
+                                          "Please enter a valid key.")).ask().strip()
+    set_key(env_file, "GOOGLE_API_KEY", google_api_key)
+
+print("Finished configuration.")

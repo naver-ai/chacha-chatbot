@@ -2,7 +2,6 @@ import json
 
 from chatlib.chatbot import DialogueTurn, ChatCompletionParams
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
-from chatlib.chatbot.generators.llama import Llama2ResponseGenerator
 from chatlib.jinja_utils import convert_to_jinja_template
 from chatlib.mapper import ChatGPTDialogueSummarizer
 

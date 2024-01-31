@@ -4,7 +4,7 @@ from chatlib.chatbot import DialogueTurn, RegenerateRequestException
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
 from chatlib.jinja_utils import convert_to_jinja_template
 from chatlib.mapper import ChatGPTDialogueSummarizer, ChatGPTDialogSummarizerParams
-from chatlib.openai_utils import ChatGPTModel
+from chatlib.integration.openai_utils import ChatGPTModel
 
 from app.common import PromptFactory, SPECIAL_TOKEN_CONFIG
 

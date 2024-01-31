@@ -1,7 +1,7 @@
 from chatlib import jinja_utils
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
 from chatlib.mapper import ChatGPTDialogueSummarizer
-from chatlib.openai_utils import ChatGPTModel
+from chatlib.integration.openai_utils import ChatGPTModel
 
 from app.common import stringify_list, SPECIAL_TOKEN_CONFIG, PromptFactory
 
