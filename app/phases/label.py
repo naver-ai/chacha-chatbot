@@ -6,7 +6,7 @@ from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedRespo
 from chatlib.jinja_utils import convert_to_jinja_template
 # Help the user label their emotion based on the Wheel of Emotions. Empathize their emotion.
 from chatlib.mapper import ChatGPTDialogueSummarizer, ChatGPTDialogSummarizerParams
-from chatlib.openai_utils import ChatGPTModel
+from chatlib.integration.openai_api import ChatGPTModel
 
 from app.common import EmotionChatbotSpecialTokens, PromptFactory, SPECIAL_TOKEN_CONFIG
 

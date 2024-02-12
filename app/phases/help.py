@@ -1,22 +1,23 @@
 from chatlib import jinja_utils
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
 from chatlib.mapper import ChatGPTDialogueSummarizer
-from chatlib.openai_utils import ChatGPTModel
+from chatlib.integration.openai_api import ChatGPTModel
 
-from app.common import stringify_list, SPECIAL_TOKEN_CONFIG, PromptFactory
+from app.common import PromptFactory
 
 
 # Emergency situation: Provide relevant resources to the user
 def create_generator():
     return ChatGPTResponseGenerator(
-            base_instruction=jinja_utils.convert_to_jinja_template(f"""
+        base_instruction=jinja_utils.convert_to_jinja_template(f"""
 - Provide the list of mental health providers for the user.
 - Do not ask too many questions.
 - Do not suggest too many options.
 - Do not overly comfort the user.
 
 {PromptFactory.get_speaking_rules_block()}""")
-        )
+    )
+
 
 summarizer = ChatGPTDialogueSummarizer(
     base_instruction="""

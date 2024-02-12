@@ -8,11 +8,11 @@ from dotenv import load_dotenv
 
 from app.response_generator import EmotionChatbotResponseGenerator
 from chatlib import cli
+from chatlib.global_config import GlobalConfig
 
 if __name__ == "__main__":
-    # Init OpenAI API
-    load_dotenv(path.join(getcwd(), ".env"))
-    openai.api_key = getenv('OPENAI_API_KEY')
+
+    GlobalConfig.is_cli_mode = True
 
     parser = argparse.ArgumentParser()
 

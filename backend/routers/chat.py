@@ -1,14 +1,14 @@
 from io import StringIO
 from typing import Optional, Any
 
-from fastapi import APIRouter, HTTPException, Body, Path
+from fastapi import APIRouter, HTTPException, Path
 from pydantic import BaseModel
 from starlette import status
 from fastapi.responses import StreamingResponse
 
 from app.common import ChatbotLocale
 from app.response_generator import EmotionChatbotResponseGenerator
-from chatlib.chatbot import TurnTakingChatSession, Dialogue, session_writer, DialogueTurn
+from chatlib.chatbot import TurnTakingChatSession, session_writer, DialogueTurn
 
 router = APIRouter()
 
