@@ -2,7 +2,7 @@
 name = "chacha-chatbot"
 version = "0.2.0"
 description = ""
-authors = ["Woosuk Seo & Young-Ho Kim"]
+authors = ["Young-Ho Kim", "Woosuk Seo"]
 license = "MIT"
 readme = "README.md"
 
