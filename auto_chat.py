@@ -47,6 +47,8 @@ if __name__ == "__main__":
         locale = ChatbotLocale.Korean
     elif locale_name == "English":
         locale = ChatbotLocale.English
+    else:
+        raise ValueError("Unsupported locale.")
 
     asyncio.run(cli.run_auto_chat_loop(
         EmotionChatbotResponseGenerator(user_name=user_name, user_age=user_age, locale=locale, verbose=True),
