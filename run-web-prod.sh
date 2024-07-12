@@ -1,1 +1,1 @@
-(cd frontend && npm install && npm run build && cd ..) && (pm2 delete chacha-chatbot ; pm2 start pm2.config.js)
+(cd frontend && npm install && npm run build && cd ..) && (poetry run gunicorn --config backend/gunicorn.config.py backend.server:app)
