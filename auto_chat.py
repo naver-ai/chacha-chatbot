@@ -2,14 +2,15 @@ import asyncio
 from os import path, getcwd, getenv
 
 import openai
-from chatlib.chat_completion_api import make_non_empty_string_validator
+from chatlib.utils.validator import make_non_empty_string_validator
 from chatlib.chatbot.generators import ChatGPTResponseGenerator
+from chatlib.llm.integration.openai_api import ChatGPTModel
 from dotenv import load_dotenv
 from questionary import prompt
 
 from app.common import ChatbotLocale
 from app.response_generator import EmotionChatbotResponseGenerator
-from chatlib import cli
+from chatlib.utils import cli
 from chatlib.global_config import GlobalConfig
 
 if __name__ == "__main__":
@@ -58,6 +59,6 @@ You are a {user_age}-year-old {locale_name} child named {user_name} who is shy a
             {"1. Use a simple, informal Korean like talking to a peer friend." if locale is ChatbotLocale.Korean else "1. Use a simple, informal English like talking to a peer friend."}
             2. Say three sentences at the most each time.  
             3. Do not ask question unless you do not understand certain emotion words.  
-                                        """),
+                                        """, model=ChatGPTModel.GPT_4o),
         max_turns=30
     ))

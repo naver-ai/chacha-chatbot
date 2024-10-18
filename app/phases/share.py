@@ -1,12 +1,13 @@
-from chatlib import dialogue_utils, dict_utils
-from chatlib.chatbot import Dialogue
+from chatlib.utils import dict_utils
+from chatlib.chatbot import Dialogue, DialogueTurn, dialogue_utils
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
-from chatlib.jinja_utils import convert_to_jinja_template
-from chatlib.mapper import ChatGPTDialogueSummarizer
-from chatlib.integration.openai_api import ChatGPTModel
+from chatlib.utils.jinja_utils import convert_to_jinja_template
+from chatlib.tool.versatile_mapper import DialogueSummarizer
+from chatlib.llm.integration.openai_api import ChatGPTModel, GPTChatCompletionAPI
+from chatlib.tool.converter import generate_pydantic_converter
 
-from app.common import EmotionChatbotSpecialTokens, PromptFactory, \
-    SPECIAL_TOKEN_CONFIG
+from app.common import EmotionChatbotSpecialTokens, FindDialogueSummarizerParams, PromptFactory, \
+    SPECIAL_TOKEN_CONFIG, ShareSummarizerResult
 
 
 # Encourage the user to share their emotion and the episode with their parents. Ask if they want to talk about other episodes.
@@ -26,8 +27,7 @@ def create_generator():
         special_tokens=SPECIAL_TOKEN_CONFIG
     )
 
-__classifier = ChatGPTDialogueSummarizer(
-    base_instruction=convert_to_jinja_template(f"""
+_summarizer_instruction_template = convert_to_jinja_template(f"""
 You are a helpful assistant that analyzes the content of the dialogue history.
 {PromptFactory.SUMMARIZER_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES}
 In an a message marked with a special token {EmotionChatbotSpecialTokens.NewEpisode}, the AI asked the user if he or she wants to share a new key episode.
@@ -37,16 +37,17 @@ Follow this JSON format:
 {  
   "share_new_episode": boolean | null // true if the user expressed a desire to share, false if the user doesn't want to, and null if the user did not express any intention yet.
 }.
-"""),
-    model=ChatGPTModel.GPT_3_5_16k_latest,
+""")
+
+def _generate_instruction(dialogue: Dialogue, params: FindDialogueSummarizerParams)->str:
+     return _summarizer_instruction_template.render(key_episode=params.key_episode, identified_emotions=params.identified_emotions)
+
+_str_to_result, _result_to_str = generate_pydantic_converter(ShareSummarizerResult)
+
+summarizer = DialogueSummarizer[ShareSummarizerResult, FindDialogueSummarizerParams](
+    api=GPTChatCompletionAPI(),
+    instruction_generator=_generate_instruction,
+    output_str_converter=_result_to_str,
+    str_output_converter=_str_to_result,
     dialogue_filter=lambda dialogue, params: StateBasedResponseGenerator.trim_dialogue_recent_n_states(dialogue, N=1)
 )
-
-async def check_new_episode_requested(dialogue: Dialogue)->bool | None:
-    last_turn_with_flag, last_turn_with_flag_index = dialogue_utils.find_last_turn(dialogue, lambda turn: dict_utils.get_nested_value(turn.metadata, "new_episode_requested") == True)
-    if last_turn_with_flag_index != -1 and last_turn_with_flag_index < len(dialogue)-1:
-        # if the flagged turn exists and is not the last one...
-        result = await __classifier.run(dialogue[last_turn_with_flag_index:])
-        return result["share_new_episode"]
-    else:
-        return None

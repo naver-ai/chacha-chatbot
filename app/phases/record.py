@@ -2,11 +2,12 @@ import json
 
 from chatlib.chatbot import DialogueTurn, RegenerateRequestException
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
-from chatlib.jinja_utils import convert_to_jinja_template
-from chatlib.mapper import ChatGPTDialogueSummarizer, ChatGPTDialogSummarizerParams
-from chatlib.integration.openai_api import ChatGPTModel
+from chatlib.utils.jinja_utils import convert_to_jinja_template
+from chatlib.tool.versatile_mapper import DialogueSummarizer, Dialogue, DialogueTurn, MapperInputOutputPair
+from chatlib.tool.converter import generate_pydantic_converter
+from chatlib.llm.integration.openai_api import GPTChatCompletionAPI
 
-from app.common import PromptFactory, SPECIAL_TOKEN_CONFIG
+from app.common import FindDialogueSummarizerParams, PromptFactory, SPECIAL_TOKEN_CONFIG, RecordSummarizerResult
 
 
 # Encourage the user to record the moments in which they felt positive emotions.
@@ -42,10 +43,7 @@ def create_generator():
 """ + PromptFactory.get_speaking_rules_block()), special_tokens=SPECIAL_TOKEN_CONFIG
     )
 
-
-class RecordPhaseDialogSummarizer(ChatGPTDialogueSummarizer):
-    def __init__(self):
-        super().__init__(base_instruction=convert_to_jinja_template("""
+_summarizer_instruction_template = convert_to_jinja_template("""
 - You are a helpful assistant that analyzes the content of the dialogue history.
 """ +
                                                                     PromptFactory.SUMMARIZER_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES + """
@@ -57,40 +55,48 @@ Follow this JSON format: {
     "explained_importance_of_recording": boolean // true if the AI had described the importance of recording positive moments.
     "reflection_note_content_provided": boolean // Whether the AI has provided the reflection note to the user with <diary> tag.
 }.
-"""), model=ChatGPTModel.GPT_3_5_16k_latest,
-                         dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(
+""")
+
+def _instruction_generator(dialogue: Dialogue, params: FindDialogueSummarizerParams)->str:
+    return _summarizer_instruction_template.render(key_episode=params.key_episode, identified_emotions=params.identified_emotions)
+
+_str_to_result, _result_to_str = generate_pydantic_converter(RecordSummarizerResult)
+
+def _str_to_result_func(model_output: str, params: FindDialogueSummarizerParams) -> RecordSummarizerResult:
+    try:
+        result = _str_to_result(model_output, params)
+        result.proceed_to_next_phase = result.asked_user_keeping_diary == True and result.explained_importance_of_recording == True and result.reflection_note_content_provided == True
+        return result
+    except:
+        raise RegenerateRequestException("Malformed data.")
+
+
+summarizer = DialogueSummarizer[RecordSummarizerResult, FindDialogueSummarizerParams](
+    api=GPTChatCompletionAPI(),
+    instruction_generator=_instruction_generator,
+    dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(
                              dialogue, 3),
-     examples=[
-                    ([
-                        DialogueTurn("오늘 좋았던 기분을 일기에 써보는건 어때?", is_user=False),
-                        DialogueTurn("뭐라고 써야 할지 모르겠어", is_user=True),
-                        DialogueTurn("이런식으로 써도 좋을 것 같아! <diary>오늘은 정말 감동적인 하루였다. 친구들과 축구를 했는데, 내가 역전골을 넣어서 정말 신났다.</diary>", is_user=False),
-                    ],
-                    json.dumps({
-                            "asked_user_keeping_diary": False,
-                            "explained_importance_of_recording": False,
-                            "reflection_note_content_provided": True,
-                    })),
-                    ([
-                        DialogueTurn("응. 오늘 오랜만에 친구들을 만나서 행복했어", is_user=True),
-                        DialogueTurn("그랬구나. 윤수는 혹시 일기같은 걸 써?", is_user=False),
-                        DialogueTurn("근데 난 일기 같은거 안써", is_user=True),
-                        DialogueTurn("오늘 행복했던 기분을 일기에 써보는 건 어때? 일기 쓰는 건 처음에는 좀 어색할 수 있지만, 시간이 지날수록 이런 감정들을 기록하고 되돌아보는 게 재미있단다.", is_user=False)
-                    ],
-                    json.dumps({
-                            "asked_user_keeping_diary": True,
-                            "explained_importance_of_recording": True,
-                            "reflection_note_content_provided": False,
-                    })),
-        ]
+    output_str_converter=_result_to_str,
+    str_output_converter=_str_to_result_func
 )
+     
 
-    def _postprocess_chatgpt_output(self, output: str, params: ChatGPTDialogSummarizerParams | None = None) -> dict:
-        result = super()._postprocess_chatgpt_output(output, params)
-        try:
-            result["proceed_to_next_phase"] = result["asked_user_keeping_diary"] == True and result["explained_importance_of_recording"] == True and result["reflection_note_content_provided"] == True
-            return result
-        except:
-            raise RegenerateRequestException("Malformed data.")
-
-summarizer = RecordPhaseDialogSummarizer()
+summarizer_examples=[MapperInputOutputPair(input=[
+                        DialogueTurn(message="오늘 좋았던 기분을 일기에 써보는건 어때?", is_user=False),
+                        DialogueTurn(message="뭐라고 써야 할지 모르겠어", is_user=True),
+                        DialogueTurn(message="이런식으로 써도 좋을 것 같아! <diary>오늘은 정말 감동적인 하루였다. 친구들과 축구를 했는데, 내가 역전골을 넣어서 정말 신났다.</diary>", is_user=False),
+                    ], output= RecordSummarizerResult(
+                        asked_user_keeping_diary=False,
+                        explained_importance_of_recording= False,
+                        reflection_note_content_provided= True)),
+                    MapperInputOutputPair(input=[
+                        DialogueTurn(message="응. 오늘 오랜만에 친구들을 만나서 행복했어", is_user=True),
+                        DialogueTurn(message="그랬구나. 윤수는 혹시 일기같은 걸 써?", is_user=False),
+                        DialogueTurn(message="근데 난 일기 같은거 안써", is_user=True),
+                        DialogueTurn(message="오늘 행복했던 기분을 일기에 써보는 건 어때? 일기 쓰는 건 처음에는 좀 어색할 수 있지만, 시간이 지날수록 이런 감정들을 기록하고 되돌아보는 게 재미있단다.", is_user=False)
+                    ], output= RecordSummarizerResult(
+                        asked_user_keeping_diary=True,
+                        explained_importance_of_recording=True,
+                        reflection_note_content_provided=False,
+                    ))
+        ]
