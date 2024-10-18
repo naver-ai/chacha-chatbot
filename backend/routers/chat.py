@@ -47,8 +47,8 @@ class ChatMessage(BaseModel):
     id: str
     message: str
     is_user: bool
-    metadata: Optional[dict]
-    processing_time: Optional[float | None]
+    metadata: dict | None = None
+    processing_time: float | None = None
     timestamp: int
 
     @staticmethod

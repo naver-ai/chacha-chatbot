@@ -1,9 +1,10 @@
-import json
-
 from chatlib.chatbot import DialogueTurn, ChatCompletionParams
 from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
-from chatlib.jinja_utils import convert_to_jinja_template
-from chatlib.mapper import ChatGPTDialogueSummarizer
+from chatlib.utils.jinja_utils import convert_to_jinja_template
+from chatlib.llm.integration.openai_api import GPTChatCompletionAPI, ChatGPTModel
+from chatlib.tool.versatile_mapper import DialogueSummarizer, MapperInputOutputPair, ChatCompletionFewShotMapperParams
+from chatlib.tool.converter import generate_pydantic_converter
+from pydantic import BaseModel
 
 from app.common import PromptFactory, SPECIAL_TOKEN_CONFIG
 
@@ -40,7 +41,7 @@ For each conversation turn, execute one task only.
 - Ask the user about an episode or  moment that is the most memorable to him or her.
 - If he or she does not remember or know what to say, ask them about an event when he or she enjoyed it or felt good or bad.
 
-""" + PromptFactory.get_speaking_rules_block()), special_tokens=SPECIAL_TOKEN_CONFIG)
+""" + PromptFactory.get_speaking_rules_block()), special_tokens=SPECIAL_TOKEN_CONFIG, model=ChatGPTModel.GPT_4o)
 
         self.__initial_user_message_format = convert_to_jinja_template("""
 {%-if locale == 'kr'-%}
@@ -59,8 +60,17 @@ def create_generator():
     return ExploreGenerator()
 
 
-summarizer = ChatGPTDialogueSummarizer(
-    base_instruction=f"""
+class ExploreSummarizerResult(BaseModel):
+    key_episode: str | None
+    user_emotion: str | None
+    move_to_next: bool
+    rationale: str
+
+_str_to_result, _result_to_str = generate_pydantic_converter(ExploreSummarizerResult)
+
+summarizer = DialogueSummarizer(
+    api=GPTChatCompletionAPI(),
+    instruction_generator="""
 - You are a helpful assistant that analyzes the content of the dialog history.
 - Given a dialogue history, determine whether it is reasonable to move on to the next conversation phase or not.
 - Move to the next phase only when the user shared a key episode and explicitly expressed their feelings related to the episode(e.g., good or bad).
@@ -70,21 +80,26 @@ summarizer = ChatGPTDialogueSummarizer(
   (2) user_emotion: the emotion of the user caused by the key episode. Make sure the emotion is connected to (1)
   (3) move_to_next: A boolean whether it is reasonable to move on to the next conversation phase or not, judged based on (1) and (2).
   (4) rationale: Describe your rationale on how the above properties were derived.
-Refer to the examples below.
-                    """,
-    examples=[(
-        [
-            DialogueTurn("어제 친구랑 싸웠어", is_user=True),
-            DialogueTurn("친구랑 싸웠구나. 그때 기분이 어땠어?", is_user=False),
-            DialogueTurn("그냥 기분이 안 좋았어", is_user=True)
-        ],
-        json.dumps({
-            'key_episode': 'fighting with a friend yesterday',
-            'user_emotion': 'felt not good',
-            'move_to_next': True,
-            'rationale': "We can proceed to the next phase since the key episode and user's emotion are identified."
-        })
-    )],
-    gpt_params=ChatCompletionParams(temperature=0.1),
+Refer to the examples below.""",
+    str_output_converter=_str_to_result,
+    output_str_converter=_result_to_str,
     dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(dialogue, 1)
 )
+
+
+
+summarizer_examples=[MapperInputOutputPair(input=
+        [
+            DialogueTurn(message="어제 친구랑 싸웠어", is_user=True),
+            DialogueTurn(message="친구랑 싸웠구나. 그때 기분이 어땠어?", is_user=False),
+            DialogueTurn(message="그냥 기분이 안 좋았어", is_user=True)
+        ], output=ExploreSummarizerResult(
+            key_episode='fighting with a friend yesterday',
+            user_emotion='felt not good',
+            move_to_next=True,
+            rationale="We can proceed to the next phase since the key episode and user's emotion are identified."
+        ))]
+
+summarizer_params=ChatCompletionFewShotMapperParams(
+    model=ChatGPTModel.GPT_4o,
+    api_params=ChatCompletionParams(temperature=0.1))

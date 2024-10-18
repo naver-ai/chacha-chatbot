@@ -3,14 +3,14 @@ import asyncio
 from os import path, getcwd, getenv
 
 import openai
-from chatlib.chat_completion_api import make_non_empty_string_validator
+from chatlib.utils.validator import make_non_empty_string_validator
 from chatlib.chatbot import TurnTakingChatSession
 from dotenv import load_dotenv
 from questionary import prompt
 
 from app.common import ChatbotLocale
 from app.response_generator import EmotionChatbotResponseGenerator
-from chatlib import cli
+from chatlib.utils import cli
 from chatlib.global_config import GlobalConfig
 
 if __name__ == "__main__":
