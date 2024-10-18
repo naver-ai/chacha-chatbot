@@ -155,9 +155,9 @@ class EmotionChatbotResponseGenerator(StateBasedResponseGenerator[EmotionChatbot
             print(summarizer_result)
             if summarizer_result.proceed_to_next_phase is True and len(
                     current_state_ai_turns) >= 2:
-                return EmotionChatbotPhase.Share, summarizer_result
+                return EmotionChatbotPhase.Share, summarizer_result.model_dump()
             else:
-                return None, summarizer_result
+                return None, summarizer_result.model_dump()
         # Share --> Explore or Terminate
         elif current == EmotionChatbotPhase.Share:
             last_turn_with_flag, last_turn_with_flag_index = dialogue_utils.find_last_turn(dialog, lambda turn: dict_utils.get_nested_value(turn.metadata, "new_episode_requested") == True)
