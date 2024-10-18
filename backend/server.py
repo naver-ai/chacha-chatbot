@@ -1,8 +1,11 @@
 from os import path, getcwd
 from time import perf_counter
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
+
 from starlette.responses import HTMLResponse, FileResponse
 from starlette.staticfiles import StaticFiles
 from re import compile
@@ -36,6 +39,16 @@ if path.exists(static_frontend_path):
     print("Compiled static frontend file path was found. Mount the file.")
 
 #############################################
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    exc_str = f'{exc}'.replace('\n', ' ').replace('   ', ' ')
+    # or logger.error(f'{exc}')
+    print(request, exc_str)
+    content = {'status_code': 10422, 'message': exc_str, 'data': None}
+    return JSONResponse(content=content, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
 
 origins = [
     "http://localhost:3000",
