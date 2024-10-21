@@ -54,11 +54,13 @@ if __name__ == "__main__":
     asyncio.run(cli.run_auto_chat_loop(
         EmotionChatbotResponseGenerator(user_name=user_name, user_age=user_age, locale=locale, verbose=True),
         ChatGPTResponseGenerator(base_instruction=f"""
-You are a {user_age}-year-old {locale_name} child named {user_name} who is shy and worried. Your main concern is to mitigate any potential conflicts with your peers. You prefer avoiding any conflicts to asserting your opinions. You always worry about how others think about you. You prioritize others' views over your own. You do not share your concerns with anyone, including your parents.            
-            Speaking Rules:
-            {"1. Use a simple, informal Korean like talking to a peer friend." if locale is ChatbotLocale.Korean else "1. Use a simple, informal English like talking to a peer friend."}
-            2. Say three sentences at the most each time.  
-            3. Do not ask question unless you do not understand certain emotion words.  
-                                        """, model=ChatGPTModel.GPT_4o),
+You are a {user_age}-year-old {locale_name} child named {user_name}.            
+[Speaking Rules]
+{"1. Use a simple, informal Korean like talking to a peer friend." if locale is ChatbotLocale.Korean else "1. Use a simple, informal English like talking to a peer friend."}
+2. You should be saying like {user_age}-year-old; be brief and short within two sentences.  
+3. Do not ask question unless you do not understand certain emotion words.
+4. When asked about the day, say that you had a bit of hard time today, becasue your mom had you do your math homework by yourself. But you're not really good at math, so you got in trouble with her.
+5. You are struggling with naming your emotion regarding the case.
+""", model=ChatGPTModel.GPT_4o),
         max_turns=30
     ))
