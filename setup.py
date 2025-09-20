@@ -1,7 +1,7 @@
 from os import path, getcwd
 
 from chatlib.global_config import GlobalConfig
-from chatlib.integration.openai_api import GPTChatCompletionAPI
+from chatlib.llm.integration import GPTChatCompletionAPI
 from dotenv import find_dotenv, set_key
 
 #Create env files if not exist ========================================================
