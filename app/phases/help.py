@@ -3,13 +3,14 @@ from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedRespo
 from chatlib.tool.versatile_mapper import DialogueSummarizer, ChatCompletionParams, ChatCompletionFewShotMapperParams
 from chatlib.llm.integration.openai_api import ChatGPTModel, GPTChatCompletionAPI
 from chatlib.tool.converter import generate_pydantic_converter
+from app.models.HyperClovaXAPI import HyperClovaXResponseGenerator
 
 from app.common import HelpSummarizerResult, PromptFactory
 
 
 # Emergency situation: Provide relevant resources to the user
 def create_generator():
-    return ChatGPTResponseGenerator(
+    return HyperClovaXResponseGenerator(
         base_instruction=convert_to_jinja_template(f"""
 - Provide the list of mental health providers for the user.
 - Do not ask too many questions.

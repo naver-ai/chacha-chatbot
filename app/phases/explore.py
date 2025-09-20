@@ -5,12 +5,13 @@ from chatlib.llm.integration.openai_api import GPTChatCompletionAPI, ChatGPTMode
 from chatlib.tool.versatile_mapper import DialogueSummarizer, MapperInputOutputPair, ChatCompletionFewShotMapperParams
 from chatlib.tool.converter import generate_pydantic_converter
 from pydantic import BaseModel
+from app.models.HyperClovaXAPI import HyperClovaXResponseGenerator, HyperClovaXAPI
 
 from app.common import PromptFactory, SPECIAL_TOKEN_CONFIG
 
 
 # Build rapport with the user. Ask about the most memorable episode. Ask about what happened and what the user felt.
-class ExploreGenerator(ChatGPTResponseGenerator):
+class ExploreGenerator(HyperClovaXResponseGenerator):
     def __init__(self):
         super().__init__(
             base_instruction=convert_to_jinja_template("""
@@ -69,7 +70,7 @@ class ExploreSummarizerResult(BaseModel):
 _str_to_result, _result_to_str = generate_pydantic_converter(ExploreSummarizerResult)
 
 summarizer = DialogueSummarizer(
-    api=GPTChatCompletionAPI(),
+    api=HyperClovaXAPI(),
     instruction_generator="""
 - You are a helpful assistant that analyzes the content of the dialog history.
 - Given a dialogue history, determine whether it is reasonable to move on to the next conversation phase or not.

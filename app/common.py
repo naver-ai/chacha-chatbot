@@ -36,6 +36,11 @@ def stringify_list(rules: list[str], ordered: bool = False, bullet: str = "-", s
                    indent: str = "  ") -> str:
     return separator.join([f"{indent}{f'{i + 1}.' if ordered else f'{bullet}'} {rule}" for i, rule in enumerate(rules)])
 
+def fix_broken_json(json_str: str) -> str:
+    if json_str.startswith('{') and not json_str.endswith('}'):
+        return json_str + '}'
+
+    return json_str
 
 class PromptFactory:
     @staticmethod

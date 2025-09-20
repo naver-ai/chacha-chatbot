@@ -1,18 +1,19 @@
 import json
 
 from chatlib.chatbot import DialogueTurn, RegenerateRequestException
-from chatlib.chatbot.generators import ChatGPTResponseGenerator, StateBasedResponseGenerator
+from chatlib.chatbot.generators import StateBasedResponseGenerator
 from chatlib.utils.jinja_utils import convert_to_jinja_template
 from chatlib.tool.versatile_mapper import DialogueSummarizer, Dialogue, DialogueTurn, MapperInputOutputPair
 from chatlib.tool.converter import generate_pydantic_converter
-from chatlib.llm.integration.openai_api import GPTChatCompletionAPI
+
+from app.models.HyperClovaXAPI import HyperClovaXResponseGenerator, HyperClovaXAPI
 
 from app.common import FindDialogueSummarizerParams, PromptFactory, SPECIAL_TOKEN_CONFIG, RecordSummarizerResult
 
 
 # Encourage the user to record the moments in which they felt positive emotions.
 def create_generator():
-    return ChatGPTResponseGenerator(
+    return HyperClovaXResponseGenerator(
         base_instruction=convert_to_jinja_template(PromptFactory.GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES + """
         
 - The goal of the current conversation is to encourage the user to keep diary to record the moments in which they felt positive emotions:
@@ -72,7 +73,7 @@ def _str_to_result_func(model_output: str, params: FindDialogueSummarizerParams)
 
 
 summarizer = DialogueSummarizer[RecordSummarizerResult, FindDialogueSummarizerParams](
-    api=GPTChatCompletionAPI(),
+    api=HyperClovaXAPI(),
     instruction_generator=_instruction_generator,
     dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(
                              dialogue, 3),

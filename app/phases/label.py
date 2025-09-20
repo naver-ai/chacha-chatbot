@@ -13,6 +13,9 @@ from app.common import EmotionChatbotSpecialTokens, PromptFactory, SPECIAL_TOKEN
 from app.common import LabeledEmotionInfo
 from app.common import LabelSummarizerResult
 from app.common import LabelDialogueSummarizerParams
+from app.common import fix_broken_json
+
+from app.models.HyperClovaXAPI import HyperClovaXResponseGenerator, HyperClovaXAPI
 
 emotion_list = None
 
@@ -27,7 +30,7 @@ def _get_emotion_list() -> list[dict]:
 
 
 def create_generator():
-    return ChatGPTResponseGenerator(base_instruction=convert_to_jinja_template(f"""
+    return HyperClovaXResponseGenerator(base_instruction=convert_to_jinja_template(f"""
 {PromptFactory.GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_DESC}
 - Ask them to elaborate more about their emotions and what makes them feel that way.
 
@@ -103,6 +106,7 @@ _str_to_result, _result_to_str = generate_pydantic_converter(LabelSummarizerResu
 
 def str_to_result(model_output: str, params: LabelDialogueSummarizerParams) -> LabelSummarizerResult:
     try:
+        model_output = fix_broken_json(model_output)
         result = _str_to_result(model_output, params)
         if len(result.identified_emotions) > 0:
             emotion_infos = result.identified_emotions
@@ -122,7 +126,7 @@ def str_to_result(model_output: str, params: LabelDialogueSummarizerParams) -> L
      
 
 summarizer = DialogueSummarizer(
-    api= GPTChatCompletionAPI(),
+    api= HyperClovaXAPI(),
     instruction_generator=_generate_instruction,
     dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(
                              dialogue, 2),

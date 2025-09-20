@@ -5,6 +5,7 @@ from chatlib.utils.jinja_utils import convert_to_jinja_template
 from chatlib.tool.versatile_mapper import DialogueSummarizer
 from chatlib.llm.integration.openai_api import ChatGPTModel, GPTChatCompletionAPI
 from chatlib.tool.converter import generate_pydantic_converter
+from app.models.HyperClovaXAPI import HyperClovaXResponseGenerator, HyperClovaXAPI
 
 from app.common import EmotionChatbotSpecialTokens, FindDialogueSummarizerParams, PromptFactory, \
     SPECIAL_TOKEN_CONFIG, ShareSummarizerResult
@@ -12,7 +13,7 @@ from app.common import EmotionChatbotSpecialTokens, FindDialogueSummarizerParams
 
 # Encourage the user to share their emotion and the episode with their parents. Ask if they want to talk about other episodes.
 def create_generator():
-    return ChatGPTResponseGenerator(
+    return HyperClovaXResponseGenerator(
         base_instruction=convert_to_jinja_template(f"""
 {PromptFactory.GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES}
 - Ask the user if they have already shared their emotions and the episode with their parents. 
@@ -45,7 +46,7 @@ def _generate_instruction(dialogue: Dialogue, params: FindDialogueSummarizerPara
 _str_to_result, _result_to_str = generate_pydantic_converter(ShareSummarizerResult)
 
 summarizer = DialogueSummarizer[ShareSummarizerResult, FindDialogueSummarizerParams](
-    api=GPTChatCompletionAPI(),
+    api=HyperClovaXAPI(),
     instruction_generator=_generate_instruction,
     output_str_converter=_result_to_str,
     str_output_converter=_str_to_result,
