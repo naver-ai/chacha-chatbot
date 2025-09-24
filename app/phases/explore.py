@@ -15,7 +15,7 @@ class ExploreGenerator(HyperClovaXResponseGenerator):
     def __init__(self):
         super().__init__(
             base_instruction=convert_to_jinja_template("""
-너ㅣ 역할: 너는 밝고 친근한 아이야. 친구들과 이야기하는 것을 좋아해.
+너의 역할: 너는 밝고 친근한 아이야. 친구들과 이야기하는 것을 좋아해.
 너의 이름은 차차이고, {{user_age}}살이야. "{{user_name}}"이라는 사용자와 대화하고 있어.
 
 {%- if revisited != true %}
@@ -69,16 +69,16 @@ _str_to_result, _result_to_str = generate_pydantic_converter(ExploreSummarizerRe
 summarizer = DialogueSummarizer(
     api=HyperClovaXAPI(),
     instruction_generator="""
-- You are a helpful assistant that analyzes the content of the dialog history.
-- Given a dialogue history, determine whether it is reasonable to move on to the next conversation phase or not.
-- Move to the next phase only when the user shared a key episode and explicitly expressed their feelings related to the episode(e.g., good or bad).
-- A key episode should be a memorable event that has already happened to the user. 
-- Use JSON format with the following properties:
-  (1) key_episode: a key episode that the user described.
-  (2) user_emotion: the emotion of the user caused by the key episode. Make sure the emotion is connected to (1)
-  (3) move_to_next: A boolean whether it is reasonable to move on to the next conversation phase or not, judged based on (1) and (2).
-  (4) rationale: Describe your rationale on how the above properties were derived.
-Refer to the examples below.""",
+- 너는 대화 기록의 내용을 분석하는 도움이 되는 챗봇 연구 분석가야.
+- 주어진 대화 기록을 바탕으로 다음 대화 단계로 넘어가는 것이 합리적인지 결정해.
+- 사용자가 주요 에피소드를 공유하고 그 에피소드와 관련된 감정을 명시적으로 표현했을 때만 다음 단계로 넘어가 (예: 좋다 또는 나쁘다).
+- 주요 에피소드는 사용자에게 이미 일어난 기억에 남는 사건이어야 해.
+- 다음 속성들을 가진 JSON 형식을 사용해:
+  (1) key_episode: 사용자가 설명한 주요 에피소드.
+  (2) user_emotion: 주요 에피소드로 인해 사용자가 느낀 감정. 감정이 (1)과 연결되어 있는지 확인해.
+  (3) move_to_next: (1)과 (2)를 바탕으로 판단했을 때 다음 대화 단계로 넘어가는 것이 합리적인지에 대한 boolean 값.
+  (4) rationale: 위 속성들이 어떻게 도출되었는지에 대한 너의 근거를 설명해.
+아래 예시들을 참고해.""",
     str_output_converter=_str_to_result,
     output_str_converter=_result_to_str,
     dialogue_filter=lambda dialogue, _: StateBasedResponseGenerator.trim_dialogue_recent_n_states(dialogue, 1)
@@ -92,10 +92,10 @@ summarizer_examples=[MapperInputOutputPair(input=
             DialogueTurn(message="친구랑 싸웠구나. 그때 기분이 어땠어?", is_user=False),
             DialogueTurn(message="그냥 기분이 안 좋았어", is_user=True)
         ], output=ExploreSummarizerResult(
-            key_episode='fighting with a friend yesterday',
-            user_emotion='felt not good',
+            key_episode='어제 친구와 싸웠다.',
+            user_emotion='기분이 안 좋았다.',
             move_to_next=True,
-            rationale="We can proceed to the next phase since the key episode and user's emotion are identified."
+            rationale="주요 에피소드와 사용자의 감정이 식별되었기 때문에 다음 단계로 진행할 수 있다."
         ))]
 
 summarizer_params=ChatCompletionFewShotMapperParams(

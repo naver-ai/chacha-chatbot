@@ -60,9 +60,9 @@ class PromptFactory:
 - 사용자가 명시적으로 세션을 끝내달라고 요청할 때까지 대화를 끝내지 마.
 """
 
-    GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_DESC = "- 지금까지의 대화에서, 사용자는 자신이 겪은 에피소드 ({{key_episode}})와 그에 대한 감정 ({{user_emotion}})을 공유했어."
-    GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES = """- 지금까지의 대화에서, 사용자는 자신이 겪은 에피소드 ({{key_episode}})와 그에 대한 감정 ({{identified_emotions | map(attribute="emotion") | join(", ")}})을 공유했어."""
-    SUMMARIZER_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES = """대화는 어린이 사용자와 너 사이에서 진행되고 있고, 사용자가 겪은 에피소드 ({{key_episode}})와 그에 대한 감정 ({{identified_emotions | map(attribute="emotion") | join(", ")}})에 대한 대화야."""
+    GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_DESC = "- 지금까지의 대화에서, 사용자는 자신이 겪은 에피소드 ({{key_episode}})와 거기에 관련하여 느꼈던 감정 ({{user_emotion}})을 공유했어."
+    GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES = """- 지금까지의 대화에서, 사용자는 자신이 겪은 에피소드 ({{key_episode}})와 거기에 관련하여 느꼈던 감정 ({{identified_emotions | map(attribute="emotion") | join(", ")}})을 공유했어."""
+    SUMMARIZER_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES = """대화는 어린이 사용자와 너 사이에서 진행되고 있고, 사용자가 겪은 에피소드 ({{key_episode}})와 거기에 관련하여 느꼈던 감정 ({{identified_emotions | map(attribute="emotion") | join(", ")}})에 대한 대화야."""
 
 
 class LabeledEmotionInfo(BaseModel):
