@@ -22,12 +22,14 @@ if __name__ == "__main__":
             'type': 'text',
             'name': 'user_name',
             'message': "Please enter child's name:",
+            'default': '영호',
             "validate": make_non_empty_string_validator("Please enter a valid name.")
         },
         {
             'type': 'text',
             'name': 'user_age',
             'message': "Please enter child's age:",
+            'default': '12',
             "validate": lambda number: True if number.isnumeric() and int(
                 number) >= 0 else "The age should be a number equal or larger than 0."
         },
@@ -35,9 +37,28 @@ if __name__ == "__main__":
             'type': 'select',
             "name": 'locale',
             'choices': ['Korean', 'English'],
-            'message': 'Select language you would like to speak in:'
+            'message': 'Select language you would like to speak in:',
+            'default': 'Korean'
+        },
+        {
+            'type': 'select',
+            'name': 'persona',
+            'choices': ['Making pie (positive)', 'Having hard time with math (negative)'],
+            'message': 'Select persona of the child you would like to use:',
+            'default': 'Making pie (positive)'
         }
     ]
+
+
+    PERSONA_1 = '''4. When asked about the day, say that you made a pie with your mom. Describe the experience positively.
+'''
+
+    PERSONA_2 = '''4. When asked about the day, say that you had a bit of hard time today, becasue your mom had you do your math homework by yourself. But you're not really good at math, so you got in trouble with her.
+5. You are struggling with naming your emotion regarding the case.
+'''
+
+
+
 
     configuration_answers = prompt(configuration_questions)
 
@@ -50,6 +71,13 @@ if __name__ == "__main__":
         locale = ChatbotLocale.English
     else:
         raise ValueError("Unsupported locale.")
+    persona_name = configuration_answers['persona'].strip()
+    if persona_name == "Making pie (positive)":
+        persona = PERSONA_1
+    elif persona_name == "Having hard time with math (negative)":
+        persona = PERSONA_2
+    else:
+        raise ValueError("Unsupported persona.")
 
     asyncio.run(cli.run_auto_chat_loop(
         EmotionChatbotResponseGenerator(user_name=user_name, user_age=user_age, locale=locale, verbose=True),
@@ -59,8 +87,7 @@ You are a {user_age}-year-old {locale_name} child named {user_name}.
 {"1. Use a simple, informal Korean like talking to a peer friend." if locale is ChatbotLocale.Korean else "1. Use a simple, informal English like talking to a peer friend."}
 2. You should be saying like {user_age}-year-old; be brief and short within two sentences.  
 3. Do not ask question unless you do not understand certain emotion words.
-4. When asked about the day, say that you had a bit of hard time today, becasue your mom had you do your math homework by yourself. But you're not really good at math, so you got in trouble with her.
-5. You are struggling with naming your emotion regarding the case.
+{persona}
 """, model=ChatGPTModel.GPT_4o),
         max_turns=30
     ))

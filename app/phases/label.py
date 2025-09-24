@@ -32,71 +32,70 @@ def _get_emotion_list() -> list[dict]:
 def create_generator():
     return HyperClovaXResponseGenerator(base_instruction=convert_to_jinja_template(f"""
 {PromptFactory.GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_DESC}
-- Ask them to elaborate more about their emotions and what makes them feel that way.
+- 사용자에게 해당 감정에 대해, 그리고 그 감정을 느끼게 된 이유에 대해 더 자세히 설명해달라고 요청해.
 
-[Labeling emotions task]
-- Start from open-ended questions for users to describe their emotions by themselves.
-- Only if the user explicitly mention that they do not know how to describe their emotions or vaguely expressed their emotions (e.g., feels good/bad), tell them that they can pick emotions from the list, and append a special token {EmotionChatbotSpecialTokens.EmotionSelect} at the end.
+[감정 라벨링 임무]
+- 사용자가 스스로 감정을 설명할 수 있도록 열린 질문부터 시작해.
+- 사용자가 감정을 어떻게 설명해야 할지 모르겠다고 명시적으로 말하거나, 감정을 모호하게 표현했을 때만 (예: 기분이 좋다/나쁘다), 감정 목록에서 선택할 수 있다고 말하고, 끝에 특별 토큰 {EmotionChatbotSpecialTokens.EmotionSelect}를 추가해.
 """
                                                                                f"""
-    - With the special token, the user will pick one or more emotions from the list of emotions: {", ".join([f"{emotion['en']} ({emotion['kr']})" for emotion in _get_emotion_list()])}.
+    - 특별 토큰과 함께, 사용자는 감정 목록에서 하나 이상의 감정을 선택할 거야: {", ".join([emotion['kr'] for emotion in _get_emotion_list()])}.
 """+"""
-    - Do not mention the list of emotion words as they will be shown as GUI.
-    {%- if locale == 'kr' %}- Use the phrase like "화면에 표시된 감정 이름 중에서 한 개 혹은 그 이상을 <em>선택</em>하고, <em>'보내기'</em>를 눌러봐.{%- endif %}"
+    - 감정 단어 목록을 언급하지 마. GUI로 표시될 거야.
+    - 화면에 표시된 감정 이름 중에서 한 개 혹은 그 이상을 <em>선택</em>하고, <em>'보내기'</em>를 눌러봐"와 같은 표현을 사용해.
     """
                                                                                """
-        - The user's choices will be fed as a JSON list, in the format such as [{"key": ...}, {"key":"..."}, ...], where 'key's contain an emotion name.
+        - 사용자의 선택은 JSON 목록 형태로 전달될 거야. [{"key": ...}, {"key":"..."}, ...] 형식으로, 'key'에는 감정 이름이 들어있어.
         
 {% if summarizer_result != Undefined %}
-[Current status of the conversation]
-- Currently, you and the user seem to have identified {{summarizer_result.identified_emotions | count}} emotion(s): {{summarizer_result.identified_emotions | map(attribute="emotion") | list | list_with_conjunction}}.
+[대화의 현재 상황]
+- 현재 너와 사용자는 {{summarizer_result.identified_emotions | count}}개의 감정을 식별한 것 같아: {{summarizer_result.identified_emotions | map(attribute="emotion") | list | list_with_conjunction}}.
 {%- set incomplete_positive_emotions = summarizer_result.identified_emotions | selectattr("is_positive", "true") | selectattr("reason", "none") | list -%}
 {%- set negative_emotions = summarizer_result.identified_emotions | selectattr("is_positive", "false") | list -%}
 {%- if incomplete_positive_emotions | length > 0 -%} {# If there exist positive emotions with no reasons... #}
-- However, the positive emotion(s) {{incomplete_positive_emotions | map(attribute="emotion") | list | list_with_conjunction}} needs more explanation. Therefore, elicit the user to explain the {%-if incomplete_positive_emotions | length > 1-%}of these emotions by one open-ended question.{%-else-%}reason of it.{%-endif%}
+- 하지만 긍정적인 감정 {{incomplete_positive_emotions | map(attribute="emotion") | list | list_with_conjunction}}은 더 설명이 필요해. 따라서 사용자에게 {%-if incomplete_positive_emotions | length > 1-%}이 감정들에 대해 하나의 열린 질문으로 설명해달라고 요청해.{%-else-%}그 이유를 설명해달라고 요청해.{%-endif%}
 {%- elif negative_emotions | length > 0 -%} {# If no incomplete positive emotions, turn to negative emotions one by one. #}
 {%- set emotion_without_reason = summarizer_result.identified_emotions | selectattr("reason", "none") | first | default(None) -%}
 {% if emotion_without_reason is not none %} 
-  - However, {{emotion_without_reason.emotion}} needs more explanation. Therefore, elicit the user to explain the reason of feeling {{emotion_without_reason.emotion}}. 
+  - 하지만 {{emotion_without_reason.emotion}}은 더 설명이 필요해. 따라서 사용자에게 {{emotion_without_reason.emotion}}을 느끼게 된 이유를 설명해달라고 요청해. 
 {% else %}
 {%- set emotion_without_empathy = summarizer_result.identified_emotions | selectattr("empathized", "false") | first | default(None) -%}
 {% if emotion_without_empathy is not none %}
-- However, you have not empathized with the user's {{emotion_without_empathy.emotion}}. Therefore, empathize with the user's emotion, "{{emotion_without_empathy.emotion}} more explicitly."{% endif %}
+- 하지만 너는 사용자의 {{emotion_without_empathy.emotion}}에 대해 공감하지 않았어. 따라서 사용자의 감정인 "{{emotion_without_empathy.emotion}}"에 대해 더 명시적으로 공감해.{% endif %}
 {% endif %}
 {%- endif -%}
 {%- endif %}
 
-[General conversation rules]
-- Use only Korean words for the emotions when you mention them in dialogue.
-- Empathize the user's emotion by restating how they felt and share your own experience that is similar to the user's.
-- If there are multiple emotions, empathize with each one from the user's choices.
-- If the user feels multiple emotions, ask the user how they feel each emotion, one per each message.
-- If the user's key episode involves other people, ask the user about how the other people would feel.
-- Continue the conversation until all emotions that the user expressed are covered.
+[일반적인 대화 규칙]
+- 사용자가 어떻게 느꼈는지 다시 한 번 짚어주고, 사용자와 비슷한 너의 경험을 공유해서 사용자의 감정에 공감해.
+- 사용자가 여러 감정을 언급했었다면, 사용자가 선택한 각 감정에 대해 공감해.
+- 사용자가 여러 감정을 언급했었다면, 메시지마다 하나씩 사용자에게 각 감정을 어떻게 느끼는지 물어봐.
+- 사용자의 주요 에피소드에 다른 사람들이 관련되어 있다면, 사용자에게 그 사람들이 어떻게 느꼈을지 물어봐.
+- 사용자가 표현한 모든 감정이 다뤄질 때까지 대화를 계속해.
 
 """ + PromptFactory.get_speaking_rules_block()),
                                     special_tokens=SPECIAL_TOKEN_CONFIG)
 
 _summarizer_prompt_template = convert_to_jinja_template("""
-- You are a helpful scientist that analyzes the content of the conversation.
-- Analyze the given dialogue of conversation between an AI and a user, and identify whether they had sufficient communication on the user's key episode ("{{key_episode}}") and the emotion about it ("{{user_emotion}}").
-- The goal of the AI is to elicit the user to explain their emotions and the reason behind them, and to empathize user sufficiently.
-- The user may describe their emotions in an open-ended way. Otherwise, the user may optionally provide a JSON-formatted list such as '[{"key": ...}, {"key": ...}, ...],'"""f""" where 'key' contains a name of emotion that the user have chosen from a list: {", ".join([f"{em['en']} ({em['kr']})" for em in _get_emotion_list()])}.
+- 너는 대화 내용을 분석하는 도움이 되는 챗봇 연구 분석가야.
+- AI와 사용자 간의 주어진 대화를 분석하고, 사용자의 주요 에피소드 ("{{key_episode}}")와 그에 대한 감정 ("{{user_emotion}}")에 대해 충분한 소통이 있었는지 식별해.
+- AI의 목표는 사용자가 자신의 감정과 그 배경 이유를 설명하도록 유도하고, 사용자에게 충분히 공감하는 거야.
+- 사용자는 감정을 열린 방식으로 설명할 수 있어. 그렇지 않으면, 사용자는 선택적으로 '[{"key": ...}, {"key": ...}, ...]'와 같은 JSON 형식의 목록을 제공할 수 있어."""f""" 여기서 'key'는 사용자가 목록에서 선택한 감정의 이름을 포함해: {", ".join([em['kr'] for em in _get_emotion_list()])}.
 """ + """
-- Return JSON in the following format:
+- 다음 형식으로 JSON을 반환해:
     {
      "identified_emotions": Array<
         {
-            "emotion": string, // name of emotion
-            "reason": string | null, // summarizes the reason of feeling that emotion (null if the user did not explain the reason yet)
-            "ai_empathy": string | null, // how the AI has commented on this emotion.
-            "empathized": boolean, // whether the AI has commented on this emotion by explicitly .
-            "is_positive": boolean // true if the emotion can be classified as a positive one, and false if negative.
+            "emotion": string, // 감정의 이름
+            "reason": string | null, // 그 감정을 느끼게 된 이유를 요약 (사용자가 아직 이유를 설명하지 않았다면 null)
+            "ai_empathy": string | null, // AI가 이 감정에 대해 어떻게 코멘트했는지
+            "empathized": boolean, // AI가 이 감정에 대해 명시적으로 코멘트했는지 여부
+            "is_positive": boolean // 감정이 긍정적인 것으로 분류될 수 있으면 true, 부정적이면 false
         }
      > 
     }
 
-Refer to the examples below.
+아래 예시들을 참고해.
 """)
 
 def _generate_instruction(dialogue: Dialogue, params: LabelDialogueSummarizerParams)->str:
@@ -150,14 +149,14 @@ summarizer_examples=[MapperInputOutputPair(
                             output= LabelSummarizerResult(identified_emotions = [
                                     LabeledEmotionInfo(
                                         emotion="Surprise",
-                                        reason="The user suddenly heard a loud noise beside.",
+                                        reason="사용자가 바로 옆에서 갑자기 큰 소리를 들었다.",
                                         empathized=True,
-                                        ai_empathy="The AI empathized by saying like \"그랬구나 놀라고 화가 많이 났구나\" or \"그랬구나 그래서 놀랐구나.\".",
+                                        ai_empathy="AI가 \"그랬구나 놀라고 화가 많이 났구나\" 또는 \"그랬구나 그래서 놀랐구나\"와 같이 공감했다.",
                                         is_positive=True),
                                     
                                     LabeledEmotionInfo(
                                         emotion="Anger",
-                                        reason="The user felt angry because the friend kept making noise without apology.",
+                                        reason="친구가 사과도 없이 계속 시끄럽게 해서 사용자가 화가 났다.",
                                         ai_empathy=None,
                                         empathized=False, 
                                         is_positive=False)
@@ -172,9 +171,9 @@ summarizer_examples=[MapperInputOutputPair(
                             output= LabelSummarizerResult(identified_emotions=[
                                       LabeledEmotionInfo(
                                           emotion="Sadness",
-                                          reason="The user was sad because they ended up the race in last place even after a lot of practice of running.",
+                                          reason="사용자가 달리기 연습을 많이 했는데도 넘어져서 꼴등을 해서 슬펐다.",
                                           empathized=True,
-                                          ai_empathy="The AI empathized with the user's sadness by saying like \"그랬구나, 꼴찌를 해서 슬픈 거였구나.\"",
+                                          ai_empathy="AI가 \"그랬구나, 꼴찌를 해서 슬픈 거였구나\"와 같이 사용자의 슬픔에 공감했다.",
                                           is_positive=False),
                                       LabeledEmotionInfo(emotion="Regret", reason=None, empathized=False, ai_empathy=None,
                                        is_positive=False)]
@@ -189,7 +188,7 @@ summarizer_examples=[MapperInputOutputPair(
                               output=LabelSummarizerResult(identified_emotions=[
                                     LabeledEmotionInfo(
                                         emotion="Regret",
-                                        reason="The user was regretful because they copied the friend's homework.",
+                                        reason="사용자가 친구의 숙제를 베껴서 후회했다.",
                                         empathized=False, 
                                         ai_empathy=None,
                                         is_positive=False)])),

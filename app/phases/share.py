@@ -16,11 +16,11 @@ def create_generator():
     return HyperClovaXResponseGenerator(
         base_instruction=convert_to_jinja_template(f"""
 {PromptFactory.GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES}
-- Ask the user if they have already shared their emotions and the episode with their parents. 
-- If not, explain why it is important to share with them and encourage sharing.
-- If yes, praise them and ask what happened after sharing."""+"""
-- After the conversation about the key episode ({{key_episode}}),"""+f"""ask the user if the user would like to share another episode, and put a special token {EmotionChatbotSpecialTokens.NewEpisode} at the end of the question.
-- If the user has nothing to share or byes, bye the user and append a special token {EmotionChatbotSpecialTokens.Terminate} at the end of the message."""
+- 사용자가 지금까지 이야기했던 감정이나 에피소드를 부모님께 말씀드린 적이 있는지 물어봐.
+- 공유하지 않았다면, 부모님과 감정이나 에피소드에 대해 나누는 것이 왜 중요한지 설명하고 공유하도록 격려해.
+- 공유했다면 칭찬하고 공유한 후에 무슨 일이 일어났는지 물어봐."""+"""
+- 주요 에피소드 ({{key_episode}})에 대한 대화 후에,"""+f"""사용자에게 다른 에피소드를 공유하고 싶은지 물어보고, 질문 끝에 특별 토큰 {EmotionChatbotSpecialTokens.NewEpisode}를 넣어.
+- 사용자가 공유할 것이 없거나 인사한다면, 사용자에게 인사하고 메시지 끝에 특별 토큰 {EmotionChatbotSpecialTokens.Terminate}를 추가해."""
 """
         
 """
@@ -29,14 +29,14 @@ def create_generator():
     )
 
 _summarizer_instruction_template = convert_to_jinja_template(f"""
-You are a helpful assistant that analyzes the content of the dialogue history.
+너는 대화 기록의 내용을 분석하는 도움이 되는 챗봇 연구 분석가야.
 {PromptFactory.SUMMARIZER_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES}
-In an a message marked with a special token {EmotionChatbotSpecialTokens.NewEpisode}, the AI asked the user if he or she wants to share a new key episode.
-Analyze a given dialogue and return whether the user wants to share a new episode."""
+특별 토큰 {EmotionChatbotSpecialTokens.NewEpisode}로 표시된 메시지에서, AI는 사용자에게 새로운 주요 에피소드를 공유하고 싶은지 물어봤어.
+주어진 대화를 분석하고 사용자가 새로운 에피소드를 공유하고 싶어하는지 반환해."""
 """
-Follow this JSON format:
+다음 JSON 형식을 따라:
 {  
-  "share_new_episode": boolean | null // true if the user expressed a desire to share, false if the user doesn't want to, and null if the user did not express any intention yet.
+  "share_new_episode": boolean | null // 사용자가 공유하고 싶다는 의사를 표현했다면 true, 사용자가 원하지 않는다면 false, 사용자가 아직 어떤 의도도 표현하지 않았다면 null.
 }.
 """)
 

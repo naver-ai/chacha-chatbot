@@ -15,11 +15,11 @@ def create_generator():
     return HyperClovaXResponseGenerator(
         base_instruction=convert_to_jinja_template(f"""
 {PromptFactory.GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES}
-- Ask the user about potential solutions to the problem of the episode.
-- Ask only one question each conversation turn. 
-- If the episode involves other people such as friends or parents, ask the user how they would feel. 
-- Help the user to find an "actionable" solution. 
-- Do not overly suggest a specific solution.
+- 에피소드에 나타난 문제 혹은 곤란한 상황에 대해서, 사용자에게 잠재적인 해결책은 어떤 것들이 있을지 물어봐.
+- 각 대화 턴마다 하나의 질문만 해.
+- 에피소드에 친구나 부모 같은 다른 사람들이 관련되어 있다면, 사용자에게 그들이 어떻게 느꼈을지 물어봐.
+- 사용자가 "실행 가능한" 해결책을 찾도록 도와줘.
+- 특정한 해결책을 과도하게 강요하지 마.
  
 {PromptFactory.get_speaking_rules_block()}
 """), special_tokens=SPECIAL_TOKEN_CONFIG
@@ -27,17 +27,17 @@ def create_generator():
 
 
 _summarizer_prompt_template = convert_to_jinja_template(f"""
-- You are a helpful assistant that analyzes the content of the conversation.
+- 너는 대화 내용을 분석하는 도움이 되는 챗봇 연구 분석가야.
 {PromptFactory.SUMMARIZER_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES}
-- The AI in the conversation is helping the user to come up with solutions to the problem of the episode.
-- Determine whether the user successfully came up with solutions so that it is a reasonable moment to move on to the next conversation phase or not."""+"""
-- Return a JSON string in the following format:
+- 대화에서 AI는 사용자가 묘사한 에피소드에 나타난 문제 혹은 곤란한 상황에 대한 해결책을 찾도록 도와주고 있어.
+- 사용자가 성공적으로 해결책을 찾았는지 판단해서 다음 대화 단계로 넘어갈 합리적인 시점인지 결정해."""+"""
+- 다음 형식으로 JSON 문자열을 반환해:
 {
-    "problem": string |null // Describe the problem of the episode.
-    "identified_solutions": string | null // Describe the solutions that the user and the AI have discussed. Set null if no solutions appeared yet.
-    "is_actionable": boolean // Whether the solution is developed to be sufficiently actionable for the user.
-    "ai_comment_to_solution": string | null // How the AI commented on the solutions identified, especially when the solution was raised by the user. Set null if the AI had not commented yet.
-    "proceed_to_next_phase": boolean // True if the problem was clearly specified && the solution was identified && the solution is developed actionable && the AI have commented on the solutions.
+    "problem": string |null // 에피소드에 나타난 문제 혹은 곤란한 상황을 설명해.
+    "identified_solutions": string | null // 사용자와 AI가 논의한 해결책들을 설명해. 아직 해결책이 나타나지 않았다면 null로 설정해.
+    "is_actionable": boolean // 해결책이 사용자에게 충분히 실행 가능하도록 발전되었는지 여부.
+    "ai_comment_to_solution": string | null // AI가 식별된 해결책들에 대해 어떻게 코멘트했는지, 특히 사용자가 해결책을 제시했을 때. AI가 아직 코멘트하지 않았다면 null로 설정해.
+    "proceed_to_next_phase": boolean // 문제가 명확히 지정되었고 && 해결책이 식별되었고 && 해결책이 실행 가능하도록 발전되었고 && AI가 해결책들에 대해 코멘트했다면 true.
 }
 """)
 
@@ -72,10 +72,10 @@ summarizer_examples=[
                     DialogueTurn(message="좋은 생각 같아! 다음에 친구를 만나면 너가 어떤 기분이였는지 먼저 말을 해보면 좋을 것 같아", is_user=False),
                 ],
                 output= FindSummarizerResult(
-                    problem="The user was angry because their friend keeps making noise.",
-                    identified_solutions="Talk to the friend about the user's feeling", 
+                    problem="사용자가 친구가 계속 시끄럽게 해서 화가 났다.",
+                    identified_solutions="친구에게 사용자의 기분에 대해 이야기하기", 
                     is_actionable=True,
-                    ai_comment_to_solution="The solution is actionable and it is appropriate to proceed to the next phase",
+                    ai_comment_to_solution="해결책이 실행 가능하고 다음 단계로 넘어가기에 적절해",
                     proceed_to_next_phase=True,
                 )),
                 MapperInputOutputPair(input=[
@@ -90,10 +90,10 @@ summarizer_examples=[
 
                 ],
                 output=FindSummarizerResult(
-                    problem="The mom scolded the user even when the user's brother made the trouble",
-                    identified_solutions="Talk to the mom to listen to the user", 
+                    problem="사용자의 동생이 잘못했는데도 엄마가 사용자만 혼냈다.",
+                    identified_solutions="엄마에게 사용자의 말을 들어달라고 이야기하기", 
                     is_actionable=True,
-                    ai_comment_to_solution="The solution is actionable but it is not a good solution as the mother does not listen to the user. So, it is not appropriate to proceed to the next phase.",
+                    ai_comment_to_solution="해결책은 실행 가능하지만 엄마가 사용자의 말을 듣지 않기 때문에 좋은 해결책이 아니야. 따라서 다음 단계로 넘어가기에 적절하지 않아.",
                     proceed_to_next_phase=False,
                 )),
                 MapperInputOutputPair(input=[
@@ -106,10 +106,10 @@ summarizer_examples=[
                     DialogueTurn(message="숙제를 미리미리 다 해야겠어", is_user=True),
                 ],
                 output=FindSummarizerResult(
-                    problem="The user copied their friend's homework",
-                    identified_solutions="Complete the homework early", 
+                    problem="사용자가 친구의 숙제를 베꼈다.",
+                    identified_solutions="숙제를 미리미리 완료하기", 
                     is_actionable=True,
-                    ai_comment_to_solution="The solution is actionable and it is appropirate to proceed to the next phase",
+                    ai_comment_to_solution="해결책이 실행 가능하고 다음 단계로 넘어가기에 적절해",
                     proceed_to_next_phase=True,
                 )),
                 

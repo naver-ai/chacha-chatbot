@@ -16,28 +16,28 @@ def create_generator():
     return HyperClovaXResponseGenerator(
         base_instruction=convert_to_jinja_template(PromptFactory.GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES + """
         
-- The goal of the current conversation is to encourage the user to keep diary to record the moments in which they felt positive emotions:
+- 현재 대화의 목표는 사용자가 긍정적인 감정을 느꼈던 순간들을 기록하기 위해 일기를 쓰도록 격려하는 거야:
 {%- for em in identified_emotions | selectattr("is_positive", "true") %}
-  * {{em.emotion}} (em.reason)
+  * {{em.emotion}} ({{em.reason}})
 {%- endfor %}
 
-- 1. First start with asking the user whether they have been keeping diaries or journals regularly.
-- 2. Then encourage the user to keep diary to record the moments in which they felt positive emotions.
-- 3. Suggest a diary content by explicitly providing an example essay summarizing the above positive emotions and the reason; 
-  {%- if locale == 'kr' %}for the essay, use '~다' style Korean, such as "~했다." rather than "~했어.";{%- endif %} 
-  put the diary content wrapped with <diary></diary>, at the end of the message;
-  {%- if locale == 'kr' %}use the phrase like "예를 들어 다음과 같은 내용으로 일기를 써볼 수 있을 거야."{%- endif %}
+- 1. 먼저 사용자가 정기적으로 일기를 쓰고 있는지 물어봐.
+- 2. 그 다음 사용자가 긍정적인 감정을 느꼈던 순간들을 기록하기 위해 일기를 쓰도록 격려해.
+- 3. 위의 긍정적인 감정들과 그 이유를 요약한 예시 일기 문단 에세이를 명시적으로 제공해서 일기 내용을 제안해; 
+  에세이에서는 "~했어"보다는 "~했다"와 같은 '~다' 스타일의 한국어를 사용해;
+  메시지 끝에 <diary></diary>로 감싼 일기 내용을 넣어;
+  "예를 들어 다음과 같은 내용으로 일기를 써볼 수 있을 거야"와 같은 표현을 사용해.
   
-- Since the user is currently conversing with you, don't ask them to record now.""" + """
+- 사용자가 현재 너와 대화하고 있으니까, 지금 기록하라고 요청하지 마.""" + """
 {% if summarizer_result != Undefined -%}
 
-[Guide to the conversation]
+[대화 가이드]
 {% if summarizer_result.asked_user_keeping_diary is false -%}
-- You still did not ask whether the user is keeping diary these days. Ask about it.
+- 아직 사용자가 요즘 일기를 쓰고 있는지 물어보지 않았어. 물어봐.
 {%- elif summarizer_result.explained_importance_of_recording is false %}
-- You still did not explain the importance of recording the emotions. Explain it.
+- 아직 감정을 기록하는 것의 중요성을 설명하지 않았어. 설명해.
 {%- elif summarizer_result.reflection_note_content_provided is false %}
-- You still did not provide the example diary content. Provide it.
+- 아직 예시 일기 내용을 제공하지 않았어. 제공해.
 {%- endif %}
 {%- endif %}
 
@@ -45,16 +45,16 @@ def create_generator():
     )
 
 _summarizer_instruction_template = convert_to_jinja_template("""
-- You are a helpful assistant that analyzes the content of the dialogue history.
+- 너는 대화 기록의 내용을 분석하는 도움이 되는 챗봇 연구 분석가야.
 """ +
                                                                     PromptFactory.SUMMARIZER_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES + """
-- The AI in the dialogue is encouraging the user to record the moments in which they felt positive emotions: {{ identified_emotions | selectattr("is_positive", "true") | map(attribute="emotion") | join(", ") }}.
+- 대화에서 AI는 사용자가 긍정적인 감정을 느꼈던 순간들을 기록하도록 격려하고 있어: {{ identified_emotions | selectattr("is_positive", "true") | map(attribute="emotion") | join(", ") }}.
 
-- Analyze the input dialogue and identify if the AI had sufficient conversation about the recording.
-Follow this JSON format: {
-    "asked_user_keeping_diary": boolean // true if the AI had asked whether the user is keeping diary at present.
-    "explained_importance_of_recording": boolean // true if the AI had described the importance of recording positive moments.
-    "reflection_note_content_provided": boolean // Whether the AI has provided the reflection note to the user with <diary> tag.
+- 입력된 대화를 분석하고 AI가 기록에 대해 충분한 대화를 했는지 식별해.
+다음 JSON 형식을 따라: {
+    "asked_user_keeping_diary": boolean // AI가 사용자가 현재 일기를 쓰고 있는지 물어봤다면 true
+    "explained_importance_of_recording": boolean // AI가 긍정적인 순간들을 기록하는 것의 중요성을 설명했다면 true
+    "reflection_note_content_provided": boolean // AI가 <diary> 태그와 함께 사용자에게 반성 노트를 제공했는지 여부
 }.
 """)
 

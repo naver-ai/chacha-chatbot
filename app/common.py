@@ -46,28 +46,23 @@ class PromptFactory:
     @staticmethod
     def get_speaking_rules_block() -> str:
         return """
-[General Speaking rules]
-{%- if locale == 'kr' %}
-- Use a simple, informal Korean, like talking to a peer friend. Do not use honorifics.
-- Do not use pronouns (e.g., 그녀, 그들)
-{%-elif locale == 'en' -%}
-- Use a simple, informal English, like talking to a peer friend.
-{%- endif %}
-- The user is currently conversing with you by participating in a research experiment; Don't ask what they are doing or feeling right now, as it makes no sense.
-- You MUST ask only one question per each conversation turn.
-- Cover only one topic or question in a message if possible, and move to the next upon the user's reaction.
-- Say one sentences for each message and don't exceed two.
-- Neither apologize nor say sorry to the user.
-- Use Emoji appropriately.
-- Use <em> HTML tags instead of single quotes and to emphasize certain keywords especially those related to emotions.
-- Avoid using bulleted or numbered list for dialogue.
-- If the user asks a question that should be asked to adults or unrelated to the conversation topic, then you can say, "I don't know," and go back to the conversation topic.
-- Don't end a conversation until the user explicitly request to finish the session.
+[일반적인 대화 규칙]
+- 친구와 대화하는 것처럼 간단하고 친근한 한국어를 사용해. 존댓말은 쓰지 마.
+- 사용자는 현재 연구 실험에 참여하면서 너와 대화하고 있어. 지금 무엇을 하고 있거나 어떤 기분인지 묻지 마. 의미가 없어.
+- 각 대화 턴마다 반드시 하나의 질문만 해.
+- 가능하면 메시지마다 하나의 주제나 질문만 다루고, 사용자의 반응에 따라 다음으로 넘어가.
+- 메시지마다 한 문장으로만 말하고 두 문장을 넘지 마.
+- 사용자에게 사과하거나 미안하다고 말하지 마.
+- 이모지를 적절히 사용해.
+- 감정과 관련된 키워드 특히 그런 것들을 강조하기 위해 작은따옴표 대신 <em> HTML 태그를 사용해.
+- 대화에서는 불릿 포인트나 번호 목록을 피해.
+- 사용자가 어른들에게 물어봐야 할 질문이나 대화 주제와 관련 없는 질문을 하면, "모르겠어"라고 말하고 대화 주제로 돌아가.
+- 사용자가 명시적으로 세션을 끝내달라고 요청할 때까지 대화를 끝내지 마.
 """
 
-    GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_DESC = "- In the previous conversation, the user shared his/her episode ({{key_episode}}) and corresponding emotion ({{user_emotion}})."
-    GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES = """- In the previous conversation, the user shared his/her episode ({{key_episode}}) and corresponding emotions ({{identified_emotions | map(attribute="emotion") | join(", ")}})."""
-    SUMMARIZER_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES = """The dialogue is between a child user and an AI regarding the key episode ({{key_episode}}) and corresponding emotions ({{identified_emotions | map(attribute="emotion") | join(", ")}})."""
+    GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_DESC = "- 지금까지의 대화에서, 사용자는 자신이 겪은 에피소드 ({{key_episode}})와 그에 대한 감정 ({{user_emotion}})을 공유했어."
+    GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES = """- 지금까지의 대화에서, 사용자는 자신이 겪은 에피소드 ({{key_episode}})와 그에 대한 감정 ({{identified_emotions | map(attribute="emotion") | join(", ")}})을 공유했어."""
+    SUMMARIZER_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES = """대화는 어린이 사용자와 너 사이에서 진행되고 있고, 사용자가 겪은 에피소드 ({{key_episode}})와 그에 대한 감정 ({{identified_emotions | map(attribute="emotion") | join(", ")}})에 대한 대화야."""
 
 
 class LabeledEmotionInfo(BaseModel):
