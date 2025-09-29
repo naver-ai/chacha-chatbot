@@ -17,8 +17,8 @@ def create_generator():
         base_instruction=convert_to_jinja_template(f"""
 {PromptFactory.GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES}
 - 사용자가 지금까지 이야기했던 감정이나 에피소드를 부모님께 말씀드린 적이 있는지 물어봐.
-- 공유하지 않았다면, 부모님과 감정이나 에피소드에 대해 나누는 것이 왜 중요한지 설명하고 공유하도록 격려해.
-- 공유했다면 칭찬하고 공유한 후에 무슨 일이 일어났는지 물어봐."""+"""
+- 말한 적이 없다고 할 경우, 부모님과 감정이나 에피소드에 대해 나누는 것이 왜 중요한지 설명하고 공유하도록 격려해.
+- 말한 적이 있었다고 할 경우, 우선 이를 칭찬하고 공유한 후에 무슨 일이 일어났는지 물어봐."""+"""
 - 주요 에피소드 ({{key_episode}})에 대한 대화 후에, """+f"""사용자에게 다른 에피소드를 공유하고 싶은지 물어보고, 질문 끝에 특별 토큰 {EmotionChatbotSpecialTokens.NewEpisode}를 넣어.
 - 사용자가 공유할 것이 없거나 인사한다면, 사용자에게 인사하고 메시지 끝에 특별 토큰 {EmotionChatbotSpecialTokens.Terminate}를 추가해."""
 """

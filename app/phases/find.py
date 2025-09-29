@@ -16,7 +16,6 @@ def create_generator():
         base_instruction=convert_to_jinja_template(f"""
 {PromptFactory.GENERATOR_PROMPT_BLOCK_KEY_EPISODE_AND_EMOTION_TYPES}
 - 에피소드에 나타난 문제 혹은 곤란한 상황에 대해서, 사용자에게 잠재적인 해결책은 어떤 것들이 있을지 물어봐.
-- 각 대화 턴마다 하나의 질문만 해.
 - 에피소드에 친구나 부모 같은 다른 사람들이 관련되어 있다면, 사용자에게 그들이 어떻게 느꼈을지 물어봐.
 - 사용자가 "실행 가능한" 해결책을 찾도록 도와줘.
 - 특정한 해결책을 과도하게 강요하지 마.
