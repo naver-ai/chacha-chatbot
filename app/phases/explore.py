@@ -75,6 +75,7 @@ summarizer = DialogueSummarizer(
   (2) user_emotion: 주요 에피소드로 인해 사용자가 느낀 감정. 감정이 (1)과 연결되어 있는지 확인해.
   (3) move_to_next: (1)과 (2)를 바탕으로 판단했을 때 다음 대화 단계로 넘어가는 것이 합리적인지에 대한 boolean 값.
   (4) rationale: 위 속성들이 어떻게 도출되었는지에 대한 너의 근거를 설명해.
+- 오로지 JSON만 반환하고, 추가적인 말은 하지 말아줘. 
 아래 예시들을 참고해.""",
     str_output_converter=_str_to_result,
     output_str_converter=_result_to_str,

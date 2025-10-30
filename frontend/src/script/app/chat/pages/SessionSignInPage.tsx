@@ -46,7 +46,7 @@ export const SessionSignInPage = () => {
     return <>
     <IntroFormFrame>
         <div className="panel">
-        <LanguageSelector className="self-end mb-2"/>
+        {false && <LanguageSelector className="self-end mb-2"/>}
         <form onSubmit={handleSubmit(onSubmit)}>
             <input {...register('sessionId')} type="text" placeholder={t("SIGN_IN.SESSION_NAME")} autoComplete="off"/>
             {

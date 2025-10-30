@@ -51,7 +51,7 @@ export const IntroView = (props: {
 
     return <IntroFormFrame>
         <div className="panel">
-            <LanguageSelector className="self-end mb-2"/>
+            {false && <LanguageSelector className="self-end mb-2"/>}
             <form onSubmit={handleSubmit(onSubmit)}>
         <input {...register("user_name")} type="text" placeholder={t("SIGN_IN.USER_NAME_PLACEHOLDER")} 
         autoComplete="off"

@@ -53,6 +53,7 @@ _summarizer_instruction_template = convert_to_jinja_template("""
     "explained_importance_of_recording": boolean // AI가 긍정적인 순간들을 기록하는 것의 중요성을 설명했다면 true
     "reflection_note_content_provided": boolean // AI가 <diary> 태그와 함께 사용자에게 반성 노트를 제공했는지 여부
 }.
+- 오로지 JSON만 반환하고, 추가적인 말은 하지 말아줘. 
 """)
 
 def _instruction_generator(dialogue: Dialogue, params: FindDialogueSummarizerParams)->str:

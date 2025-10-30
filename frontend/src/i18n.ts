@@ -90,7 +90,7 @@ i18n.use(initReactI18next)
                 translation: kr
             }
         },
-        lng: 'en',
+        lng: 'kr',
 
         interpolation: {
             escapeValue: false

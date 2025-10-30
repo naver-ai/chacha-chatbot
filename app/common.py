@@ -19,11 +19,11 @@ class EmotionChatbotPhase(StrEnum):
 
 
 class EmotionChatbotSpecialTokens(StrEnum):
-    Terminate = "<|Terminate|>"
-    NewEpisode = "<|AskNewEpisode|>"
-    EmotionSelect = "<|EmotionSelect|>"
+    Terminate = "!Terminate!"
+    NewEpisode = "!AskNewEpisode!"
+    EmotionSelect = "!EmotionSelect!"
 
-SPECIAL_TOKEN_REGEX = r"<\|[a-zA-Z0-9-_]+\|>"
+SPECIAL_TOKEN_REGEX = r"\![a-zA-Z0-9-_]+\!"
 
 SPECIAL_TOKEN_CONFIG = [
     (EmotionChatbotSpecialTokens.EmotionSelect, "select_emotion", True),

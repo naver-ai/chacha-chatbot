@@ -94,6 +94,8 @@ _summarizer_prompt_template = convert_to_jinja_template("""
      > 
     }
 
+- 오로지 JSON만 반환하고, 추가적인 말은 하지 말아줘. 
+
 아래 예시들을 참고해.
 """)
 

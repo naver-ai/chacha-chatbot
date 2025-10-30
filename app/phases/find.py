@@ -38,6 +38,7 @@ _summarizer_prompt_template = convert_to_jinja_template(f"""
     "ai_comment_to_solution": string | null // AI가 식별된 해결책들에 대해 어떻게 코멘트했는지, 특히 사용자가 해결책을 제시했을 때. AI가 아직 코멘트하지 않았다면 null로 설정해.
     "proceed_to_next_phase": boolean // 문제가 명확히 지정되었고 && 해결책이 식별되었고 && 해결책이 실행 가능하도록 발전되었고 && AI가 해결책들에 대해 코멘트했다면 true.
 }
+- 오로지 JSON만 반환하고, 추가적인 말은 하지 말아줘. 
 """)
 
 

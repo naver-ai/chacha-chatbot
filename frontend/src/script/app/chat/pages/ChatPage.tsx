@@ -287,6 +287,8 @@ const SessionMessageView = (props: { id: EntityId, isLast: boolean }) => {
     }
   }, [turn.is_user, props.isLast, t])
 
+  console.log("message:", turn)
+
   return hideMessage ? null : <MessageView avatarHash={turn.is_user === true ? userName : "system"} message={turn} onThumbnailDoubleClick={onDoubleClick} componentsBelowCallout={
       !isEmotionSelectionTurn
         ? null : <>
