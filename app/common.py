@@ -79,13 +79,11 @@ class LabelSummarizerResult(BaseModel):
 class LabelDialogueSummarizerParams(ChatCompletionFewShotMapperParams):
     key_episode: str | None = None
     user_emotion: str | None = None
-    model: str =ChatGPTModel.GPT_4o
     api_params: ChatCompletionParams = ChatCompletionParams(temperature = 0.5)
 
 class FindDialogueSummarizerParams(ChatCompletionFewShotMapperParams):
     key_episode: str | None = None
     identified_emotions: list[LabeledEmotionInfo]
-    model: str =ChatGPTModel.GPT_4o
     api_params: ChatCompletionParams = ChatCompletionParams(temperature=0.5)
 
 class FindSummarizerResult(BaseModel):

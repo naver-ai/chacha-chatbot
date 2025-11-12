@@ -36,7 +36,7 @@ class ExploreGenerator(HyperClovaXResponseGenerator):
 - 사용자에게 가장 기억에 남는 에피소드나 순간에 대해 물어봐.
 - 기억하지 못하거나 무엇을 말해야 할지 모르겠다고 하면, 즐거웠거나 좋았거나 나빴던 사건에 대해 물어봐.
 
-""" + PromptFactory.get_speaking_rules_block()), special_tokens=SPECIAL_TOKEN_CONFIG, model=ChatGPTModel.GPT_4o)
+""" + PromptFactory.get_speaking_rules_block()), special_tokens=SPECIAL_TOKEN_CONFIG)
 
         self.__initial_user_message_format = convert_to_jinja_template("""
 {%-if locale == 'kr'-%}
@@ -97,5 +97,5 @@ summarizer_examples=[MapperInputOutputPair(input=
         ))]
 
 summarizer_params=ChatCompletionFewShotMapperParams(
-    model=ChatGPTModel.GPT_4o,
+    model="HCX-007",
     api_params=ChatCompletionParams(temperature=0.1))

@@ -1,15 +1,19 @@
 from chatlib.chatbot import ChatCompletionResponseGenerator, ChatCompletionParams, TokenLimitExceedHandler
-from chatlib.utils.integration import APIAuthorizationVariableSpecPresets, APIAuthorizationVariableSpec
-from chatlib.llm.chat_completion_api import ChatCompletionAPI, ChatCompletionMessage, ChatCompletionMessageRole, ChatCompletionResult
+from chatlib.llm.chat_completion_api import ChatCompletionMessage, ChatCompletionAPI, ChatCompletionMessageRole, ChatCompletionResult
+from chatlib.utils.integration import APIAuthorizationVariableSpec, APIAuthorizationVariableSpecPresets
+from jinja2 import Template
+from typing import Callable, Awaitable
+from enum import StrEnum
 from functools import cache
 import aiohttp
-from jinja2 import Template
-from typing import Callable, Awaitable, Any, Optional
-import re
+
+class HyperClovaXModel(StrEnum):
+    HCX_007 = "HCX-007"
+    HCX_009 = "HCX-009"
 
 class HyperClovaXAPI(ChatCompletionAPI):
 
-    __host_spec = APIAuthorizationVariableSpecPresets.Host
+    __api_key_spec = APIAuthorizationVariableSpecPresets.ApiKey
 
     @classmethod
     @cache
@@ -18,78 +22,62 @@ class HyperClovaXAPI(ChatCompletionAPI):
     
     @classmethod
     def get_auth_variable_specs(cls) -> list[APIAuthorizationVariableSpec]:
-        return [cls.__host_spec]
+        return [cls.__api_key_spec]
     
     @classmethod
     def _authorize_impl(cls, variables):
-        if variables.get(cls.__host_spec) is None:
+        if variables.get(cls.__api_key_spec) is None:
             return False
         return True
-    
 
-    def _extract_message(self, text: str) -> str:
-        # <|im_start|>assistant 와 <|im_end|> 사이의 내용을 잡아오기
-        match = re.search(r"<\|im_start\|>assistant\n(.*?)<\|im_end\|>", text, re.DOTALL)
-        if match:
-            return match.group(1).strip()
-        return None
-    
 
-    async def _run_chat_completion_impl(self, model, messages, params) -> ChatCompletionResult:
+    async def _run_chat_completion_impl(self, model, messages, params):
 
-        prompt = ""
-
-        for message in messages:
-            if message.role == ChatCompletionMessageRole.SYSTEM:
-                prompt += f"<|im_start|>system\n{message.content}<|im_end|>\n"
-            elif message.role == ChatCompletionMessageRole.USER:
-                prompt += f"<|im_start|>user\n{message.content}<|im_end|>\n"
-            elif message.role == ChatCompletionMessageRole.ASSISTANT:
-                prompt += f"<|im_start|>assistant\n{message.content}<|im_end|>\n"
+        url = f"https://clovastudio.stream.ntruss.com/v3/chat-completions/{model}"
 
         headers = {
-            "content-type": "application/json; charset=utf-8"
+            'Authorization': f"Bearer {self.get_auth_variable_for_spec(self.__api_key_spec)}",
+            'Content-Type': 'application/json; charset=utf-8',
+            'Accept': 'application/json'
         }
 
-        data = {
-            "prompt": prompt,
-            "temperature": params.get("temperature", 0.5),
-            "max_tokens": params.get("max_tokens", 1000),
-            "top_p": params.get("top_p", 0.6),
-            "stop": [
-                "<|stop|>",
-                "<|endofturn|>"
-            ],
-            "include_probs": False,
-            "repeatition_penalty": 1
-        }
+        input_messages = []
+        for msg in messages:
+
+            if msg.role == ChatCompletionMessageRole.SYSTEM and msg.name == 'example_user':
+                input_messages.append({"role": "user", "content": msg.content})
+            elif msg.role == ChatCompletionMessageRole.SYSTEM and msg.name == 'example_assistant':
+                input_messages.append({"role": "assistant", "content": msg.content})
+            else:
+                input_messages.append({
+                    "role": msg.role == ChatCompletionMessageRole.SYSTEM and "system" or
+                            msg.role == ChatCompletionMessageRole.USER and "user" or
+                            msg.role == ChatCompletionMessageRole.ASSISTANT and "assistant",
+                    "content": msg.content
+                })
 
         async with aiohttp.ClientSession() as session:
-            async with session.post(self.get_auth_variable_for_spec(self.__host_spec), json=data, headers=headers) as resp:
+
+            async with session.post(url, headers=headers, json={"messages": input_messages, "params": params}) as resp:
                 if resp.status != 200:
                     raise Exception(f"Failed to get response from HyperClovaX API: {resp.status}, {await resp.text()}")
                 result_json = await resp.json()
-                # Assuming the response structure contains 'choices' similar to OpenAI
-                if 'choices' in result_json and len(result_json['choices']) > 0:
-                    message_content = self._extract_message(result_json['choices'][0].get('text', '').strip())
-
-                    return ChatCompletionResult(
-                        message=ChatCompletionMessage(
-                            role=ChatCompletionMessageRole.ASSISTANT,
-                            content=message_content
-                        ),
-                        finish_reason=result_json['choices'][0].get('finish_reason', 'stop'),
-                        provider=self.provider_name(),
-                        model=model,
-                        prompt_tokens=0,  # HyperClovaX API may not provide this info
-                        completion_tokens=len(message_content.split()),  # Rough estimate
-                        total_tokens=len(message_content.split())  # Rough estimate
-                    )
-                return None
-
+                result = result_json['result']
+                return ChatCompletionResult(
+                    message=ChatCompletionMessage(
+                        content=result['message']['content'],
+                        role=ChatCompletionMessageRole.ASSISTANT
+                    ),
+                    finish_reason=result['finishReason'],
+                    provider=self.provider_name(),
+                    model=model,
+                    prompt_tokens=result['usage']['promptTokens'],
+                    completion_tokens=result['usage']['completionTokens'],
+                    total_tokens=result['usage']['totalTokens']
+                )
 
     def get_token_limit(self, model: str) -> int:
-        return 120000
+        return 128000
     
     def is_messages_within_token_limit(self, messages: list[ChatCompletionMessage], model: str, tolerance: int = 120) -> bool:
         # Simple token limit check based on message count
@@ -100,7 +88,6 @@ class HyperClovaXAPI(ChatCompletionAPI):
         # Simple token count based on message count
         # This is a placeholder; actual implementation should calculate token usage
         return len(messages) * 50  # Assuming average 50 tokens per message
-    
 
 
 class HyperClovaXResponseGenerator(ChatCompletionResponseGenerator):
@@ -109,7 +96,7 @@ class HyperClovaXResponseGenerator(ChatCompletionResponseGenerator):
     def get_api(cls) -> HyperClovaXAPI:
         return HyperClovaXAPI()
 
-    def __init__(self, model: str = "hyperclova-x-large", base_instruction: str | Template | None = None,
+    def __init__(self, model: str = HyperClovaXModel.HCX_007, base_instruction: str | Template | None = None,
                  instruction_parameters: dict | None = None,
                  initial_user_message: str | list[ChatCompletionMessage] | None = None,
                  chat_completion_params: ChatCompletionParams | None = None,
