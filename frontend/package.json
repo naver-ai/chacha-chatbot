@@ -30,6 +30,7 @@
     "@types/file-saver": "^2.0.5",
     "@types/i18next": "^13.0.0",
     "boring-avatars": "^1.10.1",
+    "date-fns": "^4.1.0",
     "file-saver": "^2.0.5",
     "i18next": "^23.4.4",
     "nanoid": "^4.0.2",
