@@ -58,7 +58,8 @@ export const SessionSignInPage = () => {
         <div className="panel">
         {false && <LanguageSelector className="self-end mb-2"/>}
         <form onSubmit={handleSubmit(onSubmit)}>
-            <input {...register('sessionId')} type="text" placeholder={t("SIGN_IN.SESSION_NAME")} autoComplete="off"/>
+            <label htmlFor="session_id" className="text-sm mb-0 ml-1 text-slate-400">세션 ID</label>
+            <input id="session_id" {...register('sessionId')} type="text" placeholder={t("SIGN_IN.SESSION_NAME")} autoComplete="off"/>
             {
                 errors.sessionId?.message != null ? <span className="text-sm mt-2 text-red-400">{errors.sessionId?.message}</span> : null
             }
