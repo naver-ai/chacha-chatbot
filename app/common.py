@@ -5,6 +5,8 @@ from chatlib.tool.versatile_mapper import ChatCompletionFewShotMapperParams
 from chatlib.llm.integration.openai_api import ChatGPTModel
 from pydantic import BaseModel
 
+from app.models.HyperClovaXAPI import HyperClovaXModel
+
 class ChatbotLocale(StrEnum):
     Korean="kr"
     English="en"
@@ -77,11 +79,13 @@ class LabelSummarizerResult(BaseModel):
 
 
 class LabelDialogueSummarizerParams(ChatCompletionFewShotMapperParams):
+    model: str = HyperClovaXModel.HCX_007
     key_episode: str | None = None
     user_emotion: str | None = None
     api_params: ChatCompletionParams = ChatCompletionParams(temperature = 0.5)
 
 class FindDialogueSummarizerParams(ChatCompletionFewShotMapperParams):
+    model: str = HyperClovaXModel.HCX_007
     key_episode: str | None = None
     identified_emotions: list[LabeledEmotionInfo]
     api_params: ChatCompletionParams = ChatCompletionParams(temperature=0.5)

@@ -56,9 +56,17 @@ class HyperClovaXAPI(ChatCompletionAPI):
                     "content": msg.content
                 })
 
+        body = {
+            "messages": input_messages
+        }
+
+        body["thinking"] = {"effort": "none"}
+
+        body.update(params)
+
         async with aiohttp.ClientSession() as session:
 
-            async with session.post(url, headers=headers, json={"messages": input_messages, "params": params}) as resp:
+            async with session.post(url, headers=headers, json=body) as resp:
                 if resp.status != 200:
                     raise Exception(f"Failed to get response from HyperClovaX API: {resp.status}, {await resp.text()}")
                 result_json = await resp.json()
