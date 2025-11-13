@@ -10,11 +10,19 @@ import { useTranslation } from "react-i18next"
 import { LanguageSelector } from "../components/LanguageSelector"
 import { useDispatch } from "react-redux"
 import { init } from "../reducer"
+import { nanoid } from "nanoid"
+import { format } from "date-fns"
 
 
 const schema = yup.object({
     sessionId: yup.string().matches(/^[a-zA-Z0-9\-_]+$/, i18n.t("SIGN_IN.ERROR.SESSION_ID")).trim().required()
 }).required()
+
+const generateDefaultSessionId = (): string => {
+    const timestamp = format(new Date(), 'yyMMdd-HHmmss')
+    const id = nanoid(5)
+    return `${timestamp}-${id}`
+}
 
 export const SessionSignInPage = () => {
 
@@ -23,6 +31,7 @@ export const SessionSignInPage = () => {
     const {
         register,
         setFocus,
+        setValue,
         handleSubmit,
         formState: {errors, isValid},
     } = useForm({
@@ -41,6 +50,7 @@ export const SessionSignInPage = () => {
     useEffect(()=>{
         dispatch(init())
         setFocus('sessionId')
+        setValue('sessionId', generateDefaultSessionId())
     }, [])
 
     return <>
