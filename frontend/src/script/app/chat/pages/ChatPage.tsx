@@ -193,7 +193,7 @@ const TypingPanel = (props: {
   }, [setFocus])
 
   return shouldHideTypingPanel ? null : <>
-    <div id="chat-typing-panel" className="sm:fixed sm:z-10 sm:left-4 sm:right-4 sm:bottom-10 lg:left-0 lg:right-0">
+    <div id="chat-typing-panel" className="sm:fixed sm:z-10 sm:left-4 sm:right-4 sm:bottom-16 lg:left-0 lg:right-0">
       <div className="container relative">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-row bg-slate-50 px-3 py-1.5 pl-1.5 sm:rounded-lg shadow-lg">
           {
@@ -218,7 +218,7 @@ const TypingPanel = (props: {
 
 
     </div>
-    <div className="bg-background/70 fixed bottom-0 left-10 right-10 h-[50px] collapse sm:visible" /></>
+    <div className="bg-background/70 fixed bottom-0 left-0 right-0 h-[50px] collapse sm:visible" /></>
 }
 
 
