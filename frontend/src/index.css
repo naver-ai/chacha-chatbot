@@ -19,7 +19,7 @@ html, body{
 }
 
 .background-panel {
-    @apply bg-white;
+    @apply bg-background;
     /*background: linear-gradient(121deg, rgb(233, 235, 237) 0%, rgb(214, 241, 232) 100%);*/
 }
 

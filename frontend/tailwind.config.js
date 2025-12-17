@@ -20,7 +20,7 @@ module.exports = {
         'pulse-fast': 'pulse 1s linear infinite',
       },
       colors: {
-        "background": "#ebeff3",
+        "background": "#fff",
         "chat-1": "#1b5a9d",
         "chat-2": "#b54fa2",
         "clova-primary": "#05d686",

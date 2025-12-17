@@ -218,7 +218,7 @@ const TypingPanel = (props: {
 
 
     </div>
-    <div className="bg-background/70 fixed bottom-0 left-0 right-0 h-[50px] collapse sm:visible" /></>
+    <div className="bg-background/70 fixed bottom-0 left-0 right-0 h-[70px] collapse sm:visible" /></>
 }
 
 

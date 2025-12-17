@@ -6,7 +6,7 @@ export const IntroFormFrame = (props: {children?: any}) => {
         <div className="my-auto mx-auto flex flex-col items-center gap-y-4">
             <img src={vignetteUpperURL} className="pointer-events-none absolute translate-y-[-180px] opacity-70" width={500}/>
             <img src={vignetteLowerURL} className="pointer-events-none absolute translate-y-[120px] opacity-70" width={500}/>
-            <div className="text-xl font-black z-10">어린이들을 위한 챗봇, 차차 (HCX)</div>
+            <div className="text-xl font-black z-10">아이들의 마음을 읽어주는 AI, 차차</div>
             <div className="z-10">{props.children}</div>
         </div>
     </div>
