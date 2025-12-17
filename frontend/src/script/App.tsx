@@ -9,11 +9,12 @@ import { SessionSignInPage } from "./app/chat/pages/SessionSignInPage";
 export function App() {
     return <Provider store={store}>
         <SnackbarProvider maxSnack={3}><BrowserRouter>
-        <Routes>
-            <Route index element={<Navigate to={"signin"}/>}/>
-            <Route path={"/signin"} element={<SessionSignInPage/>}/>
-            <Route path={"/chat/:sessionId"} element={<ChatPage/>}/>
-            <Route path={"/share/:sessionId"} element={<ChatSharePage/>}/>
-        </Routes>
-    </BrowserRouter></SnackbarProvider></Provider>
+            <Routes>
+                <Route index element={<Navigate to={"signin"}/>}/>
+                <Route path={"/signin"} element={<SessionSignInPage/>}/>
+                <Route path={"/chat/:sessionId"} element={<ChatPage/>}/>
+                <Route path={"/share/:sessionId"} element={<ChatSharePage/>}/>
+            </Routes>
+        </BrowserRouter></SnackbarProvider>
+    </Provider>
 }
