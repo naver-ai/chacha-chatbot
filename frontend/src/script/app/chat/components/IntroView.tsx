@@ -50,7 +50,7 @@ export const IntroView = (props: {
     }, [getFieldState, setFocus])
 
     return <IntroFormFrame>
-        <div className="panel">
+        <div className="panel frame-bg">
             {false && <LanguageSelector className="self-end mb-2"/>}
             <form onSubmit={handleSubmit(onSubmit)}>
         <input {...register("user_name")} type="text" placeholder={t("SIGN_IN.USER_NAME_PLACEHOLDER")} 

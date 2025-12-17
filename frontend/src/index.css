@@ -19,7 +19,7 @@ html, body{
 }
 
 .background-panel {
-    @apply bg-background;
+    @apply bg-white;
     /*background: linear-gradient(121deg, rgb(233, 235, 237) 0%, rgb(214, 241, 232) 100%);*/
 }
 
@@ -44,6 +44,10 @@ html, body{
     }
     .intro-form-frame form {
         @apply flex flex-col justify-stretch;
+    }
+
+    .frame-bg{
+        @apply bg-gradient-to-br from-blue-100 to-pink-100;
     }
 
     textarea.chat-type {

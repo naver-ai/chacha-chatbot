@@ -13,7 +13,6 @@ import { init } from "../reducer"
 import { nanoid } from "nanoid"
 import { format } from "date-fns"
 
-
 const schema = yup.object({
     sessionId: yup.string().matches(/^[a-zA-Z0-9\-_]+$/, i18n.t("SIGN_IN.ERROR.SESSION_ID")).trim().required()
 }).required()
@@ -55,7 +54,8 @@ export const SessionSignInPage = () => {
 
     return <>
     <IntroFormFrame>
-        <div className="panel">
+
+        <div className="panel frame-bg">
         {false && <LanguageSelector className="self-end mb-2"/>}
         <form onSubmit={handleSubmit(onSubmit)}>
             <label htmlFor="session_id" className="text-sm mb-0 ml-1 text-slate-400">세션 ID</label>
