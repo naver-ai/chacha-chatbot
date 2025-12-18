@@ -34,7 +34,7 @@ html, body{
     }
 
     .text-input, input[type=text], input[type=number], textarea {
-        @apply shadow-inner border-2 bg-white px-2 py-1 rounded-md border-slate-200 disabled:text-gray-400 focus:outline-none focus:border-clova-blue;
+        @apply shadow-inner border-2 bg-white px-2 py-1 rounded-md border-slate-600/30 disabled:text-gray-400 focus:outline-none focus:border-clova-blue;
     }
 
 
@@ -48,6 +48,10 @@ html, body{
 
     .frame-bg{
         @apply bg-gradient-to-br from-blue-100 to-pink-100;
+    }
+
+    .frame-bg.frame-transparent{
+        @apply backdrop-blur-sm from-blue-100/40 to-pink-100/40;
     }
 
     textarea.chat-type {

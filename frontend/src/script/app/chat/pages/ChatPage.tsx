@@ -195,7 +195,7 @@ const TypingPanel = (props: {
   return shouldHideTypingPanel ? null : <>
     <div id="chat-typing-panel" className="sm:fixed sm:z-10 sm:left-4 sm:right-4 sm:bottom-16 lg:left-0 lg:right-0">
       <div className="container relative">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-row bg-slate-50 px-3 py-1.5 pl-1.5 sm:rounded-lg shadow-lg">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-row frame-bg frame-transparent px-2 py-2 sm:rounded-lg shadow-xl shadow-violet-900/20 border-[1px]">
           {
             isSystemMessageLoading
               ? <div className="text-input text-chat-1 animate-pulse-fast flex-1 mr-2">{t("CHAT.PROCESSING")}</div>
@@ -218,7 +218,7 @@ const TypingPanel = (props: {
 
 
     </div>
-    <div className="bg-background/70 fixed bottom-0 left-0 right-0 h-[70px] collapse sm:visible" /></>
+    <div className="backdrop-blur-sm bg-background/50 fixed bottom-0 left-0 right-0 h-[70px] collapse sm:visible" /></>
 }
 
 
