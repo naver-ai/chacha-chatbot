@@ -1,6 +1,6 @@
 import { ChatMessage } from "../types"
 import Avatar from "boring-avatars"
-import {useSelector} from "../redux/hooks";
+import { TypeAnimation } from 'react-type-animation';
 
 export const MessageView = (props: {
     avatarHash: string,
@@ -29,7 +29,10 @@ export const MessageView = (props: {
                 props.componentsAboveCallout
             }
             {
-                props.hideCallout === true ? null : <div className="callout" dangerouslySetInnerHTML={{ __html: props.overrideMessageText || props.message.message }}/>
+                props.hideCallout === true ? null : props.message.is_user === true ? <div className="callout" dangerouslySetInnerHTML={{ __html: props.overrideMessageText || props.message.message }}/> 
+                : <div className="callout">
+                    <TypeAnimation sequence={[props.overrideMessageText || props.message.message]} speed={70} cursor={false}/>
+                    </div>
             }
             {
                 props.componentsBelowCallout
