@@ -43,17 +43,15 @@ const theme: ThemeConfig = {
 export function App() {
     return <Provider store={store}>
                 <SnackbarProvider maxSnack={3}>
-        <ConfigProvider theme={theme}>
-            <AntdApp>
-                    <BrowserRouter>
-                        <Routes>
-                            <Route index element={<AutoRedirect/>}/>
-                            <Route path={"/chat/:sessionId"} element={<ChatPage/>}/>
-                            <Route path={"/share/:sessionId"} element={<ChatSharePage/>}/>
-                        </Routes>
-                    </BrowserRouter>
-            </AntdApp>
-        </ConfigProvider>
+                    <ConfigProvider theme={theme}>
+                                <BrowserRouter>
+                                    <Routes>
+                                        <Route index element={<AutoRedirect/>}/>
+                                        <Route path={"/chat/:sessionId"} element={<ChatPage/>}/>
+                                        <Route path={"/share/:sessionId"} element={<ChatSharePage/>}/>
+                                    </Routes>
+                                </BrowserRouter>
+                    </ConfigProvider>
                 </SnackbarProvider>
     </Provider>
 }

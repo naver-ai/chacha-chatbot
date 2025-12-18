@@ -27,8 +27,7 @@ import { useTranslation } from "react-i18next";
 import { twMerge } from "tailwind-merge";
 const format = require('string-format')
 import {HomeIcon} from '@heroicons/react/20/solid'
-import useApp from "antd/es/app/useApp";
-import { Button } from "antd";
+import { message, Popconfirm } from "antd";
 import { RESET_TIME_LIMIT_MILLIS, MAX_TURNS } from "../config";
 
 // Utility function to format text with line breaks
@@ -176,7 +175,7 @@ const SessionEndedOverlay = (props: { reason: 'MAX_TURNS' | 'TIMER_EXPIRED' }) =
 
   const navigate = useNavigate()
   const onResetClick = useCallback(()=>{
-    navigate("/")
+    navigate("/", {replace: true})
   }, [navigate])
 
   useEffect(() => {
@@ -272,23 +271,24 @@ const ChatSessionInfoPanel = () => {
 
   const profile = useMemo(()=>format(t("SESSION_INFO.PROFILE_FORMAT"), {name: sessionInfo!.name, age: sessionInfo!.age}), [t, sessionInfo!.name, sessionInfo!.age])
 
-  const antdApp = useApp()
+  const [messageApi, holder] = message.useMessage();
 
   const onResetClick = useCallback(async ()=>{
-    if(await antdApp.modal.confirm({
-      content: t("CHAT.CONFIRM_RESET_SESSION"),
-      okText: t("LABEL.YES"),
-      cancelText: t("LABEL.NO"),
-      okType: 'danger'
-    })){
-      navigate("/")
-    }
-  }, [t, navigate, antdApp])
+    navigate("/", {replace: true})
+  }, [navigate])
 
   return <SessionInfoPanel sessionId={sessionInfo!.sessionId} name={sessionInfo!.name} age={sessionInfo!.age}>
       <div className="flex gap-x-4 items-center"><div>{profile}</div>
         <ResetTimer initialTimestamp={initialMessageTimestamp} className="" overTimeClassName="text-red-500/70" />
-        <HomeIcon className="w-5 h-5 hover:opacity-80 transition-opacity cursor-pointer" title={t("CHAT.RESET_SESSION")} onClick={onResetClick}/>
+        <Popconfirm
+          title={t("CHAT.CONFIRM_RESET_SESSION")}
+          okText={t("LABEL.YES")}
+          cancelText={t("LABEL.NO")}
+          okType="danger"
+          onConfirm={onResetClick}
+        >
+          <HomeIcon className="w-5 h-5 hover:opacity-80 transition-opacity cursor-pointer" title={t("CHAT.RESET_SESSION")}/>
+        </Popconfirm>
       </div>
     </SessionInfoPanel>
 }

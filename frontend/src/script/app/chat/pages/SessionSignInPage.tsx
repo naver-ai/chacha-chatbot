@@ -39,7 +39,7 @@ export const SessionSignInPage = () => {
     })
 
     const onSubmit = useCallback(async (data: {sessionId: string}) => {
-        navigate(`/chat/${data.sessionId}`)
+        navigate(`/chat/${data.sessionId}`, {replace: true});
     }, [])
 
     const [t] = useTranslation()
