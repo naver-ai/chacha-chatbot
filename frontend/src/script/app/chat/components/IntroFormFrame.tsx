@@ -7,9 +7,13 @@ const vignetteLowerURL = new URL('../../../../assets/vignette_lower.svg', import
 export const IntroFormFrame = (props: {children?: any}) => {
 
     const [t] = useTranslation()
+    const [isVisible, setIsVisible] = useState(false)
 
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
     useEffect(() => {
+        // Trigger entering animation
+        const timer = setTimeout(() => setIsVisible(true), 100)
+        
         let rafId: number
         const handleMouseMove = (e: MouseEvent) => {
             if (rafId) return
@@ -23,6 +27,7 @@ export const IntroFormFrame = (props: {children?: any}) => {
 
         window.addEventListener('mousemove', handleMouseMove)
         return () => {
+            clearTimeout(timer)
             window.removeEventListener('mousemove', handleMouseMove)
             if (rafId) cancelAnimationFrame(rafId)
         }
@@ -30,20 +35,30 @@ export const IntroFormFrame = (props: {children?: any}) => {
 
     return <div className="flex flex-col justify-between h-screen intro-form-frame">
         <div className="my-auto mx-auto flex flex-col items-center gap-y-4">
-            <img 
-                src={vignetteUpperURL} 
-                className="pointer-events-none absolute translate-y-[-180px] opacity-70 transition-transform duration-300 ease-out" 
-                style={{ transform: `translate(${mousePos.x * 1.2}px, calc(-180px + ${mousePos.y * 1.3}px))` }}
-                width={500}
-            />
+            <div className={`pointer-events-none absolute transition-all duration-700 delay-[400ms] ease-out ${
+                isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-[70%]'
+            }`}>
+                <img 
+                    src={vignetteUpperURL} 
+                    className="translate-y-[-180px] opacity-70 transition-transform duration-300 ease-out" 
+                    style={{ transform: `translate(${mousePos.x * 1.2}px, calc(-180px + ${mousePos.y * 1.3}px))` }}
+                    width={500}
+                />
+            </div>
+            <div className={`pointer-events-none absolute transition-all duration-700 delay-[300ms] ease-out ${
+                isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-[70%]'
+            }`}>
             <img 
                 src={vignetteLowerURL} 
-                className="pointer-events-none absolute translate-y-[120px] opacity-70 transition-transform duration-500 ease-out" 
+                className="translate-y-[120px] opacity-70 transition-transform duration-300 ease-out" 
                 style={{ transform: `translate(${mousePos.x * 0.7}px, calc(120px + ${mousePos.y * 0.8}px))` }}
                 width={500}
             />
-            <div className="text-xl font-black z-10">{t("TITLE")}</div>
-            <div className="z-10">{props.children}</div>
+            </div>
+            <div className={`text-xl font-black z-10 transition-all duration-500 delay-200 ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}>{t("TITLE")}</div>
+            <div className={`z-10 transition-all duration-500 delay-300 ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4'}`}>{props.children}</div>
         </div>
     </div>
 }

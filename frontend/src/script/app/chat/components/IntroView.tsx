@@ -29,7 +29,6 @@ export const IntroView = (props: {
 
     const dispatch = useDispatch()
 
-
     const [t, i18n] = useTranslation()
 
     const onSubmit = useCallback((data: {user_name: string, user_age: number}) => {
