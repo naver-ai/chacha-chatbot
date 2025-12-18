@@ -14,7 +14,8 @@ export const MessageView = (props: {
 }) => {
 
     return <div className={`turn-container ${props.message.is_user ? "user" : "system"}`}>
-        <div className="profilePic" id = {!props.message.is_user ? "systemPic" : ""} onDoubleClick={props.onThumbnailDoubleClick}>
+        {
+            props.message.is_user === true ? null : <div className="profilePic" id = {!props.message.is_user ? "systemPic" : ""} onDoubleClick={props.onThumbnailDoubleClick}>
             <Avatar
                 size={40}
                 name= {props.avatarHash}
@@ -22,6 +23,7 @@ export const MessageView = (props: {
                 colors={["#A8D1D1","#F1F7B5", "#9EA1D4", "#6495ED"]}
             />
         </div>
+        }
         <div>
             {
                 props.componentsAboveCallout

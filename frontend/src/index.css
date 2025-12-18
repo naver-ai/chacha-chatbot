@@ -29,6 +29,10 @@ html, body{
 
 @layer components {
 
+    :root {
+        --chat-bottom-padding: 130px;
+    }
+
     #app{
         @apply absolute left-0 right-0 bottom-0 top-0 inset-0 overflow-hidden;
     }
@@ -79,11 +83,11 @@ html, body{
     }
 
     .turn-list-container{
-        @apply snap-y sm:scroll-pb-[130px]
+        @apply snap-y sm:scroll-pb-[var(--chat-bottom-padding)];
     }
 
     .turn-list{
-        @apply sm:mb-[130px]
+        @apply sm:mb-[var(--chat-bottom-padding)];
     }
 
     .turn-container {
@@ -91,7 +95,7 @@ html, body{
     }
 
     .turn-container .callout {
-        @apply rounded-lg sm:rounded-xl px-3 py-2 sm:px-6 sm:py-3 shadow-md max-w-xl text-gray-600 font-normal leading-relaxed;
+        @apply rounded-lg sm:rounded-xl px-3 py-2 sm:px-6 sm:py-3 shadow-lg max-w-xl border-[1px] shadow-purple-950/10 text-gray-700 font-normal leading-relaxed;
 
     }
 
@@ -100,7 +104,7 @@ html, body{
     }
 
     .turn-container.system {
-        @apply items-start pl-2;
+        @apply items-start pl-2 flex flex-row gap-x-2;
         position: relative;
     }
 
@@ -109,7 +113,7 @@ html, body{
     }
 
     .turn-container.system .callout {
-        @apply rounded-tl-none text-black bg-slate-50 ml-12 -mt-4;
+        @apply bg-transparent border-none rounded-none shadow-none font-semibold;
     }
 
     .turn-container.user {
@@ -117,7 +121,7 @@ html, body{
     }
 
     .turn-container.user .callout {
-        @apply  whitespace-break-spaces text-white bg-indigo-800/[.8] mr-12 -mt-4 rounded-tr-none border-[1px];
+        @apply  whitespace-break-spaces rounded-tr-none border-[1px];
     }
 
     .profilePic {
@@ -129,7 +133,7 @@ html, body{
     }
 
     .introViewChat {
-        @apply  -mt-0.5 !important;
+        @apply -mt-0.5 !important;
     }
 
     .chachaContainer {

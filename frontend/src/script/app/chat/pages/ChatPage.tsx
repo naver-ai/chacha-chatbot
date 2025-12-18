@@ -108,7 +108,7 @@ const ChatView = () => {
     ref={desktopScrollViewRef}
     id={isMobile === false ? "chat-scroll" : undefined}>
     <ChatSessionInfoPanel/>
-    <div className="turn-list container mx-auto px-3 sm:px-10 flex-1 overflow-y-auto sm:overflow-visible"
+    <div className="turn-list container mx-auto px-5 flex-1 overflow-y-auto sm:overflow-visible"
     ref={mobileScrollViewRef}
     id={isMobile === true ? "chat-scroll" : undefined}
     >{
