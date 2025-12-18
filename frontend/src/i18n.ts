@@ -39,7 +39,9 @@ const kr = {
 
     LABEL: {
         NEXT: "다음",
-        SEND: "보내기"
+        SEND: "보내기",
+        YES: "예",
+        NO: "아니요",
     }
 }
 
@@ -80,7 +82,9 @@ const en = {
 
     LABEL: {
         NEXT: "Next",
-        SEND: "Send"
+        SEND: "Send",
+        YES: "Yes",
+        NO: "No",
     }
 }
 

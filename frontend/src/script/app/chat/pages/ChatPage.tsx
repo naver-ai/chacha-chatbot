@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import { twMerge } from "tailwind-merge";
 const format = require('string-format')
 import {HomeIcon} from '@heroicons/react/20/solid'
+import useApp from "antd/es/app/useApp";
 
 const RESET_TIME_LIMIT_MILLIS = 2 * 60 * 1000 // 2 minutes
 
@@ -186,11 +187,18 @@ const ChatSessionInfoPanel = () => {
 
   const profile = useMemo(()=>format(t("SESSION_INFO.PROFILE_FORMAT"), {name: sessionInfo!.name, age: sessionInfo!.age}), [t, sessionInfo!.name, sessionInfo!.age])
 
-  const onResetClick = useCallback(()=>{
-    if(confirm(t("CHAT.CONFIRM_RESET_SESSION"))){
+  const antdApp = useApp()
+
+  const onResetClick = useCallback(async ()=>{
+    if(await antdApp.modal.confirm({
+      content: t("CHAT.CONFIRM_RESET_SESSION"),
+      okText: t("LABEL.YES"),
+      cancelText: t("LABEL.NO"),
+      okType: 'danger'
+    })){
       navigate("/")
     }
-  }, [t, navigate])
+  }, [t, navigate, antdApp])
 
   return <SessionInfoPanel sessionId={sessionInfo!.sessionId} name={sessionInfo!.name} age={sessionInfo!.age}>
       <div className="flex gap-x-4 items-center"><div>{profile}</div>
@@ -359,8 +367,6 @@ const SessionMessageView = (props: { id: EntityId, isLast: boolean }) => {
       }
     }
   }, [turn.is_user, props.isLast, t])
-
-  console.log("message:", turn)
 
   return hideMessage ? null : <MessageView avatarHash={turn.is_user === true ? userName : "system"} message={turn} onThumbnailDoubleClick={onDoubleClick} componentsBelowCallout={
       !isEmotionSelectionTurn
