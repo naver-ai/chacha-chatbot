@@ -54,7 +54,6 @@ export const SessionSignInPage = () => {
 
     return <>
     <IntroFormFrame>
-
         <div className="panel frame-bg">
         {false && <LanguageSelector className="self-end mb-2"/>}
         <form onSubmit={handleSubmit(onSubmit)}>
