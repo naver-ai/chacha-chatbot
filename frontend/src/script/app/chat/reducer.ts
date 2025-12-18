@@ -3,6 +3,7 @@ import {ChatMessage} from "../../types";
 import {createEntityAdapter, createSelector, createSlice, Draft, EntityAdapter, PayloadAction} from "@reduxjs/toolkit";
 import { NetworkHelper } from "../../network";
 import i18n from "src/i18n";
+import { RESET_TIME_LIMIT_MILLIS, MAX_TURNS } from "./config";
 
 
 const messagesAdapter = createEntityAdapter<ChatMessage>()
@@ -18,14 +19,20 @@ export interface ChatState{
     } | undefined
 
     isLoadingMessage: boolean
-
+    
+    resetTimestamp?: number
     messages: typeof INITIAL_MESSAGES_STATE
+    sessionEnded: boolean
+    sessionEndReason?: 'MAX_TURNS' | 'TIMER_EXPIRED'
 }
 
 const INITIAL_CHAT_STATE: ChatState = {
     sessionInfo: undefined,
     isLoadingMessage: false,
-    messages: INITIAL_MESSAGES_STATE
+    messages: INITIAL_MESSAGES_STATE,
+    resetTimestamp: undefined,
+    sessionEnded: false,
+    sessionEndReason: undefined
 }
 
 const chatSlice = createSlice({
@@ -44,6 +51,9 @@ const chatSlice = createSlice({
                 locale: action.payload.locale,
                 sessionId: action.payload.sessionId
             }
+            state.resetTimestamp = undefined
+            state.sessionEnded = false
+            state.sessionEndReason = undefined
             messagesAdapter.removeAll(state.messages)
         },
 
@@ -63,6 +73,15 @@ const chatSlice = createSlice({
             messagesAdapter.removeAll(state.messages)
             messagesAdapter.addMany(state.messages, action)
         },
+
+        updateResetTimestamp: (state, action: PayloadAction<number | undefined>) => {
+            state.resetTimestamp = action.payload
+        },
+
+        setSessionEnded: (state, action: PayloadAction<{reason: 'MAX_TURNS' | 'TIMER_EXPIRED'}>) => {
+            state.sessionEnded = true
+            state.sessionEndReason = action.payload.reason
+        }
     }
 })
 
@@ -78,6 +97,21 @@ export function loadChatSession(sessionId: string, autoReloadSystemMessage: bool
         dispatch(chatSlice.actions.setLoadingState(false))
         dispatch(chatSlice.actions.initialize_session_info({ sessionId, userAge: info.user_age, userName: info.user_name, locale: info.locale}))
         dispatch(chatSlice.actions.setMessages(messages))
+
+        // Check if session should be ended based on loaded state        
+        // Check MAX_TURNS
+        if (messages.length >= MAX_TURNS) {
+            dispatch(chatSlice.actions.setSessionEnded({reason: 'MAX_TURNS'}))
+        }
+        // Check timer expiration
+        else if (messages.length > 0) {
+            const firstMessage = messages[0]
+            const now = Date.now()
+            const elapsed = now - firstMessage.timestamp
+            if (elapsed >= RESET_TIME_LIMIT_MILLIS) {
+                dispatch(chatSlice.actions.setSessionEnded({reason: 'TIMER_EXPIRED'}))
+            }
+        }
 
         if(autoReloadSystemMessage === true){
             if(messages.length > 0 && messages[messages.length - 1].is_user === true){
@@ -148,18 +182,24 @@ function getLastSystemMessage(messagesState: typeof INITIAL_MESSAGES_STATE): Cha
     }else return null
 }
 
-export const selectInitialMessageTimestamp = createSelector(
-    (state: ReduxAppState) => state.chatState.messages,
-    (messagesState) => {
-        const firstMessageId = messagesState.ids[0]
-        if(firstMessageId){
-            const firstMessage = messagesState.entities[firstMessageId]
-            if(firstMessage){
-                return firstMessage.timestamp
+export const selectTimerStartTimestamp = createSelector(
+    (state: ReduxAppState) => ({messages: state.chatState.messages, resetTimestamp: state.chatState.resetTimestamp}),
+    (state) => {
+        const {messages: messagesState, resetTimestamp} = state
+        if(resetTimestamp != null){
+            return resetTimestamp
+        }
+        else{
+            const firstMessageId = messagesState.ids[0]
+            if(firstMessageId){
+                const firstMessage = messagesState.entities[firstMessageId]
+                if(firstMessage){
+                    return firstMessage.timestamp
+                }
             }
         }
     })
 
-export const { init } = chatSlice.actions
+export const { init, updateResetTimestamp, setSessionEnded } = chatSlice.actions
 
 export default chatSlice.reducer

@@ -10,7 +10,7 @@ import { EntityId } from "@reduxjs/toolkit"
 import { useCallback, useMemo, KeyboardEvent, FocusEvent } from "react"
 import { useForm } from "react-hook-form"
 import * as yup from "yup"
-import { loadChatSession, regenerateLastSystemMessage, selectInitialMessageTimestamp, sendUserMessage } from "../reducer"
+import { loadChatSession, regenerateLastSystemMessage, selectTimerStartTimestamp, sendUserMessage, setSessionEnded, updateResetTimestamp } from "../reducer"
 import { MessageView } from "src/script/components/messages"
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import path from "path"
@@ -28,8 +28,18 @@ import { twMerge } from "tailwind-merge";
 const format = require('string-format')
 import {HomeIcon} from '@heroicons/react/20/solid'
 import useApp from "antd/es/app/useApp";
+import { Button } from "antd";
+import { RESET_TIME_LIMIT_MILLIS, MAX_TURNS } from "../config";
 
-const RESET_TIME_LIMIT_MILLIS = 2 * 60 * 1000 // 2 minutes
+// Utility function to format text with line breaks
+const formatTextToJSX = (text: string) => {
+  return text.split('\n').map((line, index, array) => (
+    <span key={index}>
+      {line}
+      {index < array.length - 1 && <br />}
+    </span>
+  ))
+}
 
 export const ChatPage = () => {
 
@@ -77,6 +87,33 @@ const ChatView = () => {
 
   useOnScreenKeyboardScrollFix(isMobile)
 
+  const initialMessageTimestamp = useSelector(selectTimerStartTimestamp)
+  const isSessionEnded = useSelector(state => state.chatState.sessionEnded)
+  const sessionEndReason = useSelector(state => state.chatState.sessionEndReason)
+  const dispatch = useDispatch()
+
+  const handleSessionEnd = useCallback((reason: 'MAX_TURNS' | 'TIMER_EXPIRED') => {
+    console.log(`Session ended - reason: ${reason}`)
+    dispatch(setSessionEnded({reason}))
+  }, [])
+
+  // Set up timeout to trigger exactly when timer expires
+  useEffect(() => {
+    if (initialMessageTimestamp === null || initialMessageTimestamp === undefined) return
+
+    const now = Date.now()
+    const elapsed = now - initialMessageTimestamp
+    const remaining = RESET_TIME_LIMIT_MILLIS - elapsed
+
+    if (remaining > 0) {
+      // Set timeout to trigger exactly when timer reaches 0
+      const timeoutId = setTimeout(() => {
+        handleSessionEnd('TIMER_EXPIRED')
+      }, remaining)
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [initialMessageTimestamp, dispatch, handleSessionEnd])
 
   const messageIds = useSelector(state => state.chatState.messages.ids)
 
@@ -108,6 +145,11 @@ const ChatView = () => {
     requestAnimationFrame(() => {
       scrollToBottom()
     })
+    
+    // Check if MAX_TURNS reached
+    if (messageIds.length >= MAX_TURNS) {
+      handleSessionEnd('MAX_TURNS')
+    }
   }, [messageIds.length])
 
   return <div style={isMobile === true ? {maxHeight: viewPortHeight, height: viewPortHeight, minHeight: viewPortHeight} : undefined} className="overflow-hidden turn-list-container sm:overflow-y-auto justify-end h-screen sm:h-full flex flex-col sm:block" 
@@ -124,6 +166,25 @@ const ChatView = () => {
     }
     </div>
     <TypingPanel onFocus={onTypingPanelFocus}/>
+    {isSessionEnded === true && <SessionEndedOverlay reason={sessionEndReason!}/>}
+  </div>
+}
+
+const SessionEndedOverlay = (props: { reason: 'MAX_TURNS' | 'TIMER_EXPIRED' }) => {
+  const [t] = useTranslation()
+
+  const navigate = useNavigate()
+  const onResetClick = useCallback(()=>{
+    navigate("/")
+  }, [navigate])
+
+  return <div className="fixed left-0 right-0 top-0 bottom-0 bg-white/50 backdrop-blur-[1px] z-[100] flex items-center justify-center">
+    <div className="flex flex-col items-center gap-y-4">
+      <div className="text-lg max-w-xl text-center leading-8">
+        {formatTextToJSX(t(`CHAT.MESSAGE_SESSION_ENDED.${props.reason}`))}
+      </div>
+      <button className="button-main" onClick={onResetClick}>{t("CHAT.RESET_SESSION")}</button>
+    </div>
   </div>
 }
 
@@ -135,6 +196,7 @@ const ResetTimer = ({
   const [time, setTime] = useState<number>(0)
   const [isOvertime, setIsOvertime] = useState<boolean>(false)
 
+  // UI update logic only
   useEffect(() => {
     if (initialTimestamp === null || initialTimestamp === undefined) return
 
@@ -161,6 +223,8 @@ const ResetTimer = ({
     return () => clearInterval(interval)
   }, [initialTimestamp])
 
+
+
   if (initialTimestamp === null || initialTimestamp === undefined) return null
 
   const minutes = Math.floor(time / 60)
@@ -179,7 +243,7 @@ const ResetTimer = ({
 const ChatSessionInfoPanel = () => {
   const sessionInfo = useSelector(state => state.chatState.sessionInfo)
 
-  const initialMessageTimestamp = useSelector(selectInitialMessageTimestamp)
+  const initialMessageTimestamp = useSelector(selectTimerStartTimestamp)
 
   const [t] = useTranslation()
 

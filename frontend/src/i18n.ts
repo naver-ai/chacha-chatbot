@@ -24,7 +24,11 @@ const kr = {
         LINK_COPIED: "링크가 클립보드에 복사되었습니다.",
         CONFIRM_REGEN_LAST_MESSAGE: "차차의 마지막 메시지를 다시 요청할래?",
         RESET_SESSION: "대화 종료하기",
-        CONFIRM_RESET_SESSION: "현재 대화를 종료하고 초기 화면으로 돌아가시겠습니까?"
+        CONFIRM_RESET_SESSION: "현재 대화를 종료하고 초기 화면으로 돌아가시겠습니까?",
+        MESSAGE_SESSION_ENDED: {
+            MAX_TURNS: "차차와의 대화를 충분히 체험하셨나요?😊\n일정 수의 메시지에 도달하여 대화를 종료하였습니다.\n다음 분께 양보해 주세요.",
+            TIMER_EXPIRED: "차차와의 대화를 충분히 체험하셨나요?😊\n지정된 시간이 지나 대화를 종료하였습니다.\n다음 분께 양보해 주세요."
+        }
     },
     EMOTION_PICKER: {
         ERROR: {
@@ -67,7 +71,11 @@ const en = {
         LINK_COPIED: "Link copied! You can paste it now.",
         CONFIRM_REGEN_LAST_MESSAGE: "Want Chacha to say that again differently?",
         RESET_SESSION: "End Session",
-        CONFIRM_RESET_SESSION: "Are you sure you want to end the session?"
+        CONFIRM_RESET_SESSION: "Are you sure you want to end the session?",
+        MESSAGE_SESSION_ENDED: {
+            MAX_TURNS: "Chacha hopes you had a great chat!😊 To give others a chance, this session has ended.",
+            TIMER_EXPIRED: "Chacha hopes you had a great chat!😊 The session has ended after 2 minutes."
+        }
     },
     EMOTION_PICKER: {
         ERROR: {
