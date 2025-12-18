@@ -172,18 +172,39 @@ const ChatView = () => {
 
 const SessionEndedOverlay = (props: { reason: 'MAX_TURNS' | 'TIMER_EXPIRED' }) => {
   const [t] = useTranslation()
+  const [isVisible, setIsVisible] = useState(false)
 
   const navigate = useNavigate()
   const onResetClick = useCallback(()=>{
     navigate("/")
   }, [navigate])
 
-  return <div className="fixed left-0 right-0 top-0 bottom-0 bg-white/50 backdrop-blur-[1px] z-[100] flex items-center justify-center">
-    <div className="flex flex-col items-center gap-y-4">
+  useEffect(() => {
+    // Trigger animation after component mounts
+    const timer = setTimeout(() => setIsVisible(true), 10)
+    return () => clearTimeout(timer)
+  }, [])
+
+  return <div className={twMerge(
+    "fixed left-0 right-0 top-0 bottom-0 bg-white/50 backdrop-blur-[1px] z-[100] flex items-center justify-center transition-opacity duration-[1000ms]",
+    isVisible ? 'opacity-100' : 'opacity-0'
+  )}>
+    <div className={twMerge(
+      "flex flex-col items-center gap-y-4 transition-all duration-[1000ms]",
+      isVisible ? 'scale-100 translate-y-0' : 'scale-90 translate-y-4'
+    )}>
       <div className="text-lg max-w-xl text-center leading-8">
         {formatTextToJSX(t(`CHAT.MESSAGE_SESSION_ENDED.${props.reason}`))}
       </div>
-      <button className="button-main" onClick={onResetClick}>{t("CHAT.RESET_SESSION")}</button>
+      <button 
+        className={twMerge(
+          "button-main transition-all duration-[1000ms] delay-150",
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+        )} 
+        onClick={onResetClick}
+      >
+        {t("CHAT.RESET_SESSION")}
+      </button>
     </div>
   </div>
 }

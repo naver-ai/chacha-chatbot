@@ -12,6 +12,7 @@ export const BackgroundPanel = ({
 }: {showVignette?: boolean, vignetteWidth?: number, scrollContainer?: string}) => {
     
     const [scrollY, setScrollY] = useState(0);
+    const [isVignetteVisible, setIsVignetteVisible] = useState(false);
     
     useEffect(() => {
         let animationFrameId: number;
@@ -57,12 +58,23 @@ export const BackgroundPanel = ({
         };
     }, [scrollContainer]);
 
+    useEffect(() => {
+        if (showVignette) {
+            const timer = setTimeout(() => setIsVignetteVisible(true), 100);
+            return () => clearTimeout(timer);
+        } else {
+            setIsVignetteVisible(false);
+        }
+    }, [showVignette]);
+
         return <>
             <div className="background-panel fixed top-0 left-0 right-0 bottom-0 z-[-1] pointer-events-none"/>
             {showVignette && <>
                 <div 
-                    className="hidden lg:block pointer-events-none absolute left-0 top-1/2 opacity-40"
-                    style={{ transform: `translateY(-50%)` }}
+                    className={`vignette-left hidden lg:block pointer-events-none absolute left-0 top-1/2 transition-all duration-700 ${
+                        isVignetteVisible ? 'opacity-40 translate-x-0' : 'opacity-0 -translate-x-8'
+                    }`}
+                    style={{ transform: `translateY(-50%) ${isVignetteVisible ? 'translateX(0)' : 'translateX(-32px)'}` }}
                 >
                     <img 
                         src={vignetteLeftURL.toString()}
@@ -81,8 +93,10 @@ export const BackgroundPanel = ({
                     />
                 </div>
                 <div 
-                    className="hidden lg:block pointer-events-none absolute right-0 top-1/2 opacity-40"
-                    style={{ transform: `translateY(-50%)` }}
+                    className={`vignette-right hidden lg:block pointer-events-none absolute right-0 top-1/2 transition-all duration-700 ${
+                        isVignetteVisible ? 'opacity-40 translate-x-0' : 'opacity-0 translate-x-8'
+                    }`}
+                    style={{ transform: `translateY(-50%) ${isVignetteVisible ? 'translateX(0)' : 'translateX(32px)'}` }}
                 >
                     <img 
                         src={vignetteRightURL.toString()}
