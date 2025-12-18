@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react'
 
-const vignetteUpperURL = new URL('../../../../vignette_upper.svg', import.meta.url).toString()
-const vignetteLowerURL = new URL('../../../../vignette_under.svg', import.meta.url).toString()
+const vignetteUpperURL = new URL('../../../../assets/vignette_upper.svg', import.meta.url).toString()
+const vignetteLowerURL = new URL('../../../../assets/vignette_lower.svg', import.meta.url).toString()
 
 export const IntroFormFrame = (props: {children?: any}) => {
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 })

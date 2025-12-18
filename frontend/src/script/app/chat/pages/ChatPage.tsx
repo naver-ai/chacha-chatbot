@@ -52,7 +52,7 @@ export const ChatPage = () => {
     {
       sessionInfoExists ? <ChatView /> : <IntroView sessionId={sessionId!}/>
     }
-    <BackgroundPanel />
+    <BackgroundPanel showVignette={true} scrollContainer={sessionInfoExists ? "chat-scroll" : undefined} />
   </>
 }
 
@@ -105,10 +105,12 @@ const ChatView = () => {
   }, [messageIds.length])
 
   return <div style={isMobile === true ? {maxHeight: viewPortHeight, height: viewPortHeight, minHeight: viewPortHeight} : undefined} className="overflow-hidden turn-list-container sm:overflow-y-auto justify-end h-screen sm:h-full flex flex-col sm:block" 
-    ref={desktopScrollViewRef}>
+    ref={desktopScrollViewRef}
+    id={isMobile === false ? "chat-scroll" : undefined}>
     <ChatSessionInfoPanel/>
     <div className="turn-list container mx-auto px-3 sm:px-10 flex-1 overflow-y-auto sm:overflow-visible"
     ref={mobileScrollViewRef}
+    id={isMobile === true ? "chat-scroll" : undefined}
     >{
       messageIds.map((id, i) => {
         return <SessionMessageView key={id.toString()} id={id} isLast={messageIds.length - 1 === i}/>
@@ -218,7 +220,7 @@ const TypingPanel = (props: {
 
 
     </div>
-    <div className="backdrop-blur-sm bg-background/50 fixed bottom-0 left-0 right-0 h-[70px] collapse sm:visible" /></>
+    <div className="backdrop-blur-sm bg-background/50 fixed bottom-0 left-4 right-4 h-[70px] collapse sm:visible" /></>
 }
 
 

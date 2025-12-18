@@ -79,11 +79,11 @@ html, body{
     }
 
     .turn-list-container{
-        @apply snap-y sm:scroll-pb-[100px]
+        @apply snap-y sm:scroll-pb-[130px]
     }
 
     .turn-list{
-        @apply sm:mb-[100px]
+        @apply sm:mb-[130px]
     }
 
     .turn-container {
