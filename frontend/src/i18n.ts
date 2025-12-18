@@ -2,6 +2,7 @@ import * as i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 const kr = {
+    TITLE: "차차, 아이들의 마음을 읽어주는 AI",
     LANGUAGE_NAME: "한국어",
     SIGN_IN: {
         ERROR:{
@@ -21,7 +22,9 @@ const kr = {
         INPUT_PLACEHOLDER: "나에게 할 말을 입력해줘!",
         SHARE_LINK: "링크 공유하기",
         LINK_COPIED: "링크가 클립보드에 복사되었습니다.",
-        CONFIRM_REGEN_LAST_MESSAGE: "차차의 마지막 메시지를 다시 요청할래?"
+        CONFIRM_REGEN_LAST_MESSAGE: "차차의 마지막 메시지를 다시 요청할래?",
+        RESET_SESSION: "대화 종료하기",
+        CONFIRM_RESET_SESSION: "현재 대화를 종료하고 초기 화면으로 돌아가시겠습니까?"
     },
     EMOTION_PICKER: {
         ERROR: {
@@ -42,6 +45,7 @@ const kr = {
 
 const en = {
     LANGUAGE_NAME: "English",
+    TITLE: "Chacha, AI that reads children's minds",
     SIGN_IN: {
         ERROR:{
             SESSION_ID: "Only letters, numbers, hyphens, and underscores can be used. No spaces, okay?"},
@@ -59,7 +63,9 @@ const en = {
         INPUT_PLACEHOLDER: "Type what you want to say here!",
         SHARE_LINK: "Share Link",
         LINK_COPIED: "Link copied! You can paste it now.",
-        CONFIRM_REGEN_LAST_MESSAGE: "Want Chacha to say that again differently?"
+        CONFIRM_REGEN_LAST_MESSAGE: "Want Chacha to say that again differently?",
+        RESET_SESSION: "End Session",
+        CONFIRM_RESET_SESSION: "Are you sure you want to end the session?"
     },
     EMOTION_PICKER: {
         ERROR: {

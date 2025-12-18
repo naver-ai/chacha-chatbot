@@ -1,6 +1,6 @@
 import { AppDispatch, ReduxAppState } from "../../redux/store";
 import {ChatMessage} from "../../types";
-import {createEntityAdapter, createSlice, Draft, EntityAdapter, PayloadAction} from "@reduxjs/toolkit";
+import {createEntityAdapter, createSelector, createSlice, Draft, EntityAdapter, PayloadAction} from "@reduxjs/toolkit";
 import { NetworkHelper } from "../../network";
 import i18n from "src/i18n";
 
@@ -147,6 +147,18 @@ function getLastSystemMessage(messagesState: typeof INITIAL_MESSAGES_STATE): Cha
         return messagesState.entities[messagesState.ids[messagesState.ids.length - 1]]!
     }else return null
 }
+
+export const selectInitialMessageTimestamp = createSelector(
+    (state: ReduxAppState) => state.chatState.messages,
+    (messagesState) => {
+        const firstMessageId = messagesState.ids[0]
+        if(firstMessageId){
+            const firstMessage = messagesState.entities[firstMessageId]
+            if(firstMessage){
+                return firstMessage.timestamp
+            }
+        }
+    })
 
 export const { init } = chatSlice.actions
 

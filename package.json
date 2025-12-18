@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "date-fns": "^4.1.0"
+    "date-fns": "^4.1.0",
+    "tailwind-merge": "^3.4.0"
   }
 }

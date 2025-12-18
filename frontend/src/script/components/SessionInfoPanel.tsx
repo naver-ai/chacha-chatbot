@@ -1,7 +1,5 @@
-import { LanguageIcon } from "@heroicons/react/20/solid"
-import { useCallback, useMemo } from "react"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
-import { LANGUAGE_LIST } from "src/i18n"
 const format = require('string-format')
 
 export const SessionInfoPanel = (props: {
@@ -15,8 +13,9 @@ export const SessionInfoPanel = (props: {
 
     const profile = useMemo(()=>format(t("SESSION_INFO.PROFILE_FORMAT"), {name: props.name, age: props.age}), [t, props.name, props.age])
 
-    return <div className="container bg-slate-400/20 px-1.5 pr-1 py-1 flex items-center justify-between text-xs sm:text-sm sm:mt-2 sm:rounded-md border-collapse border-b-2 sm:border-none border-slate-300">
-            <div>{t("SESSION_INFO.SESSION")}: {props.sessionId} ({profile})</div>
+    return <div className="fixed left-0 right-0 top-0 z-[100] backdrop-blur-sm flex items-center justify-between text-sm shadow-md px-6 py-3 bg-white/50">
+            <div className={"text-[12pt] font-extrabold"}>{t("TITLE")}</div>
+            {false && <div>{t("SESSION_INFO.SESSION")}: {props.sessionId} ({profile})</div>}
             {props.children}
             </div>
   }

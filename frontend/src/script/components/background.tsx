@@ -14,35 +14,51 @@ export const BackgroundPanel = ({
     const [scrollY, setScrollY] = useState(0);
     
     useEffect(() => {
+        let animationFrameId: number;
+        
         const handleScroll = (event?: Event) => {
-            if (scrollContainer) {
-                const container = document.getElementById(scrollContainer);
-                if (container) {
-                    setScrollY(container.scrollTop);
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+            
+            animationFrameId = requestAnimationFrame(() => {
+                if (scrollContainer) {
+                    const container = document.getElementById(scrollContainer);
+                    if (container) {
+                        setScrollY(container.scrollTop);
+                    } else {
+                        setScrollY(window.scrollY);
+                    }
                 } else {
                     setScrollY(window.scrollY);
                 }
-            } else {
-                setScrollY(window.scrollY);
-            }
+            });
         };
         
         if (scrollContainer) {
             const container = document.getElementById(scrollContainer);
             if (container) {
-                container.addEventListener('scroll', handleScroll);
-                return () => container.removeEventListener('scroll', handleScroll);
+                container.addEventListener('scroll', handleScroll, { passive: true });
+                return () => {
+                    container.removeEventListener('scroll', handleScroll);
+                    if (animationFrameId) {
+                        cancelAnimationFrame(animationFrameId);
+                    }
+                };
             }
         }
         
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+        };
     }, [scrollContainer]);
 
         return <>
             <div className="background-panel fixed top-0 left-0 right-0 bottom-0 z-[-1] pointer-events-none"/>
-            <img className={"absolute right-8 bottom-4 hidden lg:block"} src={poweredByHCXLogoURL.href} alt={"Powered by HyperCLOVA X"} width={250}/>
-            <img className={"absolute left-8 bottom-5 hidden lg:block"} src={nccLogoURL.href} alt={"NCC Logo"} width={150}/>
             {showVignette && <>
                 <div 
                     className="hidden lg:block pointer-events-none absolute left-0 top-1/2 opacity-40"
@@ -51,17 +67,17 @@ export const BackgroundPanel = ({
                     <img 
                         src={vignetteLeftURL.toString()}
                         width={vignetteWidth}
-                        style={{ transform: `translateY(${scrollY * 0.05}px)` }}
+                        style={{ transform: `translateY(${scrollY * -0.05}px)` }}
                     />
                     <img 
                         src={vignetteLeftURL.toString()}
                         width={vignetteWidth}
-                        style={{ transform: `translateY(${scrollY * 0.08}px)` }}
+                        style={{ transform: `translateY(${scrollY * -0.15}px)` }}
                     />
                     <img 
                         src={vignetteLeftURL.toString()}
                         width={vignetteWidth}
-                        style={{ transform: `translateY(${scrollY * 0.12}px)` }}
+                        style={{ transform: `translateY(${scrollY * -0.12}px)` }}
                     />
                 </div>
                 <div 
@@ -71,19 +87,22 @@ export const BackgroundPanel = ({
                     <img 
                         src={vignetteRightURL.toString()}
                         width={vignetteWidth}
-                        style={{ transform: `translateY(${scrollY * 0.05}px)` }}
+                        style={{ transform: `translateY(${scrollY * -0.05}px)` }}
                     />
                     <img 
                         src={vignetteRightURL.toString()}
                         width={vignetteWidth}
-                        style={{ transform: `translateY(${scrollY * 0.08}px)` }}
+                        style={{ transform: `translateY(${scrollY * -0.15}px)` }}
                     />
                     <img 
                         src={vignetteRightURL.toString()}
                         width={vignetteWidth}
-                        style={{ transform: `translateY(${scrollY * 0.12}px)` }}
+                        style={{ transform: `translateY(${scrollY * -0.12}px)` }}
                     />
                 </div>
             </>}
+            <img className={"absolute right-8 bottom-4 hidden lg:block"} src={poweredByHCXLogoURL.href} alt={"Powered by HyperCLOVA X"} width={250}/>
+            <img className={"absolute left-8 bottom-5 hidden lg:block"} src={nccLogoURL.href} alt={"NCC Logo"} width={150}/>
+            
         </>
 }

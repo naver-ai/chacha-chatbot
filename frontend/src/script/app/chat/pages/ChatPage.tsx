@@ -3,14 +3,14 @@ import { useEffect, useRef, useState } from "react";
 import { nanoid } from "nanoid";
 import { useDispatch, useSelector } from "../../../redux/hooks";
 import { BackgroundPanel } from "src/script/components/background";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { yupResolver } from "@hookform/resolvers/yup"
 import { EntityId } from "@reduxjs/toolkit"
 import { useCallback, useMemo, KeyboardEvent, FocusEvent } from "react"
 import { useForm } from "react-hook-form"
 import * as yup from "yup"
-import { loadChatSession, regenerateLastSystemMessage, sendUserMessage } from "../reducer"
+import { loadChatSession, regenerateLastSystemMessage, selectInitialMessageTimestamp, sendUserMessage } from "../reducer"
 import { MessageView } from "src/script/components/messages"
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import path from "path"
@@ -24,6 +24,11 @@ import { EmotionPicker } from "../components/EmotionPicker";
 import useAsyncEffect from 'use-async-effect';
 import { NetworkHelper } from "src/script/network";
 import { useTranslation } from "react-i18next";
+import { twMerge } from "tailwind-merge";
+const format = require('string-format')
+import {HomeIcon} from '@heroicons/react/20/solid'
+
+const RESET_TIME_LIMIT_MILLIS = 2 * 60 * 1000 // 2 minutes
 
 export const ChatPage = () => {
 
@@ -52,7 +57,7 @@ export const ChatPage = () => {
     {
       sessionInfoExists ? <ChatView /> : <IntroView sessionId={sessionId!}/>
     }
-    <BackgroundPanel showVignette={true} scrollContainer={sessionInfoExists ? "chat-scroll" : undefined} />
+    <BackgroundPanel showVignette={sessionInfoExists} scrollContainer={sessionInfoExists ? "chat-scroll" : undefined} />
   </>
 }
 
@@ -121,12 +126,78 @@ const ChatView = () => {
   </div>
 }
 
+const ResetTimer = ({ 
+  initialTimestamp, 
+  className, 
+  overTimeClassName
+ }: { initialTimestamp: number | null | undefined, className?: string, overTimeClassName?: string }) => {
+  const [time, setTime] = useState<number>(0)
+  const [isOvertime, setIsOvertime] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (initialTimestamp === null || initialTimestamp === undefined) return
+
+    const updateTimer = () => {
+      const now = Date.now()
+      const elapsed = now - initialTimestamp
+      const remaining = RESET_TIME_LIMIT_MILLIS - elapsed
+      
+      if (remaining > 0) {
+        setTime(Math.ceil(remaining / 1000)) // Convert to seconds
+        setIsOvertime(false)
+      } else {
+        setTime(Math.ceil(Math.abs(remaining) / 1000)) // Show overtime in seconds
+        setIsOvertime(true)
+      }
+    }
+
+    // Update immediately
+    updateTimer()
+
+    // Set up interval to update every second
+    const interval = setInterval(updateTimer, 1000)
+
+    return () => clearInterval(interval)
+  }, [initialTimestamp])
+
+  if (initialTimestamp === null || initialTimestamp === undefined) return null
+
+  const minutes = Math.floor(time / 60)
+  const seconds = time % 60
+
+  const combinedClassName = twMerge(className, 
+      (isOvertime && overTimeClassName) ? overTimeClassName : "")
+
+  return (
+    <div className={combinedClassName}>
+      {isOvertime ? '+' : ''}{minutes}:{seconds.toString().padStart(2, '0')}
+    </div>
+  )
+}
+
 const ChatSessionInfoPanel = () => {
   const sessionInfo = useSelector(state => state.chatState.sessionInfo)
 
+  const initialMessageTimestamp = useSelector(selectInitialMessageTimestamp)
+
+  const [t] = useTranslation()
+
+  const navigate = useNavigate()
+
+  const profile = useMemo(()=>format(t("SESSION_INFO.PROFILE_FORMAT"), {name: sessionInfo!.name, age: sessionInfo!.age}), [t, sessionInfo!.name, sessionInfo!.age])
+
+  const onResetClick = useCallback(()=>{
+    if(confirm(t("CHAT.CONFIRM_RESET_SESSION"))){
+      navigate("/")
+    }
+  }, [t, navigate])
+
   return <SessionInfoPanel sessionId={sessionInfo!.sessionId} name={sessionInfo!.name} age={sessionInfo!.age}>
-    <ShareButton/>
-  </SessionInfoPanel>
+      <div className="flex gap-x-4 items-center"><div>{profile}</div>
+        <ResetTimer initialTimestamp={initialMessageTimestamp} className="" overTimeClassName="text-red-500/70" />
+        <HomeIcon className="w-5 h-5 hover:opacity-80 transition-opacity cursor-pointer" title={t("CHAT.RESET_SESSION")} onClick={onResetClick}/>
+      </div>
+    </SessionInfoPanel>
 }
 
 

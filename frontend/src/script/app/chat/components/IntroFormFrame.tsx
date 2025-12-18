@@ -1,9 +1,13 @@
 import {useState, useEffect} from 'react'
+import { useTranslation } from 'react-i18next'
 
 const vignetteUpperURL = new URL('../../../../assets/vignette_upper.svg', import.meta.url).toString()
 const vignetteLowerURL = new URL('../../../../assets/vignette_lower.svg', import.meta.url).toString()
 
 export const IntroFormFrame = (props: {children?: any}) => {
+
+    const [t] = useTranslation()
+
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
     useEffect(() => {
         let rafId: number
@@ -38,7 +42,7 @@ export const IntroFormFrame = (props: {children?: any}) => {
                 style={{ transform: `translate(${mousePos.x * 0.7}px, calc(120px + ${mousePos.y * 0.8}px))` }}
                 width={500}
             />
-            <div className="text-xl font-black z-10">아이들의 마음을 읽어주는 AI, 차차</div>
+            <div className="text-xl font-black z-10">{t("TITLE")}</div>
             <div className="z-10">{props.children}</div>
         </div>
     </div>
