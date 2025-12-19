@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useOnMountRendered } from 'src/hooks';
 
 const poweredByHCXLogoURL = new URL('../../assets/powered_by_hcx.svg', import.meta.url);
 const nccLogoURL = new URL('../../assets/ncc_logo.svg', import.meta.url);
@@ -12,7 +13,6 @@ export const BackgroundPanel = ({
 }: {showVignette?: boolean, vignetteWidth?: number, scrollContainer?: string}) => {
     
     const [scrollY, setScrollY] = useState(0);
-    const [isVignetteVisible, setIsVignetteVisible] = useState(false);
     
     useEffect(() => {
         let animationFrameId: number;
@@ -58,14 +58,7 @@ export const BackgroundPanel = ({
         };
     }, [scrollContainer]);
 
-    useEffect(() => {
-        if (showVignette) {
-            const timer = setTimeout(() => setIsVignetteVisible(true), 100);
-            return () => clearTimeout(timer);
-        } else {
-            setIsVignetteVisible(false);
-        }
-    }, [showVignette]);
+    const isVignetteVisible = useOnMountRendered(showVignette)
 
         return <>
             <div className="background-panel fixed top-0 left-0 right-0 bottom-0 z-[-1] pointer-events-none"/>

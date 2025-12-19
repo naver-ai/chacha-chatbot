@@ -5,7 +5,7 @@
   "source": "src/index.html",
   "scripts": {
     "dev": "rm -rf dist && parcel src/index.html --port 8888 --open",
-    "build": "rm -rf dist && parcel build"
+    "build": "rm -rf dist && rm -rf .parcel-cache && parcel build"
   },
   "keywords": [],
   "author": "Young-Ho Kim",

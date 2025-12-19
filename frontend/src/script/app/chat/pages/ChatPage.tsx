@@ -29,6 +29,7 @@ const format = require('string-format')
 import {HomeIcon} from '@heroicons/react/20/solid'
 import { message, Popconfirm } from "antd";
 import { RESET_TIME_LIMIT_MILLIS, MAX_TURNS } from "../config";
+import { useOnMountRendered } from "src/hooks";
 
 // Utility function to format text with line breaks
 const formatTextToJSX = (text: string) => {
@@ -171,18 +172,12 @@ const ChatView = () => {
 
 const SessionEndedOverlay = (props: { reason: 'MAX_TURNS' | 'TIMER_EXPIRED' }) => {
   const [t] = useTranslation()
-  const [isVisible, setIsVisible] = useState(false)
+  const isVisible = useOnMountRendered(true)
 
   const navigate = useNavigate()
   const onResetClick = useCallback(()=>{
     navigate("/", {replace: true})
   }, [navigate])
-
-  useEffect(() => {
-    // Trigger animation after component mounts
-    const timer = setTimeout(() => setIsVisible(true), 10)
-    return () => clearTimeout(timer)
-  }, [])
 
   return <div className={twMerge(
     "fixed left-0 right-0 top-0 bottom-0 bg-white/50 backdrop-blur-[1px] z-[100] flex items-center justify-center transition-opacity duration-[1000ms]",

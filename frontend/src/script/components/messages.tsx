@@ -1,6 +1,8 @@
 import { ChatMessage } from "../types"
 import Avatar from "boring-avatars"
 import { TypeAnimation } from 'react-type-animation';
+import { useOnMountRendered } from "src/hooks";
+import { twMerge } from "tailwind-merge";
 
 export const MessageView = (props: {
     avatarHash: string,
@@ -13,7 +15,15 @@ export const MessageView = (props: {
     onThumbnailDoubleClick?: () => void
 }) => {
 
-    return <div className={`turn-container ${props.message.is_user ? "user" : "system"}`}>
+    const isMountRendered = useOnMountRendered(true)
+
+    const containerClassName = twMerge(
+        "turn-container transition-all ease-out",
+        isMountRendered ? 'opacity-100 translate-x-0' : `opacity-0 ${props.message.is_user ? 'translate-x-3' : '-translate-x-8'}`,
+        props.message.is_user ? "user duration-[400ms] " : "system duration-[800ms]"
+    )
+
+    return <div className={containerClassName}>
         {
             props.message.is_user === true ? null : <div className="profilePic" id = {!props.message.is_user ? "systemPic" : ""} onDoubleClick={props.onThumbnailDoubleClick}>
             <Avatar

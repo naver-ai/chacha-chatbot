@@ -1,5 +1,6 @@
 import {useState, useEffect} from 'react'
 import { useTranslation } from 'react-i18next'
+import { useOnMountRendered } from '../../../../hooks'
 
 const vignetteUpperURL = new URL('../../../../assets/vignette_upper.svg', import.meta.url).toString()
 const vignetteLowerURL = new URL('../../../../assets/vignette_lower.svg', import.meta.url).toString()
@@ -7,13 +8,10 @@ const vignetteLowerURL = new URL('../../../../assets/vignette_lower.svg', import
 export const IntroFormFrame = (props: {children?: any}) => {
 
     const [t] = useTranslation()
-    const [isVisible, setIsVisible] = useState(false)
+    const isVisible = useOnMountRendered(true)
 
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
     useEffect(() => {
-        // Trigger entering animation
-        const timer = setTimeout(() => setIsVisible(true), 100)
-        
         let rafId: number
         const handleMouseMove = (e: MouseEvent) => {
             if (rafId) return
@@ -27,7 +25,6 @@ export const IntroFormFrame = (props: {children?: any}) => {
 
         window.addEventListener('mousemove', handleMouseMove)
         return () => {
-            clearTimeout(timer)
             window.removeEventListener('mousemove', handleMouseMove)
             if (rafId) cancelAnimationFrame(rafId)
         }
