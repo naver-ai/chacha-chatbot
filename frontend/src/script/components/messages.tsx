@@ -12,16 +12,17 @@ export const MessageView = (props: {
     hideCallout?: boolean,
     componentsAboveCallout?: any,
     componentsBelowCallout?: any,
+    isLast?: boolean,
     onThumbnailDoubleClick?: () => void
 }) => {
 
     const isMountRendered = useOnMountRendered(true)
 
-    const containerClassName = twMerge(
+    const containerClassName = props.isLast ? twMerge(
         "turn-container transition-all ease-out",
         isMountRendered ? 'opacity-100 translate-x-0' : `opacity-0 ${props.message.is_user ? 'translate-x-3' : '-translate-x-8'}`,
         props.message.is_user ? "user duration-[400ms] " : "system duration-[800ms]"
-    )
+    ) : twMerge("turn-container", props.message.is_user ? "user" : "system");
 
     return <div className={containerClassName}>
         {
@@ -39,7 +40,7 @@ export const MessageView = (props: {
                 props.componentsAboveCallout
             }
             {
-                props.hideCallout === true ? null : props.message.is_user === true ? <div className="callout" dangerouslySetInnerHTML={{ __html: props.overrideMessageText || props.message.message }}/> 
+                props.hideCallout === true ? null : (props.message.is_user === true || props.isLast !== true) ? <div className="callout" dangerouslySetInnerHTML={{ __html: props.overrideMessageText || props.message.message }}/> 
                 : <div className="callout">
                     <TypeAnimation sequence={[props.overrideMessageText || props.message.message]} speed={70} cursor={false}/>
                     </div>

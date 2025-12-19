@@ -448,7 +448,7 @@ const SessionMessageView = (props: { id: EntityId, isLast: boolean }) => {
     }
   }, [turn.is_user, props.isLast, t])
 
-  return hideMessage ? null : <MessageView avatarHash={turn.is_user === true ? userName : "system"} message={turn} onThumbnailDoubleClick={onDoubleClick} componentsBelowCallout={
+  return hideMessage ? null : <MessageView avatarHash={turn.is_user === true ? userName : "system"} isLast={props.isLast} message={turn} onThumbnailDoubleClick={onDoubleClick} componentsBelowCallout={
       !isEmotionSelectionTurn
         ? null : <>
           <EmotionPicker messageId={props.id} disabled={!props.isLast || isSystemBusy === true} value={emotionSelectionResult}/>
