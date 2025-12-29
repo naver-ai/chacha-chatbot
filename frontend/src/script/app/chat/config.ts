@@ -1,3 +1,3 @@
 // Chat session configuration constants
-export const RESET_TIME_LIMIT_MILLIS = 2 * 60 * 1000 // 2 minutes
-export const MAX_TURNS = 20
+export const RESET_TIME_LIMIT_MILLIS = 3 * 60 * 1000 // 3 minutes
+export const MAX_TURNS = 202
